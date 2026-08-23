@@ -1,22 +1,22 @@
 <!--tela de Login-->
 <div class="login-container min-h-screen flex flex-col justify-between px-8 py-6 md:px-16 md:py-10">
 
-<header class="flex items-start justify-between mb-10">
-  <div class="flex flex-col gap-1">
-    <div class="flex items-center gap-1.5">
-      <img
-        src="/icons/logo-ofc.png"
-        alt="Logo AsiApp"
-        class="w-6 h-6"
-      >
-      <h1 class="text-sm font-bold text-white leading-tight">AsiApp</h1>
+  <header class="flex items-start justify-between mb-10">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-1.5">
+        <img
+          src="/icons/logo-ofc.png"
+          alt="Logo AsiApp"
+          class="w-6 h-6"
+        >
+        <h1 class="text-sm font-bold text-white leading-tight">AsiApp</h1>
+      </div>
+      <p class="text-[10px] text-white/90 leading-tight">
+        Um aplicativo de Asimembros<br>para Asimembros
+      </p>
     </div>
-    <p class="text-[10px] text-white/90 leading-tight">
-      Um aplicativo de Asimembros<br>para Asimembros
-    </p>
-  </div>
-  <span class="text-sm font-semibold text-white">AsimovJr.</span>
-</header>
+    <span class="text-sm font-semibold text-white">AsimovJr.</span>
+  </header>
 
   <!--conteudo principal: formulario de login-->
   <main class="flex-1 flex items-center justify-center">
@@ -31,7 +31,7 @@
       <p class="text-white text-sm mb-1">Bem vindo!</p>
       <h2 class="text-white text-base font-medium mb-5">Faça seu Login para continuar</h2>
 
-      <!--formulário de autenticaçao-->
+      <!--formulario de autenticacao -->
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="w-full flex flex-col gap-1" novalidate>
 
         <div class="text-left">
@@ -78,12 +78,18 @@
           Esqueceu a senha?
         </a>
 
+        <!--mensagem de erro geral vinda do firebase (senha incorreta, usuario nao encontrado)-->
+        @if (authErrorMessage) {
+          <p class="text-red-300 text-xs mt-2">{{ authErrorMessage }}</p>
+        }
+
         <!--botao principal de envio do login-->
         <button
           type="submit"
+          [disabled]="isLoading"
           class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Entrar
+          {{ isLoading ? 'Entrando...' : 'Entrar' }}
         </button>
 
         <p class="text-white text-[10px] whitespace-nowrap">
@@ -98,11 +104,12 @@
           <div class="flex-1 h-px bg-white/40"></div>
         </div>
 
-        <!--login social: autenticaçao via Google-->
+        <!--login social: autenticaçao via google-->
         <button
           type="button"
+          [disabled]="isLoading"
           (click)="loginWithGoogle()"
-          class="w-full py-2 rounded-md border border-white/50 bg-white/5 backdrop-blur-sm hover:bg-white/15 transition text-white text-xs font-medium flex items-center justify-center gap-2"
+          class="w-full py-2 rounded-md border border-white/50 bg-white/5 backdrop-blur-sm hover:bg-white/15 transition text-white text-xs font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.64v3h3.88c2.27-2.09 3.54-5.17 3.54-8.88Z"/>
