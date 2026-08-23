@@ -8,6 +8,7 @@ import { Login } from './components/login/login';
 
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { environment } from '../assets/environments/environment';
 
 @NgModule({
@@ -17,7 +18,8 @@ import { environment } from '../assets/environments/environment';
     ReactiveFormsModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFireAuthModule
+    AngularFireAuthModule,
+    AngularFirestoreModule
   ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
