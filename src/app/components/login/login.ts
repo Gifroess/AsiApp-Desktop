@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import firebase from 'firebase/compat/app';
+import { AuthService } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -18,8 +16,7 @@ export class Login {
 
   constructor(
     private fb: FormBuilder,
-    private afAuth: AngularFireAuth,
-    private router: Router
+    private authService: AuthService
   ) {
     //estrutura e regras de validacao do formulário de login
     this.loginForm = this.fb.group({
@@ -37,7 +34,7 @@ export class Login {
     return dominioValido ? null : { corporateEmail: true };
   }
 
-  //autentica o usuario com email e senha no firebase authentication
+  //autentica o usuario com email e senha via AuthService (mantém a validacao de e-mail verificado)
   async onSubmit(): Promise<void> {
     this.authErrorMessage = '';
 
@@ -50,9 +47,8 @@ export class Login {
     this.isLoading = true;
 
     try {
-      await this.afAuth.signInWithEmailAndPassword(email, senha);
-      //assim que a tela Home estiver pronta no repositorio, confirmar se essa rota bate certinho
-      this.router.navigateByUrl('/home');
+      await this.authService.login(email, senha);
+      //o proprio AuthService ja redireciona pra /home apos o login
     } catch (error) {
       this.authErrorMessage = this.traduzErroFirebase(error);
     } finally {
@@ -60,16 +56,13 @@ export class Login {
     }
   }
 
-  //autentica o usuario via popup de login do google
+  //autentica o usuario via popup de login do google (AuthService bloqueia quem nao tem cadastro)
   async loginWithGoogle(): Promise<void> {
     this.authErrorMessage = '';
     this.isLoading = true;
 
     try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await this.afAuth.signInWithPopup(provider);
-      //assim que a tela Home estiver pronta no repositorio, confirmar se essa rota bate certinho
-      this.router.navigateByUrl('/home');
+      await this.authService.loginWithGoogle();
     } catch (error) {
       this.authErrorMessage = this.traduzErroFirebase(error);
     } finally {
@@ -93,7 +86,8 @@ export class Login {
       case 'auth/popup-closed-by-user':
         return 'Login com Google cancelado.';
       default:
-        return 'Não foi possível entrar. Tente novamente.';
+        //erros lançados pelo AuthService (email nao verificado, conta nao cadastrada) ja vem com mensagem pronta
+        return error?.message ?? 'Não foi possível entrar. Tente novamente.';
     }
   }
 }
