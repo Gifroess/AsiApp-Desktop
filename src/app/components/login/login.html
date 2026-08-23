@@ -18,20 +18,20 @@
     <span class="text-sm font-semibold text-white">AsimovJr.</span>
   </header>
 
-  <!--conteudo principal: formulario de login-->
+  <!--conteudo principal: formulário de login-->
   <main class="flex-1 flex items-center justify-center">
-    <div class="w-full max-w-xs flex flex-col items-center text-center">
+    <div class="w-[260px] flex flex-col items-center text-center">
 
       <img
         src="/icons/logo-asiapp.svg"
         alt="Logo AsiApp"
-        class="w-14 h-14 mb-3"
+        class="w-12 h-12 mb-3"
       >
 
       <p class="text-white text-sm mb-1">Bem vindo!</p>
-      <h2 class="text-white text-lg font-medium mb-6">Faça seu Login para continuar</h2>
+      <h2 class="text-white text-base font-medium mb-5">Faça seu Login para continuar</h2>
 
-      <!--formulario de autenticaçao-->
+      <!--formulário de autenticaçao-->
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="w-full flex flex-col gap-1" novalidate>
 
         <div class="text-left">
@@ -39,7 +39,7 @@
             type="email"
             formControlName="email"
             placeholder="Email"
-            class="w-full px-4 py-2.5 rounded-md bg-white/30 backdrop-blur-sm text-white placeholder-white/80 text-sm outline-none focus:bg-white/40 transition"
+            class="w-full px-3 py-2 rounded-md bg-white/30 backdrop-blur-sm text-white placeholder-white/80 text-xs outline-none focus:bg-white/40 transition"
           >
           <!--mensagens de erro do campo de email-->
           @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
@@ -60,7 +60,7 @@
             type="password"
             formControlName="senha"
             placeholder="Senha"
-            class="w-full px-4 py-2.5 rounded-md bg-white/30 backdrop-blur-sm text-white placeholder-white/80 text-sm outline-none focus:bg-white/40 transition"
+            class="w-full px-3 py-2 rounded-md bg-white/30 backdrop-blur-sm text-white placeholder-white/80 text-xs outline-none focus:bg-white/40 transition"
           >
           <!--mensagens de erro do campo de senha-->
           @if (loginForm.get('senha')?.touched && loginForm.get('senha')?.invalid) {
@@ -81,7 +81,7 @@
         <!--botao principal de envio do login-->
         <button
           type="submit"
-          class="w-full py-2.5 rounded-md font-semibold text-white text-sm bg-asi-dark hover:bg-black transition mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Entrar
         </button>
@@ -98,11 +98,11 @@
           <div class="flex-1 h-px bg-white/40"></div>
         </div>
 
-        <!--login social: autenticaçao via google-->
+        <!--login social: autenticaçao via Google-->
         <button
           type="button"
           (click)="loginWithGoogle()"
-          class="w-full py-2.5 rounded-md border border-white/50 bg-white/5 backdrop-blur-sm hover:bg-white/15 transition text-white text-sm font-medium flex items-center justify-center gap-2"
+          class="w-full py-2 rounded-md border border-white/50 bg-white/5 backdrop-blur-sm hover:bg-white/15 transition text-white text-xs font-medium flex items-center justify-center gap-2"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.54 5.54 0 0 1-2.4 3.64v3h3.88c2.27-2.09 3.54-5.17 3.54-8.88Z"/>
