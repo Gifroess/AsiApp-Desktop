@@ -3,7 +3,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, of, switchMap, map } from 'rxjs';
 import { UserInterface } from '../interfaces/user-interface';
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +15,7 @@ export class AuthService {
         private router: Router
     ) {}
 
-    // ---------- CADASTRO ----------
+    //cadastro
     async cadastro(name: string, email: string, password: string, confirmPassword: string) {
         if (password !== confirmPassword) {
             throw new Error('As senhas não coincidem.');
@@ -50,7 +50,7 @@ export class AuthService {
         return email.trim().toLowerCase().endsWith('@asimovjr.com.br');
     }
 
-    // ---------- LOGIN ----------
+    // login
     async login(email: string, password: string) {
         const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
@@ -63,7 +63,7 @@ export class AuthService {
         this.router.navigate(['/home']);
     }
 
-    // ---------- LOGIN COM GOOGLE (apenas para e-mails já cadastrados) ----------
+    //login com google (apenas para e-mails já cadastrados)
     async loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
         const userCredential = await this.auth.signInWithPopup(provider);
@@ -76,7 +76,7 @@ export class AuthService {
         const doc = await this.firestore.collection('users').doc(user.uid).get().toPromise();
 
         if (!doc?.exists) {
-            // e-mail não estava previamente cadastrado -> bloqueia acesso
+            //email nao estava previamente cadastrado -> bloqueia acesso
             await this.auth.signOut();
             throw new Error('E-mail não cadastrado. Realize o cadastro antes de entrar com o Google.');
         }
@@ -84,23 +84,25 @@ export class AuthService {
         this.router.navigate(['/home']);
     }
 
-    // ---------- RECUPERAR SENHA (link nativo do Firebase) ----------
+    //recuperar senha(link nativo do Firebase)
     async redefinirSenha(email: string) {
         await this.auth.sendPasswordResetEmail(email);
     }
 
-    // ---------- LOGOUT ----------
+    //logout
     async logout() {
         await this.auth.signOut();
         this.router.navigate(['/login']);
     }
 
-    // ---------- DADOS DO USUÁRIO LOGADO ----------
+    //dados do usuário logado
     getUserData(): Observable<UserInterface | null> {
         return this.auth.authState.pipe(
             switchMap(user => {
                 if (user) {
-                    return this.firestore.collection<UserInterface>('users').doc(user.uid).valueChanges();
+                    return this.firestore.collection<UserInterface>('users').doc(user.uid).valueChanges().pipe(
+                        map(data => data ?? null)
+                    );
                 } else {
                     return of(null);
                 }
