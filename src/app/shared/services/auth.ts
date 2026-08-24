@@ -43,7 +43,7 @@ export class AuthService {
     }
 
     private salvarDados(id: string, user: UserInterface) {
-        return this.firestore.collection('users').doc(id).set(user);
+        return this.firestore.collection('usuarios').doc(id).set(user);
     }
 
     private isCorporateEmail(email: string): boolean {
@@ -73,7 +73,7 @@ export class AuthService {
             throw new Error('Não foi possível autenticar com o Google.');
         }
 
-        const doc = await this.firestore.collection('users').doc(user.uid).get().toPromise();
+        const doc = await this.firestore.collection('usuarios').doc(user.uid).get().toPromise();
 
         if (!doc?.exists) {
             // e-mail não estava previamente cadastrado -> bloqueia acesso
@@ -100,7 +100,7 @@ export class AuthService {
         return this.auth.authState.pipe(
             switchMap(user => {
                 if (user) {
-                    return this.firestore.collection<UserInterface>('users').doc(user.uid).valueChanges();
+                    return this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges();
                 } else {
                     return of(null);
                 }
