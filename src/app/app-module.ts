@@ -10,16 +10,17 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { environment } from '../assets/environments/environment';
+import { Cadastro } from './components/cadastro/cadastro';
 
 @NgModule({
-  declarations: [App, Login],
+  declarations: [App, Login, Cadastro],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
-    AngularFirestoreModule
+    AngularFirestoreModule,
   ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
