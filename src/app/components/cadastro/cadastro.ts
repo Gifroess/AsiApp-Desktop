@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-cadastro',
@@ -11,8 +13,14 @@ export class Cadastro {
 
   cadastroForm: FormGroup;
   isLoading = false;
+  authErrorMessage = '';
+  cadastroConcluido = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     //estrutura e regras de validacao do formulario de cadastro
     this.cadastroForm = this.fb.group({
       nome: ['', [Validators.required]],
@@ -40,13 +48,9 @@ export class Cadastro {
 
     if (!confirmarSenhaControl) return null;
 
-    //joga o erro direto no controle de confirmarSenha (em vez de deixar so no grupo)
-    //assim a mensagem aparece embaixo do campo certo, do mesmo jeito que os outros erros do form
     if (senha && confirmarSenha && senha !== confirmarSenha) {
-      //preserva outros erros que o campo ja tenha (ex: required) e so acrescenta o novo
       confirmarSenhaControl.setErrors({ ...confirmarSenhaControl.errors, senhasDiferentes: true });
     } else if (confirmarSenhaControl.hasError('senhasDiferentes')) {
-      //senhas voltaram a bater -> remove so esse erro, sem mexer nos demais (ex: required)
       const { senhasDiferentes, ...outrosErros } = confirmarSenhaControl.errors ?? {};
       confirmarSenhaControl.setErrors(Object.keys(outrosErros).length ? outrosErros : null);
     }
@@ -54,13 +58,50 @@ export class Cadastro {
     return null;
   }
 
-  //valida o formulario inteiro, a chamada ao AuthService.cadastro() entra na prox etapa
-  onSubmit(): void {
+  //cria a conta no Firebase via AuthService e trata o retorno (sucesso ou erro)
+  async onSubmit(): Promise<void> {
+    this.authErrorMessage = '';
+
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
       return;
     }
 
-    //prox etapa -> chamar this.authService.cadastro(...) com os valores do form
+    const { nome, email, senha, confirmarSenha } = this.cadastroForm.value;
+    this.isLoading = true;
+
+    try {
+      await this.authService.cadastro(nome, email, senha, confirmarSenha);
+
+      //o AuthService ja desloga o usuario e dispara o email de verificacao apos criar a conta
+      //entao aqui so avisamos na tela e mandamos pro login depois de alguns segundos
+      this.cadastroConcluido = true;
+      this.cadastroForm.reset();
+
+      setTimeout(() => this.router.navigate(['/']), 3000);
+    } catch (error) {
+      this.authErrorMessage = this.traduzErroFirebase(error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  //converte os codigos de erro do firebase (e os erros lancados pelo proprio AuthService) em mensagens para o usuario
+  private traduzErroFirebase(error: any): string {
+    const codigo = error?.code;
+
+    switch (codigo) {
+      case 'auth/email-already-in-use':
+        return 'Esse e-mail já possui cadastro. Faça login ou recupere sua senha.';
+      case 'auth/invalid-email':
+        return 'E-mail inválido.';
+      case 'auth/weak-password':
+        return 'Senha muito fraca. Use pelo menos 6 caracteres.';
+      case 'auth/network-request-failed':
+        return 'Falha de conexão. Verifique sua internet e tente novamente.';
+      default:
+        //erros lancados pelo proprio AuthService ja vem com mensagem pronta
+        return error?.message ?? 'Não foi possível concluir o cadastro. Tente novamente.';
+    }
   }
 }
