@@ -58,7 +58,7 @@ export class Cadastro {
     return null;
   }
 
-  //cria a conta no Firebase via AuthService e trata o retorno (sucesso ou erro)
+   //cria a conta no Firebase via AuthService e trata o retorno (sucesso ou erro)
   async onSubmit(): Promise<void> {
     this.authErrorMessage = '';
 
@@ -92,8 +92,8 @@ export class Cadastro {
   }
 
   //envolve uma promise qualquer com um limite de tempo
-  //obs: isso nao cancela a operacao original no firebase, so impede que a tela fique presa esperando
-  //em caso de timeout, eh possivel que o cadastro termine de qualquer forma alguns segs depois em segundo plano
+  //importante: isso nao cancela a operacao original no firebase, so impede que a TELA fique presa esperando.
+  //ou seja, em caso de timeout, e possivel que o cadastro termine de qualquer forma alguns segundos depois em segundo plano
   private comTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject({ code: 'custom/timeout' }), ms)
