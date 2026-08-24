@@ -71,7 +71,12 @@ export class Cadastro {
     this.isLoading = true;
 
     try {
-      await this.authService.cadastro(nome, email, senha, confirmarSenha);
+      //corrida entre o cadastro de verdade e um timer: se o firebase nao responder
+      //dentro do prazo, a gente libera a tela em vez de deixar o usuario preso olhando pro loading
+      await this.comTimeout(
+        this.authService.cadastro(nome, email, senha, confirmarSenha),
+        15000
+      );
 
       //o AuthService ja desloga o usuario e dispara o email de verificacao apos criar a conta
       //entao aqui so avisamos na tela e mandamos pro login depois de alguns segundos
@@ -84,6 +89,17 @@ export class Cadastro {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  //envolve uma promise qualquer com um limite de tempo
+  //obs: isso nao cancela a operacao original no firebase, so impede que a tela fique presa esperando
+  //em caso de timeout, eh possivel que o cadastro termine de qualquer forma alguns segs depois em segundo plano
+  private comTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject({ code: 'custom/timeout' }), ms)
+    );
+
+    return Promise.race([promise, timeout]);
   }
 
   //converte os codigos de erro do firebase (e os erros lancados pelo proprio AuthService) em mensagens para o usuario
@@ -99,6 +115,8 @@ export class Cadastro {
         return 'Senha muito fraca. Use pelo menos 6 caracteres.';
       case 'auth/network-request-failed':
         return 'Falha de conexão. Verifique sua internet e tente novamente.';
+      case 'custom/timeout':
+        return 'O servidor demorou muito para responder. Verifique sua internet e tente novamente em instantes.';
       default:
         //erros lancados pelo proprio AuthService ja vem com mensagem pronta
         return error?.message ?? 'Não foi possível concluir o cadastro. Tente novamente.';
