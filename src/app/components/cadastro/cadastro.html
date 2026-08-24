@@ -108,6 +108,18 @@
           }
         </div>
 
+        <!--mensagem de sucesso apos cadastro concluido-->
+        @if (cadastroConcluido) {
+          <p class="text-green-300 text-xs mt-2">
+            Cadastro realizado! Verifique seu e-mail para confirmar a conta. Redirecionando para o login...
+          </p>
+        }
+
+        <!--mensagem de erro geral vinda do firebase (email ja em uso, senha fraca)-->
+        @if (authErrorMessage) {
+          <p class="text-red-300 text-xs mt-2">{{ authErrorMessage }}</p>
+        }
+
         <!--botao principal de envio do cadastro-->
         <button
           type="submit"
