@@ -35,11 +35,23 @@ export class Cadastro {
   //precisa ficar no nivel do FormGroup (e nao de um Control isolado) porque so assim ele tem acesso aos dois campos ao mesmo tempo pra poder comparar
   private senhasIguaisValidator(group: AbstractControl): ValidationErrors | null {
     const senha = group.get('senha')?.value;
-    const confirmarSenha = group.get('confirmarSenha')?.value;
+    const confirmarSenhaControl = group.get('confirmarSenha');
+    const confirmarSenha = confirmarSenhaControl?.value;
 
-    if (!senha || !confirmarSenha) return null;
+    if (!confirmarSenhaControl) return null;
 
-    return senha === confirmarSenha ? null : { senhasDiferentes: true };
+    //joga o erro direto no controle de confirmarSenha (em vez de deixar so no grupo)
+    //assim a mensagem aparece embaixo do campo certo, do mesmo jeito que os outros erros do form
+    if (senha && confirmarSenha && senha !== confirmarSenha) {
+      //preserva outros erros que o campo ja tenha (ex: required) e so acrescenta o novo
+      confirmarSenhaControl.setErrors({ ...confirmarSenhaControl.errors, senhasDiferentes: true });
+    } else if (confirmarSenhaControl.hasError('senhasDiferentes')) {
+      //senhas voltaram a bater -> remove so esse erro, sem mexer nos demais (ex: required)
+      const { senhasDiferentes, ...outrosErros } = confirmarSenhaControl.errors ?? {};
+      confirmarSenhaControl.setErrors(Object.keys(outrosErros).length ? outrosErros : null);
+    }
+
+    return null;
   }
 
   //valida o formulario inteiro, a chamada ao AuthService.cadastro() entra na prox etapa
