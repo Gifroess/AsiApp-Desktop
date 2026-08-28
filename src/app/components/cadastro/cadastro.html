@@ -109,24 +109,24 @@
         </div>
 
         <!--mensagem de sucesso apos cadastro concluido-->
-        @if (cadastroConcluido) {
+        @if (cadastroConcluido()) {
           <p class="text-green-300 text-xs mt-2">
             Cadastro realizado! Verifique seu e-mail para confirmar a conta. Redirecionando para o login...
           </p>
         }
 
         <!--mensagem de erro geral vinda do firebase (email ja em uso, senha fraca)-->
-        @if (authErrorMessage) {
-          <p class="text-red-300 text-xs mt-2">{{ authErrorMessage }}</p>
+        @if (authErrorMessage()) {
+          <p class="text-red-300 text-xs mt-2">{{ authErrorMessage() }}</p>
         }
 
         <!--botao principal de envio do cadastro-->
         <button
           type="submit"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isLoading ? 'Cadastrando...' : 'Cadastrar' }}
+          {{ isLoading() ? 'Cadastrando...' : 'Cadastrar' }}
         </button>
 
         <p class="text-white text-[10px] whitespace-nowrap">
