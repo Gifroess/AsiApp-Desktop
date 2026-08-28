@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth';
@@ -12,9 +12,12 @@ import { AuthService } from '../../shared/services/auth';
 export class Cadastro {
 
   cadastroForm: FormGroup;
-  isLoading = false;
-  authErrorMessage = '';
-  cadastroConcluido = false;
+  //trocados de propriedades comuns para signals: o app roda em modo zoneless (sem zone.js),
+  //entao mudancas feitas dentro de callbacks assincronos (apos um await do firebase) so
+  //atualizam a tela se forem signals
+  isLoading = signal(false);
+  authErrorMessage = signal('');
+  cadastroConcluido = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -60,7 +63,7 @@ export class Cadastro {
 
    //cria a conta no Firebase via AuthService e trata o retorno (sucesso ou erro)
   async onSubmit(): Promise<void> {
-    this.authErrorMessage = '';
+    this.authErrorMessage.set('');
 
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
@@ -68,7 +71,7 @@ export class Cadastro {
     }
 
     const { nome, email, senha, confirmarSenha } = this.cadastroForm.value;
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     try {
       //corrida entre o cadastro de verdade e um timer: se o firebase nao responder
@@ -80,14 +83,14 @@ export class Cadastro {
 
       //o AuthService ja desloga o usuario e dispara o email de verificacao apos criar a conta
       //entao aqui so avisamos na tela e mandamos pro login depois de alguns segundos
-      this.cadastroConcluido = true;
+      this.cadastroConcluido.set(true);
       this.cadastroForm.reset();
 
       setTimeout(() => this.router.navigate(['/']), 3000);
     } catch (error) {
-      this.authErrorMessage = this.traduzErroFirebase(error);
+      this.authErrorMessage.set(this.traduzErroFirebase(error));
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 
