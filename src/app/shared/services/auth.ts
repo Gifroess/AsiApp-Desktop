@@ -3,7 +3,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
-import { Observable, of, switchMap } from 'rxjs';
+import { map, Observable, of, switchMap } from 'rxjs';
 import { UserInterface } from '../interfaces/user-interface';
 
 @Injectable({ providedIn: 'root' })
@@ -100,7 +100,13 @@ export class AuthService {
         return this.auth.authState.pipe(
             switchMap(user => {
                 if (user) {
-                    return this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges();
+                    return this.firestore
+                        .collection<UserInterface>('usuarios')
+                        .doc(user.uid)
+                        .valueChanges()
+                        .pipe(
+                            map(userData => userData ?? null)
+                        );
                 } else {
                     return of(null);
                 }
