@@ -1,1 +1,104 @@
-<p>recuperar-senha works!</p>
+<!--tela de Recuperacao de Senha-->
+<div class="recuperar-senha-container min-h-screen flex flex-col justify-between px-8 py-6 md:px-16 md:py-10">
+
+  <header class="flex items-start justify-between mb-10">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-1.5">
+        <img
+          src="/icons/logo-ofc.png"
+          alt="Logo AsiApp"
+          class="w-6 h-6"
+        >
+        <h1 class="text-sm font-bold text-white leading-tight">AsiApp</h1>
+      </div>
+      <p class="text-[10px] text-white/90 leading-tight">
+        Um aplicativo de Asimembros<br>para Asimembros
+      </p>
+    </div>
+    <span class="text-sm font-semibold text-white">AsimovJr.</span>
+  </header>
+
+  <!--conteudo principal: verificacao-->
+  <main class="flex-1 flex items-center justify-center">
+    <div class="w-[260px] flex flex-col items-center text-center">
+
+      <img
+        src="/icons/logo-asiapp.svg"
+        alt="Logo AsiApp"
+        class="w-20 h-20 mb-3"
+      >
+
+      <p class="text-white text-sm mb-1">Verificação necessária</p>
+
+      <h2 class="text-white text-base font-medium leading-tight">
+        Insira o código que enviamos
+      </h2>
+
+      <p class="text-white text-base font-medium mb-5">
+        para email***@asimov.com.br
+      </p>
+
+      <!--campos de codigo-->
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <input
+          type="text"
+          maxlength="1"
+          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+        >
+
+        <input
+          type="text"
+          maxlength="1"
+          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+        >
+
+        <input
+          type="text"
+          maxlength="1"
+          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+        >
+
+        <input
+          type="text"
+          maxlength="1"
+          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+        >
+
+        <input
+          type="text"
+          maxlength="1"
+          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+        >
+
+        <input
+          type="text"
+          maxlength="1"
+          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+        >
+      </div>
+
+      <button
+        type="button"
+        class="text-white text-xs hover:underline mb-8"
+      >
+        Reenviar código
+      </button>
+
+      <!--botao principal-->
+      <button
+        type="button"
+        class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition"
+      >
+        Entrar
+      </button>
+
+      <p class="text-white text-[10px] whitespace-nowrap mt-2">
+        Não possui uma conta?
+        <a href="#" class="font-semibold hover:underline">Faça seu cadastro!</a>
+      </p>
+
+    </div>
+  </main>
+
+  <div></div>
+</div>
