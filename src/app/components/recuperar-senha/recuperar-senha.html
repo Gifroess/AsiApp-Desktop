@@ -40,41 +40,21 @@
 
       <!--campos de codigo-->
       <div class="flex items-center justify-center gap-2 mb-3">
-        <input
-          type="text"
-          maxlength="1"
-          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
-        >
 
-        <input
-          type="text"
-          maxlength="1"
-          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
-        >
+        @for (digito of codigo; track $index) {
+          <input
+            #codigoInput
+            type="text"
+            inputmode="numeric"
+            maxlength="1"
+            [value]="digito"
+            (input)="onInput($event, $index)"
+            (keydown)="onKeyDown($event, $index)"
+            (paste)="onPaste($event)"
+            class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+          >
+        }
 
-        <input
-          type="text"
-          maxlength="1"
-          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
-        >
-
-        <input
-          type="text"
-          maxlength="1"
-          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
-        >
-
-        <input
-          type="text"
-          maxlength="1"
-          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
-        >
-
-        <input
-          type="text"
-          maxlength="1"
-          class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
-        >
       </div>
 
       <button
