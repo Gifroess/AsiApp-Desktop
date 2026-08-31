@@ -59,33 +59,84 @@ export class Perfil implements OnInit {
     this.mostrarSenha = !this.mostrarSenha;
   }
 
-  async salvarNome(): Promise<void> {
-    if (this.perfilForm.invalid || !this.uid) return;
-    this.carregando = true;
+    // TESTE TEMPORÁRIO - REMOVER ANTES DO MERGE
+  async loginTeste(): Promise<void> {
     try {
-      await this.usuarioService.atualizarNome(this.uid, this.perfilForm.value.nome);
-      this.mensagemSucesso = 'Nome atualizado com sucesso!';
-      this.editandoNome = false;
-    } catch (error) {
-      this.mensagemErro = 'Erro ao atualizar nome.';
-    } finally {
-      this.carregando = false;
+      await this.authService.login('giovanafroes@asimovjr.com.br', 'teste123');
+    } catch (error: any) {
+      console.error('Erro no login de teste:', error.message);
+      this.mensagemErro = error.message;
     }
   }
 
-  async salvarSenha(): Promise<void> {
-    if (this.senhaForm.invalid) return;
+  // async salvarNome(): Promise<void> {
+  //   if (this.perfilForm.invalid || !this.uid) return;
+  //   this.carregando = true;
+  //   try {
+  //     await this.usuarioService.atualizarNome(this.uid, this.perfilForm.value.nome);
+  //     this.mensagemSucesso = 'Nome atualizado com sucesso!';
+  //     this.editandoNome = false;
+  //   } catch (error) {
+  //     this.mensagemErro = 'Erro ao atualizar nome.';
+  //   } finally {
+  //     this.carregando = false;
+  //   }
+  // }
+
+  // async salvarSenha(): Promise<void> {
+  //   if (this.senhaForm.invalid) return;
+  //   this.carregando = true;
+  //   try {
+  //     const { senhaAtual, novaSenha } = this.senhaForm.value;
+  //     await this.usuarioService.trocarSenha(senhaAtual, novaSenha);
+  //     this.mensagemSucesso = 'Senha atualizada com sucesso!';
+  //     this.senhaForm.reset();
+  //     this.editandoSenha = false;
+  //   } catch (error: any) {
+  //     this.mensagemErro = error?.code === 'auth/wrong-password'
+  //       ? 'Senha atual incorreta.'
+  //       : 'Erro ao atualizar senha.';
+  //   } finally {
+  //     this.carregando = false;
+  //   }
+  // }
+// substitui editandoNome e editandoSenha por um único estado:
+modoEdicao = false;
+
+alternarEdicao(): void {
+  this.modoEdicao = !this.modoEdicao;
+  if (!this.modoEdicao) {
+    this.senhaForm.reset(); // limpa campos de senha ao cancelar/fechar edição
+  }
+}
+
+  async salvarPerfil(): Promise<void> {
     this.carregando = true;
+    this.mensagemErro = '';
+    this.mensagemSucesso = '';
+
     try {
+      // sempre salva o nome, se tiver mudado
+      if (this.perfilForm.valid && this.perfilForm.dirty) {
+        await this.usuarioService.atualizarNome(this.uid, this.perfilForm.value.nome);
+      }
+
+      // só tenta trocar senha se o usuário preencheu os campos
       const { senhaAtual, novaSenha } = this.senhaForm.value;
-      await this.usuarioService.trocarSenha(senhaAtual, novaSenha);
-      this.mensagemSucesso = 'Senha atualizada com sucesso!';
+      if (senhaAtual && novaSenha) {
+        if (this.senhaForm.invalid) {
+          throw new Error('Preencha a nova senha corretamente (mínimo 6 caracteres).');
+        }
+        await this.usuarioService.trocarSenha(senhaAtual, novaSenha);
+      }
+
+      this.mensagemSucesso = 'Perfil atualizado com sucesso!';
+      this.modoEdicao = false;
       this.senhaForm.reset();
-      this.editandoSenha = false;
     } catch (error: any) {
       this.mensagemErro = error?.code === 'auth/wrong-password'
         ? 'Senha atual incorreta.'
-        : 'Erro ao atualizar senha.';
+        : (error?.message || 'Erro ao atualizar perfil.');
     } finally {
       this.carregando = false;
     }

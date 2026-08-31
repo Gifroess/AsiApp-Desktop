@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EnvironmentInjector, Injectable, runInInjectionContext } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
@@ -13,7 +13,8 @@ export class AuthService {
     constructor(
         private auth: AngularFireAuth,
         private firestore: AngularFirestore,
-        private router: Router
+        private router: Router, 
+        private injector: EnvironmentInjector
     ) {}
 
     // ---------- CADASTRO ----------
@@ -53,15 +54,17 @@ export class AuthService {
 
     // ---------- LOGIN ----------
     async login(email: string, password: string) {
-        const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
+        const userCredential = await runInInjectionContext(this.injector, () =>
+            this.auth.signInWithEmailAndPassword(email, password)
+        );
         const user = userCredential.user;
 
         if (!user?.emailVerified) {
-            await this.auth.signOut();
+            await runInInjectionContext(this.injector, () => this.auth.signOut());
             throw new Error('E-mail ainda não verificado. Confira sua caixa de entrada.');
         }
 
-        this.router.navigate(['/home']);
+        this.router.navigate(['/home']); 
     }
 
     // ---------- LOGIN COM GOOGLE (apenas para e-mails já cadastrados) ----------

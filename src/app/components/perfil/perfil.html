@@ -1,81 +1,99 @@
-<!--tela de Perfil-->
 <div class="flex min-h-screen bg-gray-100">
   <app-sidebar></app-sidebar>
 
   <main class="flex-1 flex items-center justify-center p-10">
-    <div class="bg-white rounded-2xl shadow-lg p-10 w-full max-w-xl">
+    <div class="bg-white rounded-3xl shadow-lg p-10 w-full max-w-xl">
 
-      <h2 class="text-xl font-semibold text-asi-dark mb-8">Seu Perfil</h2>
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-xl font-semibold text-asi-dark">Seu Perfil</h2>
+        <button type="button" (click)="alternarEdicao()"
+                class="text-xs font-semibold text-asi-blue hover:underline">
+          {{ modoEdicao ? 'Cancelar' : 'Editar Perfil' }}
+        </button>
+      </div>
 
       <!-- Avatar -->
-      <div class="flex justify-center mb-8 relative w-fit mx-auto">
+      <div class="relative w-32 h-32 mx-auto mb-8">
         <img
           [src]="usuario?.fotoUrl || 'assets/icons/icone-perfil.png'"
           alt="Foto de perfil"
-          class="w-24 h-24 rounded-full object-cover border border-asi-dark/20"
+          class="w-32 h-32 rounded-full object-cover border border-asi-dark/20"
         >
-        <label class="absolute bottom-0 right-0 bg-gray-200 rounded-full p-1.5 cursor-pointer hover:bg-gray-300 transition">
-            <img src="assets/icons/edit.png" alt="Editar foto" class="w-4 h-4">
-            <input type="file" accept="image/*" class="hidden" (change)="onFotoSelecionada($event)">
+        <label class="absolute -top-1 -right-1 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center cursor-pointer hover:bg-gray-100 transition">
+          <img src="assets/icons/edit.png" alt="Editar foto" class="w-4 h-4">
+          <input type="file" accept="image/*" class="hidden" (change)="onFotoSelecionada($event)">
         </label>
       </div>
 
-      <!-- Nome -->
-      <form [formGroup]="perfilForm" (ngSubmit)="salvarNome()" class="mb-6">
-        <label class="block text-xs font-medium mb-1 text-gray-700">Nome de Usuário:</label>
-        <div class="flex gap-2">
+      <form [formGroup]="perfilForm" (ngSubmit)="salvarPerfil()" class="flex flex-col gap-5">
+
+        <!-- Nome -->
+        <div>
+          <label class="block text-xs font-medium mb-1 text-gray-700">Nome de Usuário:</label>
           <input formControlName="nome" type="text"
-                 class="flex-1 border rounded-md px-3 py-2 text-xs bg-gray-50 outline-none focus:bg-white focus:ring-1 focus:ring-asi-blue transition"
-                 [readonly]="!editandoNome">
-          <button type="button" *ngIf="!editandoNome" (click)="editandoNome = true"
-                  class="text-xs text-asi-blue hover:underline">Editar</button>
-          <button type="submit" *ngIf="editandoNome" [disabled]="carregando"
-                  class="py-2 px-4 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">
-            {{ carregando ? 'Salvando...' : 'Salvar' }}
-          </button>
-        </div>
-      </form>
-
-      <!-- Senha -->
-      <div class="mb-6">
-        <label class="block text-xs font-medium mb-1 text-gray-700">Senha:</label>
-
-        <div class="flex gap-2 items-center" *ngIf="!editandoSenha">
-          <input type="password" value="••••••••••••" readonly
-                 class="flex-1 border rounded-md px-3 py-2 text-xs bg-gray-50">
-          <button (click)="editandoSenha = true" class="text-xs text-asi-blue hover:underline">Editar</button>
+                 class="w-full max-w-sm h-12 rounded-2xl border-2 border-gray-200 px-4 text-xs bg-gray-50 outline-none focus:bg-white focus:border-asi-blue transition"
+                 [readonly]="!modoEdicao">
         </div>
 
-        <form [formGroup]="senhaForm" (ngSubmit)="salvarSenha()" *ngIf="editandoSenha" class="flex flex-col gap-2">
-          <input formControlName="senhaAtual" [type]="mostrarSenha ? 'text' : 'password'"
-                 placeholder="Senha atual"
-                 class="border rounded-md px-3 py-2 text-xs bg-gray-50 outline-none focus:bg-white focus:ring-1 focus:ring-asi-blue transition">
-          <div class="flex gap-2">
-            <input formControlName="novaSenha" [type]="mostrarSenha ? 'text' : 'password'"
-                   placeholder="Nova senha"
-                   class="flex-1 border rounded-md px-3 py-2 text-xs bg-gray-50 outline-none focus:bg-white focus:ring-1 focus:ring-asi-blue transition">
-            <button type="button" (click)="toggleSenha()" class="text-xs px-2">👁️</button>
+        <!-- Senha (só aparece em modo de edição) -->
+        <div [formGroup]="senhaForm" *ngIf="modoEdicao" class="flex flex-col gap-3">
+          <div>
+            <label class="block text-xs font-medium mb-1 text-gray-700">Senha atual:</label>
+            <input formControlName="senhaAtual" [type]="mostrarSenha ? 'text' : 'password'"
+                   placeholder="Preencha só se for trocar a senha"
+                   class="w-full max-w-sm h-12 rounded-2xl border-2 border-gray-200 px-4 text-xs bg-gray-50 outline-none focus:bg-white focus:border-asi-blue transition">
           </div>
-          <button type="submit" [disabled]="carregando"
-                  class="self-start py-2 px-4 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">
-            {{ carregando ? 'Salvando...' : 'Salvar senha' }}
-          </button>
-        </form>
-      </div>
 
-      <!-- Cargo -->
-      <div class="mb-4">
-        <label class="block text-xs font-medium mb-1 text-gray-700">Cargo:</label>
-        <p class="text-xs text-gray-700 italic">"{{ usuario?.cargo }}"</p>
-      </div>
+          <div class="relative w-full max-w-sm">
+            <label class="block text-xs font-medium mb-1 text-gray-700">Nova senha:</label>
+            <input formControlName="novaSenha" [type]="mostrarSenha ? 'text' : 'password'"
+                   class="w-full h-12 rounded-2xl border-2 border-gray-200 pl-4 pr-11 text-xs bg-gray-50 outline-none focus:bg-white focus:border-asi-blue transition">
+            <button type="button" (click)="toggleSenha()"
+                    class="absolute right-3 top-[38px] text-gray-500 hover:text-asi-dark transition">
+              <svg *ngIf="!mostrarSenha" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="mostrarSenha" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.68M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-      @if (mensagemSucesso) {
-        <p class="text-green-600 text-xs mt-4">{{ mensagemSucesso }}</p>
-      }
+        <!-- Senha (visualização, fora do modo de edição) -->
+        <div *ngIf="!modoEdicao">
+          <label class="block text-xs font-medium mb-1 text-gray-700">Senha:</label>
+          <input type="password" value="••••••••••••" readonly
+                 class="w-full max-w-sm h-12 rounded-2xl border-2 border-gray-200 px-4 text-xs bg-gray-50">
+        </div>
 
-      @if (mensagemErro) {
-        <p class="text-red-600 text-xs mt-4">{{ mensagemErro }}</p>
-      }
+        <!-- Cargo -->
+        <div>
+          <label class="block text-xs font-medium mb-1 text-gray-700">Cargo:</label>
+          <p class="text-xs text-gray-700 italic">"{{ usuario?.cargo }}"</p>
+        </div>
+
+        <button type="submit" *ngIf="modoEdicao" [disabled]="carregando"
+                class="self-start py-2 px-6 rounded-2xl font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ carregando ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+
+        @if (mensagemSucesso) {
+          <p class="text-green-600 text-xs">{{ mensagemSucesso }}</p>
+        }
+        @if (mensagemErro) {
+          <p class="text-red-600 text-xs">{{ mensagemErro }}</p>
+        }
+
+                <!-- TESTE TEMPORÁRIO - REMOVER ANTES DO MERGE -->
+        <button *ngIf="!usuario" type="button" (click)="loginTeste()"
+                class="mb-4 py-2 px-4 rounded-xl bg-yellow-400 text-xs font-semibold">
+        🧪 Login de teste
+        </button>
+        
+      </form>
     </div>
   </main>
 </div>
