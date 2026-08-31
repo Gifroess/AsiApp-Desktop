@@ -1,4 +1,4 @@
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, signal } from '@angular/core';
 
 @Component({
   selector: 'app-recuperar-senha',
@@ -10,6 +10,11 @@ export class RecuperarSenha {
 
   //codigo de verificacao
   codigo: string[] = ['', '', '', '', '', ''];
+
+  //estados da tela
+  isLoading = signal(false);
+  isReenviando = signal(false);
+  mensagemErro = signal('');
 
   @ViewChildren('codigoInput')
   codigoInputs!: QueryList<ElementRef<HTMLInputElement>>;
@@ -24,6 +29,8 @@ export class RecuperarSenha {
 
     input.value = valor.slice(-1);
     this.codigo[index] = input.value;
+
+    this.mensagemErro.set('');
 
     if (input.value && index < this.codigo.length - 1) {
       this.codigoInputs.get(index + 1)?.nativeElement.focus();
@@ -62,6 +69,8 @@ export class RecuperarSenha {
       this.codigo[index] = digito;
     });
 
+    this.mensagemErro.set('');
+
     setTimeout(() => {
       const inputs = this.codigoInputs.toArray();
 
@@ -81,6 +90,43 @@ export class RecuperarSenha {
   //retorna o codigo completo
   get codigoCompleto(): string {
     return this.codigo.join('');
+  }
+
+
+  //verifica se todos os campos foram preenchidos
+  get codigoValido(): boolean {
+    return this.codigoCompleto.length === 6;
+  }
+
+
+  //valida o codigo informado
+  validarCodigo() {
+    if (!this.codigoValido) {
+      this.mensagemErro.set('Preencha todos os campos do código.');
+      return;
+    }
+
+    //integracao com o backend sera adicionada posteriormente
+  }
+
+
+  //prepara a tela para o reenvio do codigo
+  reenviarCodigo() {
+    this.codigo = ['', '', '', '', '', ''];
+    this.mensagemErro.set('');
+
+    //aguarda a atualizacao dos campos antes de alterar o foco
+    setTimeout(() => {
+      const inputs = this.codigoInputs.toArray();
+
+      inputs.forEach(input => {
+        input.nativeElement.value = '';
+      });
+
+      inputs[0]?.nativeElement.focus();
+    });
+
+    //integracao com o backend sera adicionada posteriormente
   }
 
 }

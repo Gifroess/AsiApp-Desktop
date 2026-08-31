@@ -57,19 +57,29 @@
 
       </div>
 
+      @if (mensagemErro()) {
+        <p class="text-red-300 text-[10px] mb-2">
+          {{ mensagemErro() }}
+        </p>
+      }
+
       <button
         type="button"
-        class="text-white text-xs hover:underline mb-8"
+        [disabled]="isReenviando()"
+        (click)="reenviarCodigo()"
+        class="text-white text-xs hover:underline mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Reenviar código
+        {{ isReenviando() ? 'Reenviando...' : 'Reenviar código' }}
       </button>
 
       <!--botao principal-->
       <button
         type="button"
-        class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition"
+        [disabled]="!codigoValido || isLoading()"
+        (click)="validarCodigo()"
+        class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Entrar
+        {{ isLoading() ? 'Validando...' : 'Entrar' }}
       </button>
 
       <p class="text-white text-[10px] whitespace-nowrap mt-2">
