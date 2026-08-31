@@ -3,7 +3,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, of, switchMap, map } from 'rxjs';
 import { UserInterface } from '../interfaces/user-interface';
 
 @Injectable({ providedIn: 'root' })
@@ -104,7 +104,8 @@ export class AuthService {
                 } else {
                     return of(null);
                 }
-            })
+            }),
+            map(data => data ?? null)   // correção
         );
     }
 }
