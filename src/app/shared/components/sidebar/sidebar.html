@@ -1,0 +1,25 @@
+<!-- sidebar.html -->
+<aside class="w-64 h-screen bg-gradient-to-b from-slate-900 to-blue-950 text-white flex flex-col justify-between p-6">
+  
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <!-- ícone do logo -->
+      <span class="font-bold text-lg">AsiApp</span>
+    </div>
+    <p class="text-xs text-slate-400 mb-8">Um aplicativo de Asimovers para Asimovers</p>
+
+    <nav class="flex flex-col gap-4 text-sm">
+      <a routerLink="/home" class="hover:text-blue-300 transition">Home</a>
+      <a routerLink="/gestao-pessoas" class="hover:text-blue-300 transition">Gestão de Pessoas</a>
+      <a routerLink="/gestao-projetos" class="hover:text-blue-300 transition">Gestão de Projetos</a>
+      <a routerLink="/gestao-financeira" class="hover:text-blue-300 transition">Gestão Financeira</a>
+      <a routerLink="/postagens" class="hover:text-blue-300 transition">Menu de Postagem</a>
+    </nav>
+  </div>
+
+  <a routerLink="/perfil" class="flex items-center gap-2 text-sm hover:text-blue-300 transition" *ngIf="usuario$ | async as usuario">
+    <img *ngIf="usuario.fotoUrl" [src]="usuario.fotoUrl" class="w-8 h-8 rounded-full object-cover">
+    <span *ngIf="!usuario.fotoUrl" class="w-8 h-8 rounded-full border border-white flex items-center justify-center">👤</span>
+    <span>"{{ usuario.name }}"</span>
+  </a>
+</aside>

@@ -3,4 +3,5 @@ export interface UserInterface {
     email: string;
     cargo: 'Membro' | 'Gerente' | 'Vice-Presidente' | 'Diretor' | 'Presidente'; 
     status: 'Ativo' | 'Inativo';
+    fotoUrl?: string;
 }

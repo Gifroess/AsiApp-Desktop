@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import firebase from 'firebase/compat/app';
 import { Observable, of, switchMap, map } from 'rxjs';
 import { UserInterface } from '../interfaces/user-interface';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -107,5 +108,10 @@ export class AuthService {
             }),
             map(data => data ?? null)   // correção
         );
+    }
+
+    async getUid(): Promise<string | null> {
+        const user = await firstValueFrom(this.auth.authState);
+        return user ? user.uid : null;
     }
 }

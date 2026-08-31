@@ -1,0 +1,81 @@
+<!--tela de Perfil-->
+<div class="flex min-h-screen bg-gray-100">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 flex items-center justify-center p-10">
+    <div class="bg-white rounded-2xl shadow-lg p-10 w-full max-w-xl">
+
+      <h2 class="text-xl font-semibold text-asi-dark mb-8">Seu Perfil</h2>
+
+      <!-- Avatar -->
+      <div class="flex justify-center mb-8 relative w-fit mx-auto">
+        <img
+          [src]="usuario?.fotoUrl || 'assets/icons/icone-perfil.png'"
+          alt="Foto de perfil"
+          class="w-24 h-24 rounded-full object-cover border border-asi-dark/20"
+        >
+        <label class="absolute bottom-0 right-0 bg-gray-200 rounded-full p-1.5 cursor-pointer hover:bg-gray-300 transition">
+            <img src="assets/icons/edit.png" alt="Editar foto" class="w-4 h-4">
+            <input type="file" accept="image/*" class="hidden" (change)="onFotoSelecionada($event)">
+        </label>
+      </div>
+
+      <!-- Nome -->
+      <form [formGroup]="perfilForm" (ngSubmit)="salvarNome()" class="mb-6">
+        <label class="block text-xs font-medium mb-1 text-gray-700">Nome de Usuário:</label>
+        <div class="flex gap-2">
+          <input formControlName="nome" type="text"
+                 class="flex-1 border rounded-md px-3 py-2 text-xs bg-gray-50 outline-none focus:bg-white focus:ring-1 focus:ring-asi-blue transition"
+                 [readonly]="!editandoNome">
+          <button type="button" *ngIf="!editandoNome" (click)="editandoNome = true"
+                  class="text-xs text-asi-blue hover:underline">Editar</button>
+          <button type="submit" *ngIf="editandoNome" [disabled]="carregando"
+                  class="py-2 px-4 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ carregando ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Senha -->
+      <div class="mb-6">
+        <label class="block text-xs font-medium mb-1 text-gray-700">Senha:</label>
+
+        <div class="flex gap-2 items-center" *ngIf="!editandoSenha">
+          <input type="password" value="••••••••••••" readonly
+                 class="flex-1 border rounded-md px-3 py-2 text-xs bg-gray-50">
+          <button (click)="editandoSenha = true" class="text-xs text-asi-blue hover:underline">Editar</button>
+        </div>
+
+        <form [formGroup]="senhaForm" (ngSubmit)="salvarSenha()" *ngIf="editandoSenha" class="flex flex-col gap-2">
+          <input formControlName="senhaAtual" [type]="mostrarSenha ? 'text' : 'password'"
+                 placeholder="Senha atual"
+                 class="border rounded-md px-3 py-2 text-xs bg-gray-50 outline-none focus:bg-white focus:ring-1 focus:ring-asi-blue transition">
+          <div class="flex gap-2">
+            <input formControlName="novaSenha" [type]="mostrarSenha ? 'text' : 'password'"
+                   placeholder="Nova senha"
+                   class="flex-1 border rounded-md px-3 py-2 text-xs bg-gray-50 outline-none focus:bg-white focus:ring-1 focus:ring-asi-blue transition">
+            <button type="button" (click)="toggleSenha()" class="text-xs px-2">👁️</button>
+          </div>
+          <button type="submit" [disabled]="carregando"
+                  class="self-start py-2 px-4 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ carregando ? 'Salvando...' : 'Salvar senha' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Cargo -->
+      <div class="mb-4">
+        <label class="block text-xs font-medium mb-1 text-gray-700">Cargo:</label>
+        <p class="text-xs text-gray-700 italic">"{{ usuario?.cargo }}"</p>
+      </div>
+
+      @if (mensagemSucesso) {
+        <p class="text-green-600 text-xs mt-4">{{ mensagemSucesso }}</p>
+      }
+
+      @if (mensagemErro) {
+        <p class="text-red-600 text-xs mt-4">{{ mensagemErro }}</p>
+      }
+    </div>
+  </main>
+</div>
