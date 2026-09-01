@@ -39,7 +39,7 @@
             ],
             "styles": [
               "src/tailwind.css",
-              "src/styles.scss"
+              "src/styles.scss"              
             ]
           },
           "configurations": {
