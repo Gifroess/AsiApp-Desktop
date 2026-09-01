@@ -59,15 +59,6 @@ export class Perfil implements OnInit {
     this.mostrarSenha = !this.mostrarSenha;
   }
 
-    // TESTE TEMPORÁRIO - REMOVER ANTES DO MERGE
-  async loginTeste(): Promise<void> {
-    try {
-      await this.authService.login('giovanafroes@asimovjr.com.br', 'teste123');
-    } catch (error: any) {
-      console.error('Erro no login de teste:', error.message);
-      this.mensagemErro = error.message;
-    }
-  }
 
   // async salvarNome(): Promise<void> {
   //   if (this.perfilForm.invalid || !this.uid) return;

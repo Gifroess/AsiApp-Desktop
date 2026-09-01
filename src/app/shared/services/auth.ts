@@ -18,31 +18,48 @@ export class AuthService {
     ) {}
 
     // ---------- CADASTRO ----------
+    // async cadastro(name: string, email: string, password: string, confirmPassword: string) {
+    //     if (password !== confirmPassword) {
+    //         throw new Error('As senhas não coincidem.');
+    //     }
+
+    //     if (!this.isCorporateEmail(email)) {
+    //         throw new Error('Utilize um e-mail corporativo (@asimovjr.com.br).');
+    //     }
+
+    //     const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
+    //     const user = userCredential.user;
+
+    //     if (user) {
+    //         const userData: UserInterface = {
+    //             name: name,
+    //             email: email,
+    //             cargo: 'Membro',
+    //             status: 'Ativo'
+    //         };
+
+    //         await this.salvarDados(user.uid, userData);
+    //         await user.sendEmailVerification();
+    //         await this.auth.signOut();
+    //     }
+    // }
+
     async cadastro(name: string, email: string, password: string, confirmPassword: string) {
-        if (password !== confirmPassword) {
-            throw new Error('As senhas não coincidem.');
-        }
+    if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
+    if (!this.isCorporateEmail(email)) throw new Error('Utilize um e-mail corporativo (@asimovjr.com.br).');
 
-        if (!this.isCorporateEmail(email)) {
-            throw new Error('Utilize um e-mail corporativo (@asimovjr.com.br).');
-        }
+    const userCredential = await runInInjectionContext(this.injector, () =>
+        this.auth.createUserWithEmailAndPassword(email, password)
+    );
+    const user = userCredential.user;
 
-        const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-
-        if (user) {
-            const userData: UserInterface = {
-                name: name,
-                email: email,
-                cargo: 'Membro',
-                status: 'Ativo'
-            };
-
-            await this.salvarDados(user.uid, userData);
-            await user.sendEmailVerification();
-            await this.auth.signOut();
-        }
+    if (user) {
+        const userData: UserInterface = { name, email, cargo: 'Membro', status: 'Ativo' };
+        await runInInjectionContext(this.injector, () => this.salvarDados(user.uid, userData));
+        await runInInjectionContext(this.injector, () => user.sendEmailVerification());
+        await runInInjectionContext(this.injector, () => this.auth.signOut());
     }
+}
 
     private salvarDados(id: string, user: UserInterface) {
         return this.firestore.collection('usuarios').doc(id).set(user);
@@ -64,7 +81,7 @@ export class AuthService {
             throw new Error('E-mail ainda não verificado. Confira sua caixa de entrada.');
         }
 
-        this.router.navigate(['/home']); 
+        this.router.navigate(['/perfil']); //mudar dps para home
     }
 
     // ---------- LOGIN COM GOOGLE (apenas para e-mails já cadastrados) ----------
@@ -100,18 +117,33 @@ export class AuthService {
     }
 
     // ---------- DADOS DO USUÁRIO LOGADO ----------
+    // getUserData(): Observable<UserInterface | null> {
+    //     return this.auth.authState.pipe(
+    //         switchMap(user => {
+    //             if (user) {
+    //                 return this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges();
+    //             } else {
+    //                 return of(null);
+    //             }
+    //         }),
+    //         map(data => data ?? null)   // correção
+    //     );
+    // }
+
     getUserData(): Observable<UserInterface | null> {
-        return this.auth.authState.pipe(
-            switchMap(user => {
-                if (user) {
-                    return this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges();
-                } else {
-                    return of(null);
-                }
-            }),
-            map(data => data ?? null)   // correção
-        );
-    }
+    return this.auth.authState.pipe(
+        switchMap(user => {
+            if (user) {
+                return runInInjectionContext(this.injector, () =>
+                    this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges()
+                );
+            } else {
+                return of(null);
+            }
+        }),
+        map(data => data ?? null)
+    );
+}
 
     async getUid(): Promise<string | null> {
         const user = await firstValueFrom(this.auth.authState);
