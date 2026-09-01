@@ -1,0 +1,84 @@
+<!--menu lateral do sistema-->
+<aside class="sidebar-container w-[250px] min-h-screen flex flex-col px-10 py-12 text-white shrink-0">
+
+  <!--identidade do AsiApp-->
+  <div class="flex flex-col gap-1">
+
+    <div class="flex items-center gap-2">
+      <img
+        src="/icons/logo-ofc.png"
+        alt="Logo AsiApp"
+        class="w-7 h-7"
+      >
+
+      <h1 class="text-[17px] font-bold leading-tight">
+        AsiApp
+      </h1>
+    </div>
+
+    <p class="text-[10px] text-white/90 leading-tight">
+      Um aplicativo de Asimembros<br>
+      para Asimembros
+    </p>
+
+  </div>
+
+
+  <!--navegacao principal-->
+  <nav class="mt-9">
+
+    <div
+      class="menu-item"
+      [class.ativo]="paginaAtiva === 'home'"
+    >
+      Home
+    </div>
+
+    <div
+      class="menu-item"
+      [class.ativo]="paginaAtiva === 'pessoas'"
+    >
+      Gestão de Pessoas
+    </div>
+
+    <div
+      class="menu-item"
+      [class.ativo]="paginaAtiva === 'projetos'"
+    >
+      Gestão de Projetos
+    </div>
+
+    <div
+      class="menu-item"
+      [class.ativo]="paginaAtiva === 'financeiro'"
+    >
+      Gestão Financeira
+    </div>
+
+    <div
+      class="menu-item"
+      [class.ativo]="paginaAtiva === 'postagens'"
+    >
+      Menu de Postagem
+    </div>
+
+  </nav>
+
+
+  <!--perfil do usuario-->
+  <div class="mt-auto flex items-center gap-3">
+
+    <img
+      src="/icons/logo-asiapp.svg"
+      alt="Perfil"
+      class="w-10 h-10"
+    >
+
+    <p class="text-[11px] leading-relaxed">
+      “Nome do<br>
+      perfil”
+    </p>
+
+  </div>
+
+</aside>
