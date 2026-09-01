@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Login } from './components/login/login';
-import { Perfil } from './components/perfil/perfil';
+import { Cadastro } from './components/cadastro/cadastro';
 
 const routes: Routes = [
-  {path: '', component: Login},
-  { path: 'perfil', component: Perfil }
+  { path: '', component: Login },
+  { path: 'cadastro', component: Cadastro },
 ];
 
 @NgModule({
