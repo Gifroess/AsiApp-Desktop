@@ -1,9 +1,93 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { AuthService } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: false,
-  styleUrl: './login.scss',
   templateUrl: './login.html',
+  styleUrl: './login.scss'
 })
-export class Login {}
+export class Login {
+
+  loginForm: FormGroup;
+  isLoading = false;
+  authErrorMessage = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
+    //estrutura e regras de validacao do formulário de login
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email, this.corporateEmailValidator]],
+      senha: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  //validacao que garante que o login seja feito apenas com email @asimovjr.com.br
+  corporateEmailValidator(control: AbstractControl): ValidationErrors | null {
+    const email = control.value as string;
+    if (!email) return null;
+
+    const dominioValido = email.trim().toLowerCase().endsWith('@asimovjr.com.br');
+    return dominioValido ? null : { corporateEmail: true };
+  }
+
+  //autentica o usuario com email e senha via AuthService (mantém a validacao de e-mail verificado)
+  async onSubmit(): Promise<void> {
+    this.authErrorMessage = '';
+
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    const { email, senha } = this.loginForm.value;
+    this.isLoading = true;
+
+    try {
+      await this.authService.login(email, senha);
+      //o proprio AuthService ja redireciona pra /home apos o login
+    } catch (error) {
+      this.authErrorMessage = this.traduzErroFirebase(error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  //autentica o usuario via popup de login do google (AuthService bloqueia quem nao tem cadastro)
+  async loginWithGoogle(): Promise<void> {
+    this.authErrorMessage = '';
+    this.isLoading = true;
+
+    try {
+      await this.authService.loginWithGoogle();
+    } catch (error) {
+      this.authErrorMessage = this.traduzErroFirebase(error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  //converte os codigos de erro do firebase em mensagens para o usuario
+  private traduzErroFirebase(error: any): string {
+    const codigo = error?.code;
+
+    switch (codigo) {
+      case 'auth/invalid-email':
+        return 'E-mail inválido.';
+      case 'auth/user-not-found':
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+        return 'E-mail ou senha incorretos.';
+      case 'auth/too-many-requests':
+        return 'Muitas tentativas. Tente novamente em alguns minutos.';
+      case 'auth/popup-closed-by-user':
+        return 'Login com Google cancelado.';
+      default:
+        //erros lançados pelo AuthService (email nao verificado, conta nao cadastrada) ja vem com mensagem pronta
+        return error?.message ?? 'Não foi possível entrar. Tente novamente.';
+    }
+  }
+}
