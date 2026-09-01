@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/*cores da identidade visual do AsiApp*/
+@theme {
+  --color-asi-blue: #1E6FEB;
+  --color-asi-dark: #0B0F19;
+}
