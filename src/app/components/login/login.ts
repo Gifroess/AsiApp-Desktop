@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 
@@ -11,8 +11,10 @@ import { AuthService } from '../../shared/services/auth';
 export class Login {
 
   loginForm: FormGroup;
-  isLoading = false;
-  authErrorMessage = '';
+  //signals: o app roda zoneless, mudanças feitas após um await do firebase
+  //só atualizam a tela se forem signals (mesmo padrão do cadastro)
+  isLoading = signal(false);
+  authErrorMessage = signal('');
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +38,7 @@ export class Login {
 
   //autentica o usuario com email e senha via AuthService (mantém a validacao de e-mail verificado)
   async onSubmit(): Promise<void> {
-    this.authErrorMessage = '';
+    this.authErrorMessage.set('');
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -44,29 +46,29 @@ export class Login {
     }
 
     const { email, senha } = this.loginForm.value;
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     try {
       await this.authService.login(email, senha);
-      //o proprio AuthService ja redireciona pra /home apos o login
+      //o proprio AuthService redireciona: /home se verificado, /verificar-email se nao
     } catch (error) {
-      this.authErrorMessage = this.traduzErroFirebase(error);
+      this.authErrorMessage.set(this.traduzErroFirebase(error));
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 
   //autentica o usuario via popup de login do google (AuthService bloqueia quem nao tem cadastro)
   async loginWithGoogle(): Promise<void> {
-    this.authErrorMessage = '';
-    this.isLoading = true;
+    this.authErrorMessage.set('');
+    this.isLoading.set(true);
 
     try {
       await this.authService.loginWithGoogle();
     } catch (error) {
-      this.authErrorMessage = this.traduzErroFirebase(error);
+      this.authErrorMessage.set(this.traduzErroFirebase(error));
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 
