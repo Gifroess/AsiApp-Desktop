@@ -23,6 +23,23 @@ describe('Home', () => {
     expect(component).toBeTruthy();
   });
 
+  it('mantem o placeholder quando nao ha usuario', () => {
+    expect(component.nomeMembro()).toBe('Nome do Membro');
+  });
+
+  it('atualiza o nome com o usuario logado', async () => {
+    await TestBed.resetTestingModule()
+      .configureTestingModule({
+        declarations: [Home, Sidebar],
+        providers: [
+          { provide: AuthService, useValue: { getUserData: () => of({ name: 'Miguel' }) } },
+        ],
+      })
+      .compileComponents();
+    const f = TestBed.createComponent(Home);
+    expect(f.componentInstance.nomeMembro()).toBe('Miguel');
+  });
+
   it('calcula o percentual de faturamento', () => {
     component.faturamento = { alcancado: 50, meta: 200 };
     expect(component.faturamentoPct).toBe(25);

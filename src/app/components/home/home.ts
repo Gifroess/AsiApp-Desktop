@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { AuthService } from '../../shared/services/auth';
 
 interface Kpi {
@@ -31,8 +31,8 @@ interface Projeto {
   styleUrl: './home.scss',
 })
 export class Home {
-  //nome real do membro logado; placeholder ate carregar
-  nomeMembro = 'Nome do Membro';
+  //nome real do membro logado; placeholder ate carregar (signal: app roda zoneless)
+  nomeMembro = signal('Nome do Membro');
 
   faturamento = { alcancado: 99999.99, meta: 99999.99 };
 
@@ -92,7 +92,7 @@ export class Home {
 
   constructor(private auth: AuthService) {
     this.auth.getUserData().subscribe((u) => {
-      if (u?.name) this.nomeMembro = u.name;
+      if (u?.name) this.nomeMembro.set(u.name);
     });
   }
 
