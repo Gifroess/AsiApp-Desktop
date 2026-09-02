@@ -27,36 +27,41 @@
   <!--navegacao principal-->
   <nav class="mt-9">
 
-    <div
+    <a
       class="menu-item"
+      routerLink="/home"
       [class.ativo]="paginaAtiva === 'home'"
     >
       Home
-    </div>
+    </a>
 
+    <!--sem tela ainda-->
     <div
-      class="menu-item"
+      class="menu-item menu-item--desativado"
       [class.ativo]="paginaAtiva === 'pessoas'"
     >
       Gestão de Pessoas
     </div>
 
-    <div
+    <a
       class="menu-item"
+      routerLink="/gestao-projetos"
       [class.ativo]="paginaAtiva === 'projetos'"
     >
       Gestão de Projetos
-    </div>
+    </a>
 
+    <!--sem tela ainda-->
     <div
-      class="menu-item"
+      class="menu-item menu-item--desativado"
       [class.ativo]="paginaAtiva === 'financeiro'"
     >
       Gestão Financeira
     </div>
 
+    <!--sem tela ainda-->
     <div
-      class="menu-item"
+      class="menu-item menu-item--desativado"
       [class.ativo]="paginaAtiva === 'postagens'"
     >
       Menu de Postagem
@@ -66,7 +71,7 @@
 
 
   <!--perfil do usuario-->
-  <div class="mt-auto flex items-center gap-3">
+  <a class="mt-auto flex items-center gap-3" routerLink="/perfil">
 
     <img
       src="/icons/logo-asiapp.svg"
@@ -79,6 +84,6 @@
       perfil”
     </p>
 
-  </div>
+  </a>
 
 </aside>

@@ -79,17 +79,17 @@
         </a>
 
         <!--mensagem de erro geral vinda do firebase (senha incorreta, usuario nao encontrado)-->
-        @if (authErrorMessage) {
-          <p class="text-red-300 text-xs mt-2">{{ authErrorMessage }}</p>
+        @if (authErrorMessage()) {
+          <p class="text-red-300 text-xs mt-2">{{ authErrorMessage() }}</p>
         }
 
         <!--botao principal de envio do login-->
         <button
           type="submit"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition mt-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isLoading ? 'Entrando...' : 'Entrar' }}
+          {{ isLoading() ? 'Entrando...' : 'Entrar' }}
         </button>
 
         <p class="text-white text-[10px] whitespace-nowrap">
@@ -107,7 +107,7 @@
         <!--login social: autenticaçao via google-->
         <button
           type="button"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           (click)="loginWithGoogle()"
           class="w-full py-2 rounded-md border border-white/50 bg-white/5 backdrop-blur-sm hover:bg-white/15 transition text-white text-xs font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >

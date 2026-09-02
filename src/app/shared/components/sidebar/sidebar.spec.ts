@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterModule } from '@angular/router';
 import { Sidebar } from './sidebar';
 
 describe('Sidebar', () => {
@@ -8,6 +9,7 @@ describe('Sidebar', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [Sidebar],
+      imports: [RouterModule.forRoot([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Sidebar);
@@ -17,5 +19,12 @@ describe('Sidebar', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('marca Home como ativo via paginaAtiva', () => {
+    fixture.componentRef.setInput('paginaAtiva', 'home');
+    fixture.detectChanges();
+    const home: HTMLElement = fixture.nativeElement.querySelector('a[routerLink="/home"]');
+    expect(home.classList).toContain('ativo');
   });
 });

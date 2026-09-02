@@ -1,0 +1,13 @@
+/*scrollbar fina da caixa de projetos (simula o mock)*/
+.projetos-scroll {
+  scrollbar-width: thin;
+}
+
+.projetos-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.projetos-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}

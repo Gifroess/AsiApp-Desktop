@@ -16,9 +16,11 @@ import { environment } from '../assets/environments/environment';
 import { Cadastro } from './components/cadastro/cadastro';
 import { Perfil } from './components/perfil/perfil';
 import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
+import { Home } from './components/home/home';
+import { VerificarEmail } from './components/verificar-email/verificar-email';
 
 @NgModule({
-  declarations: [App, Login, Cadastro, GestaoProjetos, Perfil, Sidebar, RecuperarSenha],
+  declarations: [App, Login, Cadastro, GestaoProjetos, Perfil, Sidebar, RecuperarSenha, Home, VerificarEmail],
   imports: [
     BrowserModule,
     ReactiveFormsModule,

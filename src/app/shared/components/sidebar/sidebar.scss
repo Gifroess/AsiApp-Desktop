@@ -6,10 +6,17 @@
 }
 
 .menu-item {
+  display: block;
   padding: 19px 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.28);
   font-size: 13px;
   font-weight: 400;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.menu-item {
+  cursor: pointer;
 }
 
 .menu-item.ativo {
@@ -18,4 +25,10 @@
 
 .menu-item:last-child {
   border-bottom: none;
+}
+
+/* itens sem tela: visíveis mas sem interação */
+.menu-item--desativado {
+  opacity: 0.55;
+  cursor: default;
 }
