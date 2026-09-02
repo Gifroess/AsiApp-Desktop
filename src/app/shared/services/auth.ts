@@ -18,32 +18,6 @@ export class AuthService {
     ) {}
 
     // ---------- CADASTRO ----------
-    // async cadastro(name: string, email: string, password: string, confirmPassword: string) {
-    //     if (password !== confirmPassword) {
-    //         throw new Error('As senhas não coincidem.');
-    //     }
-
-    //     if (!this.isCorporateEmail(email)) {
-    //         throw new Error('Utilize um e-mail corporativo (@asimovjr.com.br).');
-    //     }
-
-    //     const userCredential = await this.auth.createUserWithEmailAndPassword(email, password);
-    //     const user = userCredential.user;
-
-    //     if (user) {
-    //         const userData: UserInterface = {
-    //             name: name,
-    //             email: email,
-    //             cargo: 'Membro',
-    //             status: 'Ativo'
-    //         };
-
-    //         await this.salvarDados(user.uid, userData);
-    //         await user.sendEmailVerification();
-    //         await this.auth.signOut();
-    //     }
-    // }
-
     async cadastro(name: string, email: string, password: string, confirmPassword: string) {
     if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
     if (!this.isCorporateEmail(email)) throw new Error('Utilize um e-mail corporativo (@asimovjr.com.br).');
@@ -54,7 +28,7 @@ export class AuthService {
     const user = userCredential.user;
 
     if (user) {
-        const userData: UserInterface = { name, email, cargo: 'Membro', status: 'Ativo' };
+        const userData: UserInterface = { name, email, role: 'Aguardando atribuição' };
         await runInInjectionContext(this.injector, () => this.salvarDados(user.uid, userData));
         await runInInjectionContext(this.injector, () => user.sendEmailVerification());
         await runInInjectionContext(this.injector, () => this.auth.signOut());
@@ -62,7 +36,7 @@ export class AuthService {
 }
 
     private salvarDados(id: string, user: UserInterface) {
-        return this.firestore.collection('usuarios').doc(id).set(user);
+        return this.firestore.collection('users').doc(id).set(user);
     }
 
     private isCorporateEmail(email: string): boolean {
@@ -94,7 +68,7 @@ export class AuthService {
             throw new Error('Não foi possível autenticar com o Google.');
         }
 
-        const doc = await this.firestore.collection('usuarios').doc(user.uid).get().toPromise();
+        const doc = await this.firestore.collection('users').doc(user.uid).get().toPromise();
 
         if (!doc?.exists) {
             // e-mail não estava previamente cadastrado -> bloqueia acesso
@@ -117,25 +91,12 @@ export class AuthService {
     }
 
     // ---------- DADOS DO USUÁRIO LOGADO ----------
-    // getUserData(): Observable<UserInterface | null> {
-    //     return this.auth.authState.pipe(
-    //         switchMap(user => {
-    //             if (user) {
-    //                 return this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges();
-    //             } else {
-    //                 return of(null);
-    //             }
-    //         }),
-    //         map(data => data ?? null)   // correção
-    //     );
-    // }
-
     getUserData(): Observable<UserInterface | null> {
     return this.auth.authState.pipe(
         switchMap(user => {
             if (user) {
                 return runInInjectionContext(this.injector, () =>
-                    this.firestore.collection<UserInterface>('usuarios').doc(user.uid).valueChanges()
+                    this.firestore.collection<UserInterface>('users').doc(user.uid).valueChanges()
                 );
             } else {
                 return of(null);

@@ -1,7 +1,15 @@
+export type UserRole =
+    | 'Aguardando atribuição'
+    | 'Membro'
+    | 'Gerência'
+    | 'Vice-Presidência'
+    | 'Diretoria'
+    | 'Presidência'
+    | 'Administrador';
+
 export interface UserInterface {
     name: string;
     email: string;
-    cargo: 'Membro' | 'Gerente' | 'Vice-Presidente' | 'Diretor' | 'Presidente'; 
-    status: 'Ativo' | 'Inativo';
+    role: UserRole;
     fotoUrl?: string;
 }

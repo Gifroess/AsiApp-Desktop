@@ -13,7 +13,7 @@ export class UsuarioService {
 
   // Atualiza o nome no documento do Firestore 
   async atualizarNome(uid: string, novoNome: string): Promise<void> {
-    await this.firestore.collection('usuarios').doc(uid).update({ name: novoNome });
+    await this.firestore.collection('users').doc(uid).update({ name: novoNome });
   }
 
   // Troca senha - exige reautenticação recente 
@@ -30,6 +30,6 @@ export class UsuarioService {
 
   // Atualiza a URL da foto no documento do usuário
   async atualizarFotoUrl(uid: string, url: string): Promise<void> {
-    await this.firestore.collection('usuarios').doc(uid).update({ fotoUrl: url });
+    await this.firestore.collection('users').doc(uid).update({ fotoUrl: url });
   }
 }
