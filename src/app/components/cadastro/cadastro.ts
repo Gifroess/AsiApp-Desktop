@@ -82,11 +82,11 @@ export class Cadastro {
       );
 
       //o AuthService ja desloga o usuario e dispara o email de verificacao apos criar a conta
-      //entao aqui so avisamos na tela e mandamos pro login depois de alguns segundos
+      //entao aqui so avisamos na tela e mandamos pra tela de verificacao depois de alguns segundos
       this.cadastroConcluido.set(true);
       this.cadastroForm.reset();
 
-      setTimeout(() => this.router.navigate(['/']), 3000);
+      setTimeout(() => this.router.navigate(['/verificar-email'], { queryParams: { email } }), 3000);
     } catch (error) {
       this.authErrorMessage.set(this.traduzErroFirebase(error));
     } finally {

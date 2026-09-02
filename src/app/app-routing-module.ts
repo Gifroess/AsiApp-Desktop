@@ -6,11 +6,13 @@ import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
 import { Home } from './components/home/home';
 import { Perfil } from './components/perfil/perfil';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
+import { VerificarEmail } from './components/verificar-email/verificar-email';
 
 const routes: Routes = [
   { path: '', component: Login },
   { path: 'login', redirectTo: '', pathMatch: 'full' },
   { path: 'cadastro', component: Cadastro },
+  { path: 'verificar-email', component: VerificarEmail },
   { path: 'recuperar-senha', component: RecuperarSenha },
   { path: 'home', component: Home },
   { path: 'perfil', component: Perfil },
