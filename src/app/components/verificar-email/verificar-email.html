@@ -21,9 +21,7 @@
 
       <h2 class="text-white text-base font-medium mb-2">Confirme seu e-mail</h2>
       <p class="text-white/90 text-xs leading-relaxed mb-5">
-        Enviamos um link de verificação
-        @if (emailAlvo()) { para <span class="font-semibold">{{ emailAlvo() }}</span> }
-        . Abra o link e depois faça login. Não recebeu? Reenvie abaixo.
+        Enviamos um link de verificação @if (emailAlvo()) {para <span class="font-semibold">{{ emailAlvo() }}</span>} @else {para o seu e-mail}. Abra o link e depois faça login. Não recebeu? Reenvie abaixo.
       </p>
 
       <!--reenvio: precisa de e-mail + senha para reautenticar-->
