@@ -44,3 +44,14 @@ __screenshots__/
 Thumbs.db
 
 src/assets/environments/environment.ts
+
+# Chave da service account (scripts de migração/admin) — nunca commitar
+scripts/serviceAccountKey.json
+
+# Artefatos do playwright-cli
+.playwright-cli/
+
+
+#md
+*.md
+!README.md
