@@ -1,0 +1,129 @@
+<!--tela Home: dashboard pos-login-->
+<div class="flex h-screen overflow-hidden bg-white text-asi-dark">
+
+  <!--sidebar fixa-->
+  <app-sidebar paginaAtiva="home" class="shrink-0"></app-sidebar>
+
+  <!--conteudo com scroll-->
+  <main class="flex-1 overflow-y-auto">
+
+    <!--cabecalho + progressao geral + portal bj-->
+    <div class="px-10 py-8 max-w-[1120px]">
+
+      <p class="text-[10px] tracking-[0.35em] text-neutral-400 font-medium">HOME</p>
+      <h1 class="text-[26px] font-bold mt-1">Bem vindo, "{{ nomeMembro }}"!</h1>
+      <p class="text-xs text-neutral-500 mt-1">Acompanhe os processos da empresa hoje</p>
+
+      <!--PROGRESSAO GERAL-->
+      <h2 class="text-[17px] font-medium mt-8">Progressão Geral</h2>
+
+      <!--faturamento-->
+      <div class="mt-4 rounded-xl bg-neutral-200/60 p-5">
+        <p class="text-[11px] text-neutral-500 mb-3">Faturamento</p>
+
+        <div class="flex rounded-md overflow-hidden text-white text-[11px]">
+          <div class="bg-asi-blue px-3 py-3" [style.width.%]="faturamentoPct">
+            <p class="opacity-80">Alcançado</p>
+            <p class="font-semibold whitespace-nowrap">{{ formatBRL(faturamento.alcancado) }}</p>
+          </div>
+          <div class="bg-asi-blue/50 px-3 py-3 flex-1 text-right">
+            <p class="opacity-90">Meta</p>
+            <p class="font-semibold whitespace-nowrap">{{ formatBRL(faturamento.meta) }}</p>
+          </div>
+        </div>
+
+        <div class="flex justify-between text-[11px] text-neutral-500 mt-2">
+          <span>GAP {{ faturamentoGap }}</span>
+          <span>{{ faturamentoPct }}% da meta atual</span>
+        </div>
+      </div>
+
+      <!--kpis-->
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @for (k of kpis; track k.label) {
+          <div class="rounded-xl bg-neutral-100 border border-neutral-200 p-5 flex flex-col gap-3">
+            <p class="text-[11px] text-neutral-500">{{ k.label }}</p>
+            <p class="text-2xl font-bold text-center">{{ k.valor }}</p>
+            <p class="text-[11px] text-asi-blue">{{ k.sub }}</p>
+          </div>
+        }
+      </div>
+
+      <!--PORTAL BJ-->
+      <div class="mt-4 rounded-xl bg-neutral-200/60 p-5">
+        <p class="text-[11px] text-neutral-500 mb-4">Portal BJ</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          @for (ind of indicadores; track ind.nome) {
+            <div
+              class="rounded-xl p-4 text-white"
+              [style.background-color]="ind.tipo === 'essencial' ? '#5aa95a' : '#3d6fb0'"
+            >
+              <p class="text-xs font-semibold mb-3 leading-tight">{{ ind.nome }}</p>
+
+              <div class="flex rounded-md overflow-hidden text-[10px] mb-3">
+                <div class="bg-white/15 px-2 py-3" [style.width.%]="indicadorPct(ind)">Alcançado</div>
+                <div class="bg-white/25 px-2 py-3 flex-1 text-right">Meta</div>
+              </div>
+
+              <div class="flex justify-between text-[10px] font-semibold border-t border-white/30 pt-2">
+                <span>GAP</span>
+                <span>{{ ind.gap }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!--legenda-->
+        <div class="flex gap-6 mt-4 text-[11px] text-neutral-600">
+          <span class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-sm bg-[#5aa95a]"></span>Indicadores Essenciais
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-sm bg-[#3d6fb0]"></span>Indicadores Complementares
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!--OVERVIEW DE PROJETOS-->
+    <section class="bg-neutral-200/50 px-10 py-8">
+      <h2 class="text-[17px] font-medium">Overview de Projetos</h2>
+
+      <div class="projetos-scroll mt-4 max-h-[430px] overflow-y-auto flex flex-col gap-4 pr-2">
+        @for (p of projetos; track p.nome) {
+          <article class="bg-white rounded-xl shadow-sm px-6 py-4">
+            <div class="flex justify-between items-start gap-4">
+              <h3 class="font-bold text-sm">{{ p.nome }}</h3>
+              <span class="text-[11px] text-asi-blue whitespace-nowrap">Orçamento: {{ p.orcamento }}</span>
+            </div>
+
+            <div class="flex gap-4 text-[11px] text-neutral-500 mt-1">
+              <span class="flex items-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4" /><path d="M4 21v-1a7 7 0 0 1 14 0v1" />
+                </svg>
+                <a class="text-asi-blue underline" href="#">{{ p.gerentes }}</a>
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 20v-1a6 6 0 0 1 12 0v1M15 20v-1a5 5 0 0 1 6-4.9" />
+                </svg>
+                {{ p.membros }}
+              </span>
+            </div>
+
+            <div class="flex gap-8 mt-3 text-[11px] text-neutral-600">
+              <p class="flex-1 leading-relaxed">{{ p.descricao }}</p>
+              <p class="w-56 leading-relaxed">
+                <span class="font-semibold text-neutral-700">Alocados:</span>
+                {{ p.alocados.join(', ') }}
+              </p>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+  </main>
+</div>

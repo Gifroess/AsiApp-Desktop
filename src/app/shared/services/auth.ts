@@ -81,7 +81,7 @@ export class AuthService {
             throw new Error('E-mail ainda não verificado. Confira sua caixa de entrada.');
         }
 
-        this.router.navigate(['/perfil']); //mudar dps para home
+        this.router.navigate(['/home']);
     }
 
     // ---------- LOGIN COM GOOGLE (apenas para e-mails já cadastrados) ----------
