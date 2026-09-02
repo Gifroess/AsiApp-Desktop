@@ -1,0 +1,94 @@
+<!--tela de Recuperacao de Senha-->
+<div class="recuperar-senha-container min-h-screen flex flex-col justify-between px-8 py-6 md:px-16 md:py-10">
+
+  <header class="flex items-start justify-between mb-10">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-1.5">
+        <img
+          src="/icons/logo-ofc.png"
+          alt="Logo AsiApp"
+          class="w-6 h-6"
+        >
+        <h1 class="text-sm font-bold text-white leading-tight">AsiApp</h1>
+      </div>
+      <p class="text-[10px] text-white/90 leading-tight">
+        Um aplicativo de Asimembros<br>para Asimembros
+      </p>
+    </div>
+    <span class="text-sm font-semibold text-white">AsimovJr.</span>
+  </header>
+
+  <!--conteudo principal: verificacao-->
+  <main class="flex-1 flex items-center justify-center">
+    <div class="w-[260px] flex flex-col items-center text-center">
+
+      <img
+        src="/icons/logo-asiapp.svg"
+        alt="Logo AsiApp"
+        class="w-20 h-20 mb-3"
+      >
+
+      <p class="text-white text-sm mb-1">Verificação necessária</p>
+
+      <h2 class="text-white text-base font-medium leading-tight">
+        Insira o código que enviamos
+      </h2>
+
+      <p class="text-white text-base font-medium mb-5">
+        para email***@asimov.com.br
+      </p>
+
+      <!--campos de codigo-->
+      <div class="flex items-center justify-center gap-2 mb-3">
+
+        @for (digito of codigo; track $index) {
+          <input
+            #codigoInput
+            type="text"
+            inputmode="numeric"
+            maxlength="1"
+            [value]="digito"
+            (input)="onInput($event, $index)"
+            (keydown)="onKeyDown($event, $index)"
+            (paste)="onPaste($event)"
+            class="w-8 h-10 rounded-md bg-white/30 backdrop-blur-sm text-white text-xs text-center outline-none focus:bg-white/40 transition"
+          >
+        }
+
+      </div>
+
+      @if (mensagemErro()) {
+        <p class="text-red-300 text-[10px] mb-2">
+          {{ mensagemErro() }}
+        </p>
+      }
+
+      <button
+        type="button"
+        [disabled]="isReenviando()"
+        (click)="reenviarCodigo()"
+        class="text-white text-xs hover:underline mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ isReenviando() ? 'Reenviando...' : 'Reenviar código' }}
+      </button>
+
+      <!--botao principal-->
+      <button
+        type="button"
+        [disabled]="!codigoValido || isLoading()"
+        (click)="validarCodigo()"
+        class="w-full py-2 rounded-md font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ isLoading() ? 'Validando...' : 'Entrar' }}
+      </button>
+
+      <p class="text-white text-[10px] whitespace-nowrap mt-2">
+        Não possui uma conta?
+        <a href="#" class="font-semibold hover:underline">Faça seu cadastro!</a>
+      </p>
+
+    </div>
+  </main>
+
+  <div></div>
+</div>
