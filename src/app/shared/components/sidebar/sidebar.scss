@@ -1,0 +1,21 @@
+.sidebar-container {
+  background-image: url('/assets/images/login-background.png');
+  background-size: auto 100%;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.menu-item {
+  padding: 19px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.menu-item.ativo {
+  font-weight: 600;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}

@@ -2,92 +2,412 @@
   <app-sidebar></app-sidebar>
 
   <main class="flex-1 flex items-center justify-center p-10">
+
     <div class="bg-white rounded-3xl shadow-lg p-10 w-full max-w-xl">
 
+      <!-- Título -->
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-xl font-semibold text-asi-dark">Seu Perfil</h2>
-        <button type="button" (click)="alternarEdicao()"
-                class="text-xs font-semibold text-asi-blue hover:underline">
+        <h2 class="text-xl font-bold text-asi-dark">
+          Seu Perfil
+        </h2>
+
+        <button
+          type="button"
+          (click)="alternarEdicao()"
+          class="text-xs font-semibold text-asi-blue hover:underline"
+        >
           {{ modoEdicao ? 'Cancelar' : 'Editar Perfil' }}
         </button>
       </div>
 
+
       <!-- Avatar -->
-      <div class="relative w-32 h-32 mx-auto mb-8">
+      <div class="relative w-32 h-32 mx-auto mb-10">
+
         <img
           [src]="usuario?.fotoUrl || 'assets/icons/icone-perfil.png'"
           alt="Foto de perfil"
           class="w-32 h-32 rounded-full object-cover border border-asi-dark/20"
         >
-        <label class="absolute -top-1 -right-1 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center cursor-pointer hover:bg-gray-100 transition">
-          <img src="assets/icons/edit.png" alt="Editar foto" class="w-4 h-4">
-          <input type="file" accept="image/*" class="hidden" (change)="onFotoSelecionada($event)">
+
+        <label
+          class="absolute -top-1 -right-1
+                 w-8 h-8
+                 bg-white
+                 rounded-full
+                 shadow
+                 flex
+                 items-center
+                 justify-center
+                 cursor-pointer
+                 hover:bg-gray-100
+                 transition"
+        >
+          <img
+            src="assets/icons/edit.png"
+            alt="Editar foto"
+            class="w-4 h-4"
+          >
+
+          <input
+            type="file"
+            accept="image/*"
+            class="hidden"
+            (change)="onFotoSelecionada($event)"
+          >
         </label>
+
       </div>
 
-      <form [formGroup]="perfilForm" (ngSubmit)="salvarPerfil()" class="flex flex-col gap-5">
 
-        <!-- Nome -->
-        <div>
-          <label class="block text-xs font-medium mb-1 text-gray-700">Nome de Usuário:</label>
-          <input formControlName="nome" type="text"
-                 class="w-full max-w-sm h-12 rounded-2xl border-2 border-gray-200 px-4 text-xs bg-gray-50 outline-none focus:bg-white focus:border-asi-blue transition"
-                 [readonly]="!modoEdicao">
+      <!-- Formulário -->
+      <form
+        [formGroup]="perfilForm"
+        (ngSubmit)="salvarPerfil()"
+        class="flex flex-col gap-6"
+      >
+
+
+        <!-- ================================================= -->
+        <!-- NOME DE USUÁRIO                                  -->
+        <!-- ================================================= -->
+
+        <div class="flex items-center gap-6">
+
+          <label
+            class="w-32 shrink-0
+                   text-xs
+                   font-bold
+                   text-asi-dark"
+          >
+            Nome de Usuário:
+          </label>
+
+          <input
+            formControlName="nome"
+            type="text"
+            placeholder="Nome do Membro"
+            [readonly]="!modoEdicao"
+            class="w-[368px]
+                   h-[48px]
+                   rounded-[20px]
+                   border-2
+                   border-gray-200
+                   px-4
+                   text-xs
+                   bg-gray-50
+                   outline-none
+                   focus:bg-white
+                   focus:border-asi-blue
+                   transition"
+          >
+
         </div>
 
-        <!-- Senha (só aparece em modo de edição) -->
-        <div [formGroup]="senhaForm" *ngIf="modoEdicao" class="flex flex-col gap-3">
-          <div>
-            <label class="block text-xs font-medium mb-1 text-gray-700">Senha atual:</label>
-            <input formControlName="senhaAtual" [type]="mostrarSenha ? 'text' : 'password'"
-                   placeholder="Preencha só se for trocar a senha"
-                   class="w-full max-w-sm h-12 rounded-2xl border-2 border-gray-200 px-4 text-xs bg-gray-50 outline-none focus:bg-white focus:border-asi-blue transition">
-          </div>
 
-          <div class="relative w-full max-w-sm">
-            <label class="block text-xs font-medium mb-1 text-gray-700">Nova senha:</label>
-            <input formControlName="novaSenha" [type]="mostrarSenha ? 'text' : 'password'"
-                   class="w-full h-12 rounded-2xl border-2 border-gray-200 pl-4 pr-11 text-xs bg-gray-50 outline-none focus:bg-white focus:border-asi-blue transition">
-            <button type="button" (click)="toggleSenha()"
-                    class="absolute right-3 top-[38px] text-gray-500 hover:text-asi-dark transition">
-              <svg *ngIf="!mostrarSenha" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
-                <circle cx="12" cy="12" r="3"/>
+        <!-- ================================================= -->
+        <!-- SENHA - VISUALIZAÇÃO                             -->
+        <!-- ================================================= -->
+
+        <div
+          *ngIf="!modoEdicao"
+          class="flex items-center gap-6"
+        >
+
+          <label
+            class="w-32 shrink-0
+                   text-xs
+                   font-bold
+                   text-asi-dark"
+          >
+            Senha:
+          </label>
+
+          <div class="relative w-[368px]">
+
+            <input
+              type="password"
+              value="••••••••••••"
+              readonly
+              class="w-[368px]
+                     h-[48px]
+                     rounded-[20px]
+                     border-2
+                     border-gray-200
+                     px-4
+                     pr-11
+                     text-xs
+                     bg-gray-50
+                     outline-none"
+            >
+
+            <!-- Ícone do olho -->
+            <button
+              type="button"
+              class="absolute
+                     right-3
+                     top-1/2
+                     -translate-y-1/2
+                     text-gray-400
+                     hover:text-asi-dark
+                     transition"
+            >
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M1 12s4-8 11-8
+                     11 8 11 8
+                     -4 8-11 8
+                     -11-8-11-8Z"
+                />
+
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                />
               </svg>
-              <svg *ngIf="mostrarSenha" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.68M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
+
             </button>
+
           </div>
+
         </div>
 
-        <!-- Senha (visualização, fora do modo de edição) -->
-        <div *ngIf="!modoEdicao">
-          <label class="block text-xs font-medium mb-1 text-gray-700">Senha:</label>
-          <input type="password" value="••••••••••••" readonly
-                 class="w-full max-w-sm h-12 rounded-2xl border-2 border-gray-200 px-4 text-xs bg-gray-50">
+
+        <!-- ================================================= -->
+        <!-- SENHA - MODO EDIÇÃO                              -->
+        <!-- ================================================= -->
+
+        <div
+          *ngIf="modoEdicao"
+          [formGroup]="senhaForm"
+          class="flex flex-col gap-5"
+        >
+
+          <!-- Senha atual -->
+          <div class="flex items-center gap-6">
+
+            <label
+              class="w-32 shrink-0
+                     text-xs
+                     font-bold
+                     text-asi-dark"
+            >
+              Senha atual:
+            </label>
+
+            <div class="relative w-[368px]">
+
+              <input
+                formControlName="senhaAtual"
+                [type]="mostrarSenha ? 'text' : 'password'"
+                placeholder="Senha atual"
+                class="w-[368px]
+                       h-[48px]
+                       rounded-[20px]
+                       border-2
+                       border-gray-200
+                       px-4
+                       pr-11
+                       text-xs
+                       bg-gray-50
+                       outline-none
+                       focus:bg-white
+                       focus:border-asi-blue
+                       transition"
+              >
+
+              <button
+                type="button"
+                (click)="toggleSenha()"
+                class="absolute
+                       right-3
+                       top-1/2
+                       -translate-y-1/2
+                       text-gray-400
+                       hover:text-asi-dark
+                       transition"
+              >
+
+                <!-- Olho aberto -->
+                <svg
+                  *ngIf="!mostrarSenha"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M1 12s4-8 11-8
+                       11 8 11 8
+                       -4 8-11 8
+                       -11-8-11-8Z"
+                  />
+
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                  />
+                </svg>
+
+
+                <!-- Olho fechado -->
+                <svg
+                  *ngIf="mostrarSenha"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M17.94 17.94
+                       A10.94 10.94 0 0 1 12 20
+                       c-7 0-11-8-11-8
+                       a21.6 21.6 0 0 1 5.06-6.06"
+                  />
+
+                  <path
+                    d="M9.9 4.24
+                       A10.94 10.94 0 0 1 12 4
+                       c7 0 11 8 11 8
+                       a21.6 21.6 0 0 1-2.61 3.68"
+                  />
+
+                  <path
+                    d="M14.12 14.12
+                       a3 3 0 1 1-4.24-4.24"
+                  />
+
+                  <line
+                    x1="1"
+                    y1="1"
+                    x2="23"
+                    y2="23"
+                  />
+                </svg>
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Nova senha -->
+          <div class="flex items-center gap-6">
+
+            <label
+              class="w-32 shrink-0
+                     text-xs
+                     font-bold
+                     text-asi-dark"
+            >
+              Nova senha:
+            </label>
+
+            <input
+              formControlName="novaSenha"
+              [type]="mostrarSenha ? 'text' : 'password'"
+              placeholder="Nova senha"
+              class="w-[368px]
+                     h-[48px]
+                     rounded-[20px]
+                     border-2
+                     border-gray-200
+                     px-4
+                     text-xs
+                     bg-gray-50
+                     outline-none
+                     focus:bg-white
+                     focus:border-asi-blue
+                     transition"
+            >
+
+          </div>
+
         </div>
 
-        <!-- Cargo -->
-        <div>
-          <label class="block text-xs font-medium mb-1 text-gray-700">Cargo:</label>
-          <p class="text-xs text-gray-700 italic">"{{ usuario?.cargo }}"</p>
+
+        <!-- ================================================= -->
+        <!-- CARGO                                             -->
+        <!-- ================================================= -->
+
+        <div class="flex items-center gap-6">
+
+          <label
+            class="w-32 shrink-0
+                   text-xs
+                   font-bold
+                   text-asi-dark"
+          >
+            Cargo:
+          </label>
+
+          <p class="text-xs text-asi-dark italic">
+            "{{ usuario?.cargo }}"
+          </p>
+
         </div>
 
-        <button type="submit" *ngIf="modoEdicao" [disabled]="carregando"
-                class="self-start py-2 px-6 rounded-2xl font-semibold text-white text-xs bg-asi-dark hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">
+
+        <!-- ================================================= -->
+        <!-- BOTÃO SALVAR                                      -->
+        <!-- ================================================= -->
+
+        <button
+          type="submit"
+          *ngIf="modoEdicao"
+          [disabled]="carregando"
+          class="self-center
+                 mt-3
+                 py-2
+                 px-6
+                 rounded-2xl
+                 font-semibold
+                 text-white
+                 text-xs
+                 bg-asi-dark
+                 hover:bg-black
+                 transition
+                 disabled:opacity-50
+                 disabled:cursor-not-allowed"
+        >
           {{ carregando ? 'Salvando...' : 'Salvar alterações' }}
         </button>
 
+
+        <!-- ================================================= -->
+        <!-- MENSAGENS                                         -->
+        <!-- ================================================= -->
+
         @if (mensagemSucesso) {
-          <p class="text-green-600 text-xs">{{ mensagemSucesso }}</p>
+          <p class="text-green-600 text-xs text-center">
+            {{ mensagemSucesso }}
+          </p>
         }
+
         @if (mensagemErro) {
-          <p class="text-red-600 text-xs">{{ mensagemErro }}</p>
+          <p class="text-red-600 text-xs text-center">
+            {{ mensagemErro }}
+          </p>
         }
-        
+
       </form>
+
     </div>
+
   </main>
 </div>
