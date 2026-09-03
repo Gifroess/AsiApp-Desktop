@@ -1,4 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth';
+import { UserInterface } from '../../interfaces/user-interface';
 
 @Component({
   selector: 'app-sidebar',
@@ -6,9 +9,24 @@ import { Component, Input } from '@angular/core';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss'
 })
-export class Sidebar {
+export class Sidebar implements OnInit {
 
-  //pagina ativa do menu
   @Input() paginaAtiva = '';
 
+  usuario: UserInterface | null = null;
+
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.getUserData().subscribe(usuario => {
+      this.usuario = usuario;
+    });
+  }
+
+  navegar(rota: string): void {
+    this.router.navigate([rota]);
+  }
 }

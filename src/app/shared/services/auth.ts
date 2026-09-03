@@ -54,7 +54,7 @@ export class AuthService {
     const user = userCredential.user;
 
     if (user) {
-        const userData: UserInterface = { name, email, cargo: 'Membro', status: 'Ativo' };
+        const userData: UserInterface = { name, email, role: 'Membro', status: 'Ativo' };
         await runInInjectionContext(this.injector, () => this.salvarDados(user.uid, userData));
         await runInInjectionContext(this.injector, () => user.sendEmailVerification());
         await runInInjectionContext(this.injector, () => this.auth.signOut());

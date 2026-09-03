@@ -1,7 +1,7 @@
 export interface UserInterface {
     name: string;
     email: string;
-    cargo: 'Membro' | 'Gerente' | 'Vice-Presidente' | 'Diretor' | 'Presidente'; 
+    role: 'Aguardando atribuição' | 'Membro' | 'Gerência' | 'Vice-Presidência' | 'Diretoria' | 'Presidência' | 'Administrador';
     status: 'Ativo' | 'Inativo';
     fotoUrl?: string;
 }

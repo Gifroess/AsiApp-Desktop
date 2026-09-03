@@ -1,14 +1,12 @@
-<!--menu lateral do sistema-->
-<aside class="sidebar-container w-[250px] min-h-screen flex flex-col px-10 py-12 text-white shrink-0">
+<!-- menu lateral do sistema -->
+<aside class="sidebar-container w-[250px] h-full flex flex-col px-10 py-12 text-white shrink-0 self-stretch">
 
-  <!--identidade do AsiApp-->
+  <!-- identidade do AsiApp -->
   <div class="flex flex-col gap-1">
 
     <div class="flex items-center gap-2">
       <img
-
         src="assets/icons/logo-ofc.png"
-
         alt="Logo AsiApp"
         class="w-7 h-7"
       >
@@ -25,41 +23,44 @@
 
   </div>
 
+ <!-- BOTÕES DESABILITADOS NOS COMPONENTES SEM TELAS, VOU ATUALIZAR DPS -->
 
-  <!--navegacao principal-->
+  <!-- navegação principal -->
   <nav class="mt-9">
 
+    <!-- Home -->
     <div
-      class="menu-item"
-      [class.ativo]="paginaAtiva === 'home'"
+      class="menu-item opacity-50 cursor-not-allowed"
     >
       Home
     </div>
 
+    <!-- Gestão de Pessoas -->
     <div
-      class="menu-item"
-      [class.ativo]="paginaAtiva === 'pessoas'"
+      class="menu-item opacity-50 cursor-not-allowed"
     >
       Gestão de Pessoas
     </div>
 
+    <!-- Gestão de Projetos -->
     <div
-      class="menu-item"
+      class="menu-item cursor-pointer"
       [class.ativo]="paginaAtiva === 'projetos'"
+      (click)="navegar('projetos')"
     >
       Gestão de Projetos
     </div>
 
+    <!-- Gestão Financeira -->
     <div
-      class="menu-item"
-      [class.ativo]="paginaAtiva === 'financeiro'"
+      class="menu-item opacity-50 cursor-not-allowed"
     >
       Gestão Financeira
     </div>
 
+    <!-- Menu de Postagem -->
     <div
-      class="menu-item"
-      [class.ativo]="paginaAtiva === 'postagens'"
+      class="menu-item opacity-50 cursor-not-allowed"
     >
       Menu de Postagem
     </div>
@@ -67,20 +68,20 @@
   </nav>
 
 
-  <!--perfil do usuario-->
-  <div class="mt-auto flex items-center gap-3">
+  <!-- perfil do usuário -->
+  <div
+    class="mt-auto flex items-center gap-3 cursor-pointer"
+    (click)="navegar('perfil')"
+  >
 
     <img
-
-      src="assets/icons/logo-asiapp.svg"
-
-      alt="Perfil"
-      class="w-10 h-10"
+      [src]="usuario?.fotoUrl || 'assets/icons/logo-asiapp.svg'"
+      alt="Foto de perfil"
+      class="w-10 h-10 rounded-full object-cover"
     >
 
     <p class="text-[11px] leading-relaxed">
-      “Nome do<br>
-      perfil”
+      {{ usuario?.name || 'Usuário' }}
     </p>
 
   </div>
