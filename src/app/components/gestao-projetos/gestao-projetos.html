@@ -1,10 +1,192 @@
-<!--tela de Gestao de Projetos-->
-<div class="min-h-screen flex bg-white">
-
+<!--tela de gestao de projetos-->
+<div class="h-screen flex bg-white overflow-hidden">
   <app-sidebar paginaAtiva="projetos"></app-sidebar>
 
   <!--conteudo principal-->
-  <main class="flex-1 bg-white">
-  </main>
+  <main
+    class="flex-1 h-full overflow-y-auto bg-white px-12 py-8 xl:px-[76px] xl:py-[36px] flex flex-col"
+  >
+    <!--cabecalho da pagina-->
+    <header class="mb-5">
+      <p class="text-[10px] tracking-[4px] text-black mb-1">GESTÃO</p>
 
+      <h1 class="text-[20px] font-bold text-black leading-tight">Gestão de Projetos</h1>
+
+      <p class="text-[13px] text-black mt-2">Acompanhe e gerencie todos os projetos da empresa!</p>
+    </header>
+
+    <!--container de projetos-->
+    <section class="bg-[#e5e7e9] rounded-[14px] p-5">
+      <!--acoes principais-->
+      <div class="flex items-center gap-2 mb-5">
+        <!--barra de pesquisa-->
+        <div class="flex flex-1 min-w-0 h-[42px]">
+          <input
+            type="text"
+            placeholder="Pesquise um projeto"
+            class="flex-1 rounded-l-lg bg-white/80 px-4 text-[11px] text-black placeholder:text-gray-400 outline-none"
+          />
+
+          <button
+            type="button"
+            class="w-[55px] flex items-center justify-center rounded-r-lg bg-[#d1d3d5]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              class="w-4 h-4 text-black"
+            >
+              <circle cx="11" cy="11" r="7"></circle>
+
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!--botao cadastrar projeto-->
+        <button
+          type="button"
+          class="h-[42px] px-4 rounded-lg bg-gradient-to-r from-[#168be8] to-[#00365f] text-white text-[11px] font-semibold flex items-center gap-2 whitespace-nowrap"
+        >
+          <span class="text-[22px] font-light leading-none"> + </span>
+
+          Cadastrar Projeto
+        </button>
+
+        <!--botao filtros-->
+        <button
+          type="button"
+          class="h-[42px] px-5 rounded-lg bg-white text-black text-[11px] flex items-center gap-2 whitespace-nowrap"
+        >
+          <img src="/icons/filtro.png" alt="Filtros" class="w-4 h-4" />
+
+          Filtros
+        </button>
+      </div>
+
+      <!--lista de projetos-->
+      <div class="overflow-x-auto w-full">
+        <div class="bg-white rounded-lg overflow-hidden w-full min-w-[850px]">
+          <!--cabecalho da tabela-->
+          <div
+            class="grid grid-cols-[2fr_1.1fr_1fr_1fr_1fr_1fr_75px_35px] items-center px-5 py-3 border-b border-gray-200"
+          >
+            <span class="text-[11px] font-semibold"> Projeto </span>
+
+            <span class="text-[11px] font-semibold"> Gerente </span>
+
+            <span class="text-[11px] font-semibold"> Área </span>
+
+            <span class="text-[11px] font-semibold"> Prazo </span>
+
+            <span class="text-[11px] font-semibold"> Valor </span>
+
+            <span class="text-[11px] font-semibold"> Status </span>
+
+            <span class="text-[11px] font-semibold text-center"> Ações </span>
+
+            <span class="text-[11px] font-semibold text-center"> Mais </span>
+          </div>
+
+          <!--projetos-->
+          <div *ngFor="let projeto of projetos">
+            <!--linha principal-->
+            <div
+              class="grid grid-cols-[2fr_1.1fr_1fr_1fr_1fr_1fr_75px_35px] items-center px-5 py-4 border-b border-gray-100"
+            >
+              <!--nome projeto-->
+              <div class="flex items-center gap-3">
+                <div class="w-1 h-8 rounded-full" [class]="projeto.cor"></div>
+
+                <span class="text-[11px] font-medium">
+                  {{ projeto.nome }}
+                </span>
+              </div>
+
+              <span class="text-[11px]">
+                {{ projeto.gerente }}
+              </span>
+
+              <span class="text-[11px]">
+                {{ projeto.area }}
+              </span>
+
+              <span class="text-[11px]">
+                {{ projeto.prazo }}
+              </span>
+
+              <span class="text-[11px]">
+                {{ projeto.valor }}
+              </span>
+              <!--status-->
+              <span
+                class="text-[10px] font-medium px-4 py-1 rounded-full w-fit"
+                [class.bg-yellow-100]="projeto.status === 'Em andamento'"
+                [class.bg-blue-100]="projeto.status === 'A iniciar'"
+                [class.bg-green-100]="projeto.status === 'Concluído'"
+              >
+                {{ projeto.status }}
+              </span>
+
+              <!--acoes-->
+              <div class="flex items-center justify-center gap-3">
+                <button type="button" class="hover:opacity-70 transition">
+                  <img src="/icons/editar.png" alt="Editar projeto" class="w-4 h-4" />
+                </button>
+
+                <button type="button" class="hover:opacity-70 transition">
+                  <img src="/icons/lixeira.png" alt="Excluir projeto" class="w-4 h-4" />
+                </button>
+              </div>
+
+              <!--mais-->
+              <button
+                type="button"
+                class="flex justify-center items-center"
+                (click)="abrirProjeto(projeto)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="w-4 h-4 text-gray-500"
+                >
+                  <path *ngIf="!projeto.aberto" d="m6 9 6 6 6-6" />
+
+                  <path *ngIf="projeto.aberto" d="m18 15-6-6-6 6" />
+                </svg>
+              </button>
+            </div>
+
+            <!--detalhes do projeto-->
+            <div
+              *ngIf="projeto.aberto"
+              class="grid grid-cols-2 px-10 py-5 bg-gray-50 border-b border-gray-100"
+            >
+              <!--membros alocados-->
+              <div>
+                <p class="text-[11px] font-semibold mb-2">Membros Alocados:</p>
+
+                <p *ngFor="let membro of projeto.membros" class="text-[11px]">• {{ membro }}</p>
+              </div>
+
+              <!--descricao-->
+              <div>
+                <p class="text-[11px] font-semibold mb-2">Descrição do Projeto:</p>
+
+                <p class="text-[11px]">
+                  {{ projeto.descricao }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>

@@ -1,5 +1,13 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
 .login-container {
-  background-image: url('/images/login-background.png');
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-image: url('/assets/images/login-background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
