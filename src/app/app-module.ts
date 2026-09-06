@@ -1,6 +1,7 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -8,6 +9,7 @@ import { App } from './app';
 import { Login } from './components/login/login';
 import { Cadastro } from './components/cadastro/cadastro';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
+import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
 import { Perfil } from './components/perfil/perfil';
 
 import { Sidebar } from './shared/components/sidebar/sidebar';
@@ -25,6 +27,7 @@ import { environment } from '../assets/environments/environment';
     Login,
     Cadastro,
     GestaoProjetos,
+    GestaoPessoas,
     Perfil,
     Sidebar
   ],
@@ -33,6 +36,7 @@ import { environment } from '../assets/environments/environment';
     BrowserModule,
     ReactiveFormsModule,
     AppRoutingModule,
+    FormsModule,
 
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,

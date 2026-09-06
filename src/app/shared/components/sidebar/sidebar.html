@@ -37,7 +37,9 @@
 
     <!-- Gestão de Pessoas -->
     <div
-      class="menu-item opacity-50 cursor-not-allowed"
+      class="menu-item cursor-pointer"
+      [class.ativo]="paginaAtiva === 'projetos'"
+      (click)="navegar('pessoas')"
     >
       Gestão de Pessoas
     </div>
