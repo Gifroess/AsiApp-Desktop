@@ -29,4 +29,8 @@ export class Sidebar implements OnInit {
   navegar(rota: string): void {
     this.router.navigate([rota]);
   }
+
+  async logout(): Promise<void> {
+  await this.authService.logout();
+}
 }

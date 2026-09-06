@@ -6,13 +6,14 @@ import { Cadastro } from './components/cadastro/cadastro';
 import { Perfil } from './components/perfil/perfil';
 import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
+import { authGuard } from './shared/guards/auth.guard';
 
 const routes: Routes = [
   { path: '', component: Login },
   { path: 'cadastro', component: Cadastro },
   { path: 'recuperar-senha', component: RecuperarSenha },
-  { path: 'perfil', component: Perfil },
-  { path: 'projetos', component: GestaoProjetos }
+  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
+  { path: 'projetos', component: GestaoProjetos, canActivate: [authGuard] }
 ];
 
 @NgModule({

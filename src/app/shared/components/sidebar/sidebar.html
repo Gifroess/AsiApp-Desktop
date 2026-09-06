@@ -68,9 +68,12 @@
   </nav>
 
 
+<!-- perfil e logout -->
+<div class="mt-auto flex flex-col gap-4">
+
   <!-- perfil do usuário -->
   <div
-    class="mt-auto flex items-center gap-3 cursor-pointer"
+    class="flex items-center gap-3 cursor-pointer"
     (click)="navegar('perfil')"
   >
 
@@ -86,4 +89,35 @@
 
   </div>
 
-</aside>
+  <!-- botão sair -->
+  <button
+    type="button"
+    (click)="logout()"
+    class="w-full flex items-center gap-3 pt-3 border-t border-white/20 text-white/70 hover:text-white transition cursor-pointer"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="w-5 h-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15"
+      />
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M18 15l3-3m0 0l-3-3m3 3H9"
+      />
+    </svg>
+
+    <span class="text-[11px]">
+      Sair
+    </span>
+  </button>
+
+</div>

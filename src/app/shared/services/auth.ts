@@ -113,7 +113,7 @@ export class AuthService {
     // ---------- LOGOUT ----------
     async logout() {
         await this.auth.signOut();
-        this.router.navigate(['/login']);
+        this.router.navigate(['']);
     }
 
     // ---------- DADOS DO USUÁRIO LOGADO ----------
@@ -149,4 +149,11 @@ export class AuthService {
         const user = await firstValueFrom(this.auth.authState);
         return user ? user.uid : null;
     }
+
+    isAuthenticated(): Observable<boolean> {
+        return this.auth.authState.pipe(
+            map(user => !!user)
+        );
+    }
 }
+
