@@ -16,7 +16,7 @@
     </header>
 
     <!--container de projetos-->
-    <section class="bg-[#e5e7e9] rounded-[14px] p-5">
+    <section class="bg-[#e5e7e9] rounded-[14px] p-5 flex-1 min-h-0">
       <!--acoes principais-->
       <div class="flex items-center gap-2 mb-5">
         <!--barra de pesquisa-->
@@ -61,18 +61,18 @@
           type="button"
           class="h-[42px] px-5 rounded-lg bg-white text-black text-[11px] flex items-center gap-2 whitespace-nowrap"
         >
-          <img src="/icons/filtro.png" alt="Filtros" class="w-4 h-4" />
+          <img src="/assets/icons/filtro.png" alt="Filtros" class="w-4 h-4" />
 
           Filtros
         </button>
       </div>
 
       <!--lista de projetos-->
-      <div class="overflow-x-auto w-full">
-        <div class="bg-white rounded-lg overflow-hidden w-full min-w-[850px]">
+      <div class="w-full">
+        <div class="w-full">
           <!--cabecalho da tabela-->
           <div
-            class="grid grid-cols-[2fr_1.1fr_1fr_1fr_1fr_1fr_75px_35px] items-center px-5 py-3 border-b border-gray-200"
+            class="grid grid-cols-[1.65fr_1fr_1.2fr_1fr_1fr_1fr_80px_45px] items-center px-4 py-2 bg-white/70 rounded-lg"
           >
             <span class="text-[11px] font-semibold"> Projeto </span>
 
@@ -95,11 +95,11 @@
           <div *ngFor="let projeto of projetos">
             <!--linha principal-->
             <div
-              class="grid grid-cols-[2fr_1.1fr_1fr_1fr_1fr_1fr_75px_35px] items-center px-5 py-4 border-b border-gray-100"
+              class="grid grid-cols-[1.65fr_1fr_1.2fr_1fr_1fr_1fr_80px_45px] items-center px-4 py-3"
             >
               <!--nome projeto-->
               <div class="flex items-center gap-3">
-                <div class="w-1 h-8 rounded-full" [class]="projeto.cor"></div>
+                <div class="w-[2px] h-[30px] rounded-full" [class]="projeto.cor"></div>
 
                 <span class="text-[11px] font-medium">
                   {{ projeto.nome }}
@@ -123,23 +123,25 @@
               </span>
               <!--status-->
               <span
-                class="text-[10px] font-medium px-4 py-1 rounded-full w-fit"
-                [class.bg-yellow-100]="projeto.status === 'Em andamento'"
-                [class.bg-blue-100]="projeto.status === 'A iniciar'"
-                [class.bg-green-100]="projeto.status === 'Concluído'"
+                  class="text-[11px] font-medium"
+                  [class.text-[#d88900]]="projeto.status === 'Em andamento'"
+                  [class.text-[#168be8]]="projeto.status === 'A iniciar'"
+                  [class.text-[#36a82f]]="projeto.status === 'Concluído'"
               >
                 {{ projeto.status }}
               </span>
 
               <!--acoes-->
-              <div class="flex items-center justify-center gap-3">
-                <button type="button" class="hover:opacity-70 transition">
-                  <img src="/icons/editar.png" alt="Editar projeto" class="w-4 h-4" />
+              <div class="flex items-center justify-center gap-2">
+                
+                <button type="button" class="w-7 h-7 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition">
+                  <img src="/assets/icons/editar.png" alt="Editar projeto" class="w-3.5 h-3.5" />
                 </button>
 
-                <button type="button" class="hover:opacity-70 transition">
-                  <img src="/icons/lixeira.png" alt="Excluir projeto" class="w-4 h-4" />
+                <button type="button" class="w-7 h-7 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition">
+                  <img src="/assets/icons/lixeira.png" alt="Excluir projeto" class="w-3.5 h-3.5" />
                 </button>
+
               </div>
 
               <!--mais-->
@@ -154,7 +156,7 @@
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
-                  class="w-4 h-4 text-gray-500"
+                  class="w-4 h-4 text-black"
                 >
                   <path *ngIf="!projeto.aberto" d="m6 9 6 6 6-6" />
 
@@ -166,23 +168,38 @@
             <!--detalhes do projeto-->
             <div
               *ngIf="projeto.aberto"
-              class="grid grid-cols-2 px-10 py-5 bg-gray-50 border-b border-gray-100"
+              class="grid grid-cols-2 gap-12 px-4 py-2 bg-[#e5e7e9]"
             >
-              <!--membros alocados-->
-              <div>
-                <p class="text-[11px] font-semibold mb-2">Membros Alocados:</p>
 
-                <p *ngFor="let membro of projeto.membros" class="text-[11px]">• {{ membro }}</p>
+              <!--membros alocados-->
+              <div class="border-l border-[#cfd1d3] pl-4 ml-1">
+
+                <p class="text-[10px] font-medium mb-2">
+                  Membros Alocados:
+                </p>
+
+                <p
+                  *ngFor="let membro of projeto.membros"
+                  class="text-[10px] leading-[18px]"
+                >
+                  {{ membro }}
+                </p>
+
               </div>
 
               <!--descricao-->
               <div>
-                <p class="text-[11px] font-semibold mb-2">Descrição do Projeto:</p>
 
-                <p class="text-[11px]">
+                <p class="text-[10px] font-medium mb-2">
+                  Descrição do Projeto:
+                </p>
+
+                <p class="text-[10px] leading-[16px] max-w-[430px]">
                   {{ projeto.descricao }}
                 </p>
+
               </div>
+
             </div>
           </div>
         </div>
