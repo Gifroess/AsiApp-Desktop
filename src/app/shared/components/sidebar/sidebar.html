@@ -1,10 +1,23 @@
 <!-- menu lateral do sistema -->
-<aside class="sidebar-container w-[250px] h-full flex flex-col px-10 py-12 text-white shrink-0 self-stretch">
+<aside
+  class="sidebar-container
+         w-[250px]
+         h-full
+         flex
+         flex-col
+         px-10
+         py-12
+         text-white
+         shrink-0
+         self-stretch"
+>
+
 
   <!-- identidade do AsiApp -->
   <div class="flex flex-col gap-1">
 
     <div class="flex items-center gap-2">
+
       <img
         src="assets/icons/logo-ofc.png"
         alt="Logo AsiApp"
@@ -14,7 +27,9 @@
       <h1 class="text-[17px] font-bold leading-tight">
         AsiApp
       </h1>
+
     </div>
+
 
     <p class="text-[10px] text-white/90 leading-tight">
       Um aplicativo de Asimembros<br>
@@ -23,42 +38,52 @@
 
   </div>
 
- <!-- BOTÕES DESABILITADOS NOS COMPONENTES SEM TELAS, VOU ATUALIZAR DPS -->
+
+  <!--
+    botões desabilitados enquanto as telas
+    correspondentes ainda não estão disponíveis
+  -->
+
 
   <!-- navegação principal -->
   <nav class="mt-9">
 
-    <!-- Home -->
+
+    <!-- home -->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
       Home
     </div>
 
-    <!-- Gestão de Pessoas -->
+
+    <!-- gestão de pessoas -->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
       Gestão de Pessoas
     </div>
 
-    <!-- Gestão de Projetos -->
+
+    <!-- gestão de projetos -->
     <div
       class="menu-item cursor-pointer"
       [class.ativo]="paginaAtiva === 'projetos'"
-      (click)="navegar('projetos')"
+      (click)="navegar('/projetos')"
     >
       Gestão de Projetos
     </div>
 
-    <!-- Gestão Financeira -->
+
+    <!-- gestão financeira -->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
       Gestão Financeira
     </div>
 
-    <!-- Menu de Postagem -->
+
+    <!-- menu de postagem -->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
@@ -71,17 +96,17 @@
   <!-- perfil do usuário -->
   <div
     class="mt-auto flex items-center gap-3 cursor-pointer"
-    (click)="navegar('perfil')"
+    (click)="navegar('/perfil')"
   >
 
     <img
-      [src]="usuario?.fotoUrl || 'assets/icons/logo-asiapp.svg'"
+      [src]="usuario()?.photoUrl || 'assets/icons/icone-perfil.png'"
       alt="Foto de perfil"
       class="w-10 h-10 rounded-full object-cover"
     >
 
-    <p class="text-[11px] leading-relaxed">
-      {{ usuario?.name || 'Usuário' }}
+    <p class="text-[11px] leading-relaxed text-white">
+      {{ usuario()?.name || 'Usuário' }}
     </p>
 
   </div>

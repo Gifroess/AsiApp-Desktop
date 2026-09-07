@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 import { AuthService } from '../../shared/services/auth';
 import { UsuarioService } from '../../shared/services/usuario.service';
 import { StorageService } from '../../shared/services/storage.service';
+
 import { UserInterface } from '../../shared/interfaces/user-interface';
+
 
 @Component({
   selector: 'app-perfil',
@@ -12,6 +15,7 @@ import { UserInterface } from '../../shared/interfaces/user-interface';
   styleUrl: './perfil.scss'
 })
 export class Perfil implements OnInit {
+
   usuario: UserInterface | null = null;
   uid = '';
 
@@ -19,12 +23,12 @@ export class Perfil implements OnInit {
   senhaForm: FormGroup;
 
   mostrarSenha = false;
-  editandoNome = false;
-  editandoSenha = false;
+  modoEdicao = false;
 
   mensagemSucesso = '';
   mensagemErro = '';
   carregando = false;
+
 
   constructor(
     private fb: FormBuilder,
@@ -32,121 +36,214 @@ export class Perfil implements OnInit {
     private usuarioService: UsuarioService,
     private storageService: StorageService
   ) {
+
     this.perfilForm = this.fb.group({
       nome: ['', Validators.required]
     });
 
     this.senhaForm = this.fb.group({
       senhaAtual: ['', Validators.required],
-      novaSenha: ['', [Validators.required, Validators.minLength(6)]]
+      novaSenha: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6)
+        ]
+      ]
     });
   }
 
+
   ngOnInit(): void {
+
+    //carrega os dados do usuário logado
     this.authService.getUserData().subscribe(usuario => {
+
       this.usuario = usuario;
+
       if (usuario) {
-        this.perfilForm.patchValue({ nome: usuario.name });
+        this.perfilForm.patchValue({
+          nome: usuario.name
+        });
+
+        this.perfilForm.markAsPristine();
       }
     });
 
+
+    //busca o uid do usuário autenticado
     this.authService.getUid().then(uid => {
-        if (uid) this.uid = uid;
+
+      if (uid) {
+        this.uid = uid;
+      }
     });
   }
 
+
+  //exibe ou oculta a senha
   toggleSenha(): void {
     this.mostrarSenha = !this.mostrarSenha;
   }
 
 
-  // async salvarNome(): Promise<void> {
-  //   if (this.perfilForm.invalid || !this.uid) return;
-  //   this.carregando = true;
-  //   try {
-  //     await this.usuarioService.atualizarNome(this.uid, this.perfilForm.value.nome);
-  //     this.mensagemSucesso = 'Nome atualizado com sucesso!';
-  //     this.editandoNome = false;
-  //   } catch (error) {
-  //     this.mensagemErro = 'Erro ao atualizar nome.';
-  //   } finally {
-  //     this.carregando = false;
-  //   }
-  // }
+  //ativa ou cancela a edição do perfil
+  alternarEdicao(): void {
 
-  // async salvarSenha(): Promise<void> {
-  //   if (this.senhaForm.invalid) return;
-  //   this.carregando = true;
-  //   try {
-  //     const { senhaAtual, novaSenha } = this.senhaForm.value;
-  //     await this.usuarioService.trocarSenha(senhaAtual, novaSenha);
-  //     this.mensagemSucesso = 'Senha atualizada com sucesso!';
-  //     this.senhaForm.reset();
-  //     this.editandoSenha = false;
-  //   } catch (error: any) {
-  //     this.mensagemErro = error?.code === 'auth/wrong-password'
-  //       ? 'Senha atual incorreta.'
-  //       : 'Erro ao atualizar senha.';
-  //   } finally {
-  //     this.carregando = false;
-  //   }
-  // }
-// substitui editandoNome e editandoSenha por um único estado:
-modoEdicao = false;
+    this.modoEdicao = !this.modoEdicao;
 
-alternarEdicao(): void {
-  this.modoEdicao = !this.modoEdicao;
-  if (!this.modoEdicao) {
-    this.senhaForm.reset(); // limpa campos de senha ao cancelar/fechar edição
+    this.mensagemErro = '';
+    this.mensagemSucesso = '';
+
+    //ao cancelar, desfaz alterações que ainda não foram salvas
+    if (!this.modoEdicao) {
+
+      this.perfilForm.patchValue({
+        nome: this.usuario?.name || ''
+      });
+
+      this.perfilForm.markAsPristine();
+
+      this.senhaForm.reset();
+
+      this.mostrarSenha = false;
+    }
   }
-}
 
+
+  //salva as alterações feitas no perfil
   async salvarPerfil(): Promise<void> {
+
+    if (!this.uid) {
+      this.mensagemErro = 'Usuário não autenticado.';
+      return;
+    }
+
     this.carregando = true;
     this.mensagemErro = '';
     this.mensagemSucesso = '';
 
     try {
-      // sempre salva o nome, se tiver mudado
-      if (this.perfilForm.valid && this.perfilForm.dirty) {
-        await this.usuarioService.atualizarNome(this.uid, this.perfilForm.value.nome);
-      }
 
-      // só tenta trocar senha se o usuário preencheu os campos
-      const { senhaAtual, novaSenha } = this.senhaForm.value;
-      if (senhaAtual && novaSenha) {
-        if (this.senhaForm.invalid) {
-          throw new Error('Preencha a nova senha corretamente (mínimo 6 caracteres).');
+      //atualiza o nome somente quando ele foi alterado
+      if (this.perfilForm.dirty) {
+
+        if (this.perfilForm.invalid) {
+          throw new Error('Informe um nome válido.');
         }
-        await this.usuarioService.trocarSenha(senhaAtual, novaSenha);
+
+        await this.usuarioService.atualizarNome(
+          this.uid,
+          this.perfilForm.value.nome
+        );
+
+        this.perfilForm.markAsPristine();
       }
 
-      this.mensagemSucesso = 'Perfil atualizado com sucesso!';
+
+      const {
+        senhaAtual,
+        novaSenha
+      } = this.senhaForm.value;
+
+
+      //se um dos campos de senha for preenchido, os dois passam a ser obrigatórios
+      if (senhaAtual || novaSenha) {
+
+        if (!senhaAtual || !novaSenha) {
+          throw new Error(
+            'Preencha a senha atual e a nova senha.'
+          );
+        }
+
+        if (this.senhaForm.invalid) {
+          throw new Error(
+            'A nova senha deve possuir pelo menos 6 caracteres.'
+          );
+        }
+
+        await this.usuarioService.trocarSenha(
+          senhaAtual,
+          novaSenha
+        );
+      }
+
+
+      this.mensagemSucesso =
+        'Perfil atualizado com sucesso!';
+
       this.modoEdicao = false;
       this.senhaForm.reset();
+      this.mostrarSenha = false;
+
     } catch (error: any) {
-      this.mensagemErro = error?.code === 'auth/wrong-password'
-        ? 'Senha atual incorreta.'
-        : (error?.message || 'Erro ao atualizar perfil.');
+
+      if (
+        error?.code === 'auth/wrong-password' ||
+        error?.code === 'auth/invalid-credential'
+      ) {
+        this.mensagemErro = 'Senha atual incorreta.';
+      } else {
+        this.mensagemErro =
+          error?.message ||
+          'Erro ao atualizar perfil.';
+      }
+
     } finally {
       this.carregando = false;
     }
   }
 
-  async onFotoSelecionada(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length || !this.uid) return;
+
+  //envia uma nova foto de perfil
+  async onFotoSelecionada(
+    event: Event
+  ): Promise<void> {
+
+    const input =
+      event.target as HTMLInputElement;
+
+    if (!input.files?.length) {
+      return;
+    }
+
+    if (!this.uid) {
+      this.mensagemErro = 'Usuário não autenticado.';
+      return;
+    }
 
     const file = input.files[0];
+
     this.carregando = true;
+    this.mensagemErro = '';
+    this.mensagemSucesso = '';
+
     try {
-      const url = await this.storageService.uploadFotoPerfil(this.uid, file);
-      await this.usuarioService.atualizarFotoUrl(this.uid, url);
-      this.mensagemSucesso = 'Foto atualizada!';
+
+      const url =
+        await this.storageService.uploadFotoPerfil(
+          this.uid,
+          file
+        );
+
+      await this.usuarioService.atualizarFotoUrl(
+        this.uid,
+        url
+      );
+
+      this.mensagemSucesso =
+        'Foto atualizada com sucesso!';
+
     } catch (error) {
-      this.mensagemErro = 'Erro ao enviar foto.';
+
+      this.mensagemErro =
+        'Erro ao enviar foto.';
+
     } finally {
       this.carregando = false;
+
+      //permite selecionar novamente o mesmo arquivo
+      input.value = '';
     }
   }
 }
