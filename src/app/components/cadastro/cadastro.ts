@@ -1,7 +1,20 @@
-import { Component, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  Component,
+  signal
+} from '@angular/core';
+
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
+
 import { Router } from '@angular/router';
+
 import { AuthService } from '../../shared/services/auth';
+
 
 @Component({
   selector: 'app-cadastro',
@@ -12,117 +25,233 @@ import { AuthService } from '../../shared/services/auth';
 export class Cadastro {
 
   cadastroForm: FormGroup;
-  //trocados de propriedades comuns para signals: o app roda em modo zoneless (sem zone.js),
-  //entao mudancas feitas dentro de callbacks assincronos (apos um await do firebase) so
-  //atualizam a tela se forem signals
+
+  //signals utilizados porque o projeto roda em modo zoneless
   isLoading = signal(false);
   authErrorMessage = signal('');
   cadastroConcluido = signal(false);
+
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
   ) {
-    //estrutura e regras de validacao do formulario de cadastro
-    this.cadastroForm = this.fb.group({
-      nome: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email, this.corporateEmailValidator]],
-      senha: ['', [Validators.required, Validators.minLength(6)]],
-      confirmarSenha: ['', [Validators.required]]
-    }, { validators: this.senhasIguaisValidator });
+
+    //estrutura e validações do formulário de cadastro
+    this.cadastroForm = this.fb.group(
+      {
+        nome: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(2)
+          ]
+        ],
+
+        email: [
+          '',
+          [
+            Validators.required,
+            Validators.email,
+            this.corporateEmailValidator
+          ]
+        ],
+
+        senha: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(6)
+          ]
+        ],
+
+        confirmarSenha: [
+          '',
+          Validators.required
+        ]
+      },
+      {
+        validators: this.senhasIguaisValidator
+      }
+    );
   }
 
-  //validacao que garante que o cadastro seja feito apenas com email @asimovjr.com.br
-  corporateEmailValidator(control: AbstractControl): ValidationErrors | null {
+
+  //valida o domínio corporativo da Asimov
+  corporateEmailValidator(
+    control: AbstractControl
+  ): ValidationErrors | null {
+
     const email = control.value as string;
-    if (!email) return null;
 
-    const dominioValido = email.trim().toLowerCase().endsWith('@asimovjr.com.br');
-    return dominioValido ? null : { corporateEmail: true };
+    if (!email) {
+      return null;
+    }
+
+    const dominioValido = email
+      .trim()
+      .toLowerCase()
+      .endsWith('@asimovjr.com.br');
+
+    return dominioValido
+      ? null
+      : { corporateEmail: true };
   }
 
-  //validador de grupo: compara os campos senha e confirmarSenha
-  //precisa ficar no nivel do FormGroup (e nao de um Control isolado) porque so assim ele tem acesso aos dois campos ao mesmo tempo pra poder comparar
-  private senhasIguaisValidator(group: AbstractControl): ValidationErrors | null {
+
+  //compara os campos de senha e confirmação
+  private senhasIguaisValidator(
+    group: AbstractControl
+  ): ValidationErrors | null {
+
     const senha = group.get('senha')?.value;
-    const confirmarSenhaControl = group.get('confirmarSenha');
-    const confirmarSenha = confirmarSenhaControl?.value;
 
-    if (!confirmarSenhaControl) return null;
+    const confirmarSenhaControl =
+      group.get('confirmarSenha');
 
-    if (senha && confirmarSenha && senha !== confirmarSenha) {
-      confirmarSenhaControl.setErrors({ ...confirmarSenhaControl.errors, senhasDiferentes: true });
-    } else if (confirmarSenhaControl.hasError('senhasDiferentes')) {
-      const { senhasDiferentes, ...outrosErros } = confirmarSenhaControl.errors ?? {};
-      confirmarSenhaControl.setErrors(Object.keys(outrosErros).length ? outrosErros : null);
+    const confirmarSenha =
+      confirmarSenhaControl?.value;
+
+
+    if (!confirmarSenhaControl) {
+      return null;
+    }
+
+
+    if (
+      senha &&
+      confirmarSenha &&
+      senha !== confirmarSenha
+    ) {
+
+      confirmarSenhaControl.setErrors({
+        ...confirmarSenhaControl.errors,
+        senhasDiferentes: true
+      });
+
+    } else if (
+      confirmarSenhaControl.hasError('senhasDiferentes')
+    ) {
+
+      const {
+        senhasDiferentes,
+        ...outrosErros
+      } = confirmarSenhaControl.errors ?? {};
+
+      confirmarSenhaControl.setErrors(
+        Object.keys(outrosErros).length
+          ? outrosErros
+          : null
+      );
     }
 
     return null;
   }
 
-   //cria a conta no Firebase via AuthService e trata o retorno (sucesso ou erro)
+
+  //cria a conta utilizando o AuthService
   async onSubmit(): Promise<void> {
+
     this.authErrorMessage.set('');
+    this.cadastroConcluido.set(false);
+
 
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
       return;
     }
 
-    const { nome, email, senha, confirmarSenha } = this.cadastroForm.value;
-    this.isLoading.set(true);
 
-    try {
-      //corrida entre o cadastro de verdade e um timer: se o firebase nao responder
-      //dentro do prazo, a gente libera a tela em vez de deixar o usuario preso olhando pro loading
-      await this.comTimeout(
-        this.authService.cadastro(nome, email, senha, confirmarSenha),
-        15000
+    const {
+      nome,
+      email,
+      senha,
+      confirmarSenha
+    } = this.cadastroForm.value;
+
+
+    if (!nome?.trim()) {
+
+      this.authErrorMessage.set(
+        'Informe um nome válido.'
       );
 
-      //o AuthService ja desloga o usuario e dispara o email de verificacao apos criar a conta
-      //entao aqui so avisamos na tela e mandamos pro login depois de alguns segundos
+      return;
+    }
+
+
+    this.isLoading.set(true);
+
+
+    try {
+
+      await this.authService.cadastro(
+        nome,
+        email,
+        senha,
+        confirmarSenha
+      );
+
+
+      //o AuthService cria o usuário, salva os dados,
+      //envia a verificação de e-mail e encerra a sessão
       this.cadastroConcluido.set(true);
+
       this.cadastroForm.reset();
 
-      setTimeout(() => this.router.navigate(['/']), 3000);
+
+      //retorna ao login após exibir a confirmação
+      setTimeout(() => {
+        this.router.navigate(['/']);
+      }, 3000);
+
+
     } catch (error) {
-      this.authErrorMessage.set(this.traduzErroFirebase(error));
+
+      this.authErrorMessage.set(
+        this.traduzErroFirebase(error)
+      );
+
+
     } finally {
+
       this.isLoading.set(false);
     }
   }
 
-  //envolve uma promise qualquer com um limite de tempo
-  //importante: isso nao cancela a operacao original no firebase, so impede que a TELA fique presa esperando.
-  //ou seja, em caso de timeout, e possivel que o cadastro termine de qualquer forma alguns segundos depois em segundo plano
-  private comTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject({ code: 'custom/timeout' }), ms)
-    );
 
-    return Promise.race([promise, timeout]);
-  }
+  //transforma os erros do firebase em mensagens mais claras
+  private traduzErroFirebase(
+    error: any
+  ): string {
 
-  //converte os codigos de erro do firebase (e os erros lancados pelo proprio AuthService) em mensagens para o usuario
-  private traduzErroFirebase(error: any): string {
     const codigo = error?.code;
 
+
     switch (codigo) {
+
       case 'auth/email-already-in-use':
         return 'Esse e-mail já possui cadastro. Faça login ou recupere sua senha.';
+
       case 'auth/invalid-email':
         return 'E-mail inválido.';
+
       case 'auth/weak-password':
         return 'Senha muito fraca. Use pelo menos 6 caracteres.';
+
       case 'auth/network-request-failed':
         return 'Falha de conexão. Verifique sua internet e tente novamente.';
-      case 'custom/timeout':
-        return 'O servidor demorou muito para responder. Verifique sua internet e tente novamente em instantes.';
+
+      case 'auth/too-many-requests':
+        return 'Muitas tentativas foram realizadas. Aguarde alguns minutos e tente novamente.';
+
+      case 'auth/operation-not-allowed':
+        return 'O cadastro por e-mail e senha não está disponível no momento.';
+
       default:
-        //erros lancados pelo proprio AuthService ja vem com mensagem pronta
-        return error?.message ?? 'Não foi possível concluir o cadastro. Tente novamente.';
+        return error?.message ||
+          'Não foi possível concluir o cadastro. Tente novamente.';
     }
   }
 }

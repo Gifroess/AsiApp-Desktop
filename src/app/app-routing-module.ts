@@ -3,20 +3,68 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { Login } from './components/login/login';
 import { Cadastro } from './components/cadastro/cadastro';
-import { Perfil } from './components/perfil/perfil';
 import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
+import { Perfil } from './components/perfil/perfil';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
 
+
 const routes: Routes = [
-  { path: '', component: Login },
-  { path: 'cadastro', component: Cadastro },
-  { path: 'recuperar-senha', component: RecuperarSenha },
-  { path: 'perfil', component: Perfil },
-  { path: 'projetos', component: GestaoProjetos }
+
+  //login
+  {
+    path: '',
+    component: Login
+  },
+
+  {
+    path: 'login',
+    component: Login
+  },
+
+
+  //cadastro
+  {
+    path: 'cadastro',
+    component: Cadastro
+  },
+
+
+  //recuperação de senha
+  {
+    path: 'recuperar-senha',
+    component: RecuperarSenha
+  },
+
+
+  //perfil
+  {
+    path: 'perfil',
+    component: Perfil
+  },
+
+
+  //gestão de projetos
+  {
+    path: 'projetos',
+    component: GestaoProjetos
+  },
+
+
+  //redireciona rotas inexistentes para o login
+  {
+    path: '**',
+    redirectTo: ''
+  }
+
 ];
 
+
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  imports: [
+    RouterModule.forRoot(routes)
+  ],
+  exports: [
+    RouterModule
+  ]
 })
 export class AppRoutingModule {}
