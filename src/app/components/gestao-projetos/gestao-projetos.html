@@ -9,7 +9,7 @@
     class="flex-1 min-w-0 min-h-screen bg-white px-10 py-8 xl:px-[68px] xl:py-[36px]"
   >
 
-    <!--cabecalho da pagina-->
+    <!--cabecalho-->
     <header class="mb-5">
 
       <p class="text-[10px] tracking-[4px] text-black mb-1">
@@ -27,23 +27,26 @@
     </header>
 
 
-    <!--container de projetos-->
+    <!--container-->
     <section
       class="w-full min-w-0 bg-[#e5e7e9] rounded-[14px] p-[18px]"
     >
 
-      <!--acoes principais-->
+      <!--acoes-->
       <div
         class="w-full min-w-0 flex items-center gap-2.5 mb-4"
       >
 
-        <!--barra de pesquisa-->
+        <!--pesquisa-->
         <div
           class="flex flex-1 min-w-0 h-[41px]"
         >
 
           <input
             type="text"
+            [value]="textoPesquisa()"
+            (input)="atualizarTextoPesquisa($event)"
+            (keydown.enter)="pesquisar()"
             placeholder="Pesquise um projeto"
             class="flex-1 min-w-0 rounded-l-lg bg-white/80 px-4 text-[11px] text-black placeholder:text-gray-400 outline-none"
           />
@@ -51,6 +54,7 @@
 
           <button
             type="button"
+            (click)="pesquisar()"
             class="w-[54px] shrink-0 flex items-center justify-center rounded-r-lg bg-[#d1d3d5]"
           >
 
@@ -71,9 +75,10 @@
         </div>
 
 
-        <!--botao cadastrar projeto-->
+        <!--cadastrar-->
         <button
           type="button"
+          (click)="abrirCadastroProjeto()"
           class="h-[41px] shrink-0 px-4 rounded-lg bg-gradient-to-r from-[#168be8] to-[#00365f] text-white text-[10.5px] font-semibold flex items-center gap-2 whitespace-nowrap"
         >
 
@@ -86,9 +91,10 @@
         </button>
 
 
-        <!--botao filtros-->
+        <!--filtros-->
         <button
           type="button"
+          (click)="abrirFiltros()"
           class="h-[41px] shrink-0 px-4 rounded-lg bg-white text-black text-[10.5px] flex items-center gap-2 whitespace-nowrap"
         >
 
@@ -105,7 +111,7 @@
       </div>
 
 
-      <!--cabecalho da tabela-->
+      <!--cabecalho tabela-->
       <div
         class="w-full
                min-w-0
@@ -158,8 +164,11 @@
       </div>
 
 
-      <!--lista de projetos-->
-      @for (projeto of projetos(); track projeto.id) {
+      <!--projetos-->
+      @for (
+        projeto of projetosFiltrados();
+        track projeto.id
+      ) {
 
         <div class="w-full min-w-0">
 
@@ -176,7 +185,9 @@
           >
 
             <!--projeto-->
-            <div class="flex items-center gap-3 min-w-0">
+            <div
+              class="flex items-center gap-3 min-w-0"
+            >
 
               <div
                 class="w-[2px] h-[30px] rounded-full shrink-0"
@@ -214,10 +225,8 @@
             >
 
               <input
-                #prazoInput
                 type="date"
                 [value]="projeto.prazo"
-                (click)="abrirCalendario(prazoInput)"
                 (change)="alterarPrazo(projeto, $event)"
                 aria-label="Prazo do projeto"
                 class="prazo-input"
@@ -250,8 +259,10 @@
               class="flex items-center justify-center gap-2"
             >
 
+              <!--editar-->
               <button
                 type="button"
+                (click)="abrirEdicaoProjeto(projeto)"
                 class="w-[27px] h-[27px] shrink-0 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition"
               >
 
@@ -264,8 +275,10 @@
               </button>
 
 
+              <!--excluir-->
               <button
                 type="button"
+                (click)="solicitarExclusao(projeto)"
                 class="w-[27px] h-[27px] shrink-0 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition"
               >
 
@@ -320,7 +333,7 @@
           </div>
 
 
-          <!--detalhes do projeto-->
+          <!--detalhes-->
           @if (projeto.aberto) {
 
             <div
@@ -332,19 +345,25 @@
                 class="border-l border-[#cfd1d3] pl-4 ml-1 min-h-[48px]"
               >
 
-                <p class="text-[10px] font-medium mb-2">
+                <p
+                  class="text-[10px] font-medium mb-2"
+                >
                   Membros Alocados:
                 </p>
 
 
-                @if (projeto.membros.length > 0) {
+                @if (
+                  projeto.membros.length > 0
+                ) {
 
                   @for (
                     membro of projeto.membros;
                     track membro
                   ) {
 
-                    <p class="text-[10px] leading-[17px]">
+                    <p
+                      class="text-[10px] leading-[17px]"
+                    >
                       {{ membro }}
                     </p>
 
@@ -355,7 +374,7 @@
                   <p
                     class="text-[10px] leading-[17px] text-black/60"
                   >
-                    Nenhum membro carregado.
+                    Nenhum membro alocado.
                   </p>
 
                 }
@@ -366,7 +385,9 @@
               <!--descricao-->
               <div>
 
-                <p class="text-[10px] font-medium mb-2">
+                <p
+                  class="text-[10px] font-medium mb-2"
+                >
                   Descrição do Projeto:
                 </p>
 
@@ -384,10 +405,625 @@
 
         </div>
 
+      } @empty {
+
+        <div
+          class="py-10 text-center text-[11px] text-black/50"
+        >
+          Nenhum projeto encontrado.
+        </div>
+
       }
 
     </section>
 
   </main>
+
+
+  <!--modal cadastrar / editar-->
+  @if (modalProjetoAberto()) {
+
+    <div
+      class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+    >
+
+      <div
+        class="w-full max-w-[620px] max-h-[90vh] overflow-y-auto bg-[#f1f2f3] rounded-[16px] p-7 shadow-xl"
+      >
+
+        <div
+          class="flex items-start justify-between mb-6"
+        >
+
+          <div>
+
+            <p
+              class="text-[9px] tracking-[3px] text-black/60 mb-1"
+            >
+              GESTÃO
+            </p>
+
+            <h2
+              class="text-[18px] font-bold"
+            >
+              {{
+                modoEdicao()
+                  ? 'Editar Projeto'
+                  : 'Cadastrar Projeto'
+              }}
+            </h2>
+
+          </div>
+
+
+          <button
+            type="button"
+            (click)="fecharModalProjeto()"
+            class="text-xl text-black/60 hover:text-black"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form
+          [formGroup]="formProjeto"
+          class="grid grid-cols-2 gap-x-4 gap-y-4"
+        >
+
+          <!--nome-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Nome do Projeto *
+            </label>
+
+            <input
+              type="text"
+              formControlName="name"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+
+          <!--cliente-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Cliente *
+            </label>
+
+            <input
+              type="text"
+              formControlName="client"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+
+          <!--area-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Área *
+            </label>
+
+            <input
+              type="text"
+              formControlName="area"
+              placeholder="Ex.: Mobile"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+
+          <!--gerente-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Gerente *
+            </label>
+
+            <select
+              formControlName="managerId"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            >
+
+              <option value="">
+                Selecione
+              </option>
+
+              @for (
+                usuario of usuarios();
+                track usuario.id
+              ) {
+
+                <option
+                  [value]="usuario.id"
+                >
+                  {{ usuario.name }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <!--prazo-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Prazo *
+            </label>
+
+            <input
+              type="date"
+              formControlName="deadline"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+
+          <!--valor-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Valor *
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="value"
+              placeholder="0,00"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+
+          <!--status-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Status *
+            </label>
+
+            <select
+              formControlName="status"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            >
+
+              <option value="A Iniciar">
+                A Iniciar
+              </option>
+
+              <option value="Em Andamento">
+                Em Andamento
+              </option>
+
+              <option value="Concluído">
+                Concluído
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div></div>
+
+
+          <!--equipe-->
+          <div class="col-span-2">
+
+            <div
+              class="flex items-center justify-between mb-2"
+            >
+
+              <label
+                class="text-[10px] font-medium"
+              >
+                Equipe
+              </label>
+
+              <span
+                class="text-[9px] text-black/50"
+              >
+                O gerente é incluído automaticamente.
+              </span>
+
+            </div>
+
+
+            <div
+              class="bg-white rounded-lg p-3 max-h-[140px] overflow-y-auto grid grid-cols-2 gap-2"
+            >
+
+              @for (
+                usuario of usuarios();
+                track usuario.id
+              ) {
+
+                <label
+                  class="flex items-center gap-2 text-[10px] cursor-pointer"
+                >
+
+                  <input
+                    type="checkbox"
+                    [checked]="membroSelecionado(usuario.id)"
+                    (change)="alternarMembro(usuario.id, $event)"
+                  />
+
+                  {{ usuario.name }}
+
+                </label>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <!--descricao-->
+          <div class="col-span-2">
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Descrição
+            </label>
+
+            <textarea
+              formControlName="description"
+              rows="3"
+              class="w-full p-3 rounded-lg bg-white text-[11px] outline-none resize-none"
+            ></textarea>
+
+          </div>
+
+        </form>
+
+
+        @if (
+          mensagemErroProjeto()
+        ) {
+
+          <p
+            class="text-[10px] text-red-600 mt-4"
+          >
+            {{ mensagemErroProjeto() }}
+          </p>
+
+        }
+
+
+        <div
+          class="flex justify-end gap-3 mt-6"
+        >
+
+          <button
+            type="button"
+            (click)="fecharModalProjeto()"
+            class="h-9 px-5 rounded-lg bg-white text-[10px] font-medium"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            type="button"
+            [disabled]="isSalvando()"
+            (click)="salvarProjeto()"
+            class="h-9 px-5 rounded-lg bg-[#005b94] text-white text-[10px] font-semibold disabled:opacity-50"
+          >
+            {{
+              isSalvando()
+                ? 'Salvando...'
+                : (
+                    modoEdicao()
+                      ? 'Salvar alterações'
+                      : 'Cadastrar Projeto'
+                  )
+            }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!--modal filtros-->
+  @if (modalFiltrosAberto()) {
+
+    <div
+      class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+    >
+
+      <div
+        class="w-full max-w-[430px] bg-[#f1f2f3] rounded-[16px] p-7 shadow-xl"
+      >
+
+        <div
+          class="flex items-start justify-between mb-6"
+        >
+
+          <div>
+
+            <p
+              class="text-[9px] tracking-[3px] text-black/60 mb-1"
+            >
+              PROJETOS
+            </p>
+
+            <h2
+              class="text-[18px] font-bold"
+            >
+              Aplicar Filtros
+            </h2>
+
+          </div>
+
+
+          <button
+            type="button"
+            (click)="fecharFiltros()"
+            class="text-xl text-black/60 hover:text-black"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <form
+          [formGroup]="formFiltros"
+          class="grid grid-cols-2 gap-4"
+        >
+
+          <!--area-->
+          <div class="col-span-2">
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Área
+            </label>
+
+            <select
+              formControlName="area"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            >
+
+              <option value="">
+                Todas as áreas
+              </option>
+
+              @for (
+                area of areasDisponiveis();
+                track area
+              ) {
+
+                <option [value]="area">
+                  {{ area }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <!--data inicio-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Prazo a partir de
+            </label>
+
+            <input
+              type="date"
+              formControlName="dataInicio"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[10px] outline-none"
+            />
+
+          </div>
+
+
+          <!--data fim-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Prazo até
+            </label>
+
+            <input
+              type="date"
+              formControlName="dataFim"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[10px] outline-none"
+            />
+
+          </div>
+
+
+          <!--valor minimo-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Valor mínimo
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="valorMin"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+
+          <!--valor maximo-->
+          <div>
+
+            <label
+              class="block text-[10px] font-medium mb-1.5"
+            >
+              Valor máximo
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="valorMax"
+              class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+            />
+
+          </div>
+
+        </form>
+
+
+        <div
+          class="flex justify-between gap-3 mt-6"
+        >
+
+          <button
+            type="button"
+            (click)="limparFiltros()"
+            class="h-9 px-5 rounded-lg bg-white text-[10px] font-medium"
+          >
+            Limpar
+          </button>
+
+
+          <button
+            type="button"
+            (click)="aplicarFiltros()"
+            class="h-9 px-5 rounded-lg bg-[#005b94] text-white text-[10px] font-semibold"
+          >
+            Aplicar Filtros
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!--modal exclusao-->
+  @if (modalExclusaoAberto()) {
+
+    <div
+      class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+    >
+
+      <div
+        class="w-full max-w-[360px] bg-white rounded-[16px] p-7 shadow-xl"
+      >
+
+        <h2
+          class="text-[17px] font-bold mb-2"
+        >
+          Excluir projeto
+        </h2>
+
+
+        <p
+          class="text-[11px] leading-[17px] text-black/70"
+        >
+          Tem certeza que deseja excluir
+          <strong>
+            {{ projetoParaExcluir()?.nome }}
+          </strong>?
+          Esta ação não poderá ser desfeita.
+        </p>
+
+
+        @if (
+          mensagemErroExclusao()
+        ) {
+
+          <p
+            class="text-[10px] text-red-600 mt-3"
+          >
+            {{ mensagemErroExclusao() }}
+          </p>
+
+        }
+
+
+        <div
+          class="flex justify-end gap-3 mt-6"
+        >
+
+          <button
+            type="button"
+            (click)="cancelarExclusao()"
+            class="h-9 px-5 rounded-lg bg-[#f1f2f3] text-[10px] font-medium"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            type="button"
+            [disabled]="isExcluindo()"
+            (click)="confirmarExclusao()"
+            class="h-9 px-5 rounded-lg bg-red-600 text-white text-[10px] font-semibold disabled:opacity-50"
+          >
+            {{
+              isExcluindo()
+                ? 'Excluindo...'
+                : 'Excluir'
+            }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
 
 </div>
