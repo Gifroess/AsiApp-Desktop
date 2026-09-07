@@ -1,36 +1,59 @@
 <!--tela de gestao de projetos-->
-<div class="h-screen flex bg-white overflow-hidden">
+<div class="min-h-screen flex bg-white overflow-x-hidden">
+
   <app-sidebar paginaAtiva="projetos"></app-sidebar>
+
 
   <!--conteudo principal-->
   <main
-    class="flex-1 h-full overflow-y-auto bg-white px-12 py-8 xl:px-[76px] xl:py-[36px] flex flex-col"
+    class="flex-1 min-w-0 min-h-screen bg-white px-10 py-8 xl:px-[68px] xl:py-[36px]"
   >
+
     <!--cabecalho da pagina-->
     <header class="mb-5">
-      <p class="text-[10px] tracking-[4px] text-black mb-1">GESTÃO</p>
 
-      <h1 class="text-[20px] font-bold text-black leading-tight">Gestão de Projetos</h1>
+      <p class="text-[10px] tracking-[4px] text-black mb-1">
+        GESTÃO
+      </p>
 
-      <p class="text-[13px] text-black mt-2">Acompanhe e gerencie todos os projetos da empresa!</p>
+      <h1 class="text-[20px] font-bold text-black leading-tight">
+        Gestão de Projetos
+      </h1>
+
+      <p class="text-[13px] text-black mt-2">
+        Acompanhe e gerencie todos os projetos da empresa!
+      </p>
+
     </header>
 
+
     <!--container de projetos-->
-    <section class="bg-[#e5e7e9] rounded-[14px] p-5 flex-1 min-h-0">
+    <section
+      class="w-full min-w-0 bg-[#e5e7e9] rounded-[14px] p-[18px]"
+    >
+
       <!--acoes principais-->
-      <div class="flex items-center gap-2 mb-5">
+      <div
+        class="w-full min-w-0 flex items-center gap-2.5 mb-4"
+      >
+
         <!--barra de pesquisa-->
-        <div class="flex flex-1 min-w-0 h-[42px]">
+        <div
+          class="flex flex-1 min-w-0 h-[41px]"
+        >
+
           <input
             type="text"
             placeholder="Pesquise um projeto"
-            class="flex-1 rounded-l-lg bg-white/80 px-4 text-[11px] text-black placeholder:text-gray-400 outline-none"
+            class="flex-1 min-w-0 rounded-l-lg bg-white/80 px-4 text-[11px] text-black placeholder:text-gray-400 outline-none"
           />
+
 
           <button
             type="button"
-            class="w-[55px] flex items-center justify-center rounded-r-lg bg-[#d1d3d5]"
+            class="w-[54px] shrink-0 flex items-center justify-center rounded-r-lg bg-[#d1d3d5]"
           >
+
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -40,152 +63,305 @@
               class="w-4 h-4 text-black"
             >
               <circle cx="11" cy="11" r="7"></circle>
-
               <path d="m20 20-3.5-3.5"></path>
             </svg>
+
           </button>
+
         </div>
+
 
         <!--botao cadastrar projeto-->
         <button
           type="button"
-          class="h-[42px] px-4 rounded-lg bg-gradient-to-r from-[#168be8] to-[#00365f] text-white text-[11px] font-semibold flex items-center gap-2 whitespace-nowrap"
+          class="h-[41px] shrink-0 px-4 rounded-lg bg-gradient-to-r from-[#168be8] to-[#00365f] text-white text-[10.5px] font-semibold flex items-center gap-2 whitespace-nowrap"
         >
-          <span class="text-[22px] font-light leading-none"> + </span>
+
+          <span class="text-[20px] font-light leading-none">
+            +
+          </span>
 
           Cadastrar Projeto
+
         </button>
+
 
         <!--botao filtros-->
         <button
           type="button"
-          class="h-[42px] px-5 rounded-lg bg-white text-black text-[11px] flex items-center gap-2 whitespace-nowrap"
+          class="h-[41px] shrink-0 px-4 rounded-lg bg-white text-black text-[10.5px] flex items-center gap-2 whitespace-nowrap"
         >
-          <img src="/assets/icons/filtro.png" alt="Filtros" class="w-4 h-4" />
+
+          <img
+            src="/assets/icons/filtro.png"
+            alt="Filtros"
+            class="w-4 h-4"
+          />
 
           Filtros
+
         </button>
+
       </div>
 
+
+      <!--cabecalho da tabela-->
+      <div
+        class="w-full
+               min-w-0
+               grid
+               grid-cols-[minmax(0,1.5fr)_minmax(0,1.18fr)_minmax(0,.78fr)_98px_minmax(0,.94fr)_minmax(0,.82fr)_78px_34px]
+               gap-x-3
+               items-center
+               px-4
+               py-[9px]
+               bg-white/70
+               rounded-lg"
+      >
+
+        <span class="text-[11px] font-semibold">
+          Projeto
+        </span>
+
+        <span class="text-[11px] font-semibold">
+          Gerente
+        </span>
+
+        <span class="text-[11px] font-semibold">
+          Área
+        </span>
+
+        <div
+          class="w-full flex items-center justify-start pl-[7px]"
+        >
+          <span class="text-[11px] font-semibold">
+            Prazo
+          </span>
+        </div>
+
+        <span class="text-[11px] font-semibold pl-1">
+          Valor
+        </span>
+
+        <span class="text-[11px] font-semibold">
+          Status
+        </span>
+
+        <span class="text-[11px] font-semibold text-center">
+          Ações
+        </span>
+
+        <span class="text-[11px] font-semibold text-center">
+          Mais
+        </span>
+
+      </div>
+
+
       <!--lista de projetos-->
-      <div class="w-full">
-        <div class="w-full">
-          <!--cabecalho da tabela-->
+      @for (projeto of projetos(); track projeto.id) {
+
+        <div class="w-full min-w-0">
+
+          <!--linha principal-->
           <div
-            class="grid grid-cols-[1.65fr_1fr_1.2fr_1fr_1fr_1fr_80px_45px] items-center px-4 py-2 bg-white/70 rounded-lg"
+            class="w-full
+                   min-w-0
+                   grid
+                   grid-cols-[minmax(0,1.5fr)_minmax(0,1.18fr)_minmax(0,.78fr)_98px_minmax(0,.94fr)_minmax(0,.82fr)_78px_34px]
+                   gap-x-3
+                   items-center
+                   px-4
+                   py-3"
           >
-            <span class="text-[11px] font-semibold"> Projeto </span>
 
-            <span class="text-[11px] font-semibold"> Gerente </span>
+            <!--projeto-->
+            <div class="flex items-center gap-3 min-w-0">
 
-            <span class="text-[11px] font-semibold"> Área </span>
+              <div
+                class="w-[2px] h-[30px] rounded-full shrink-0"
+                [style.backgroundColor]="projeto.cor"
+              ></div>
 
-            <span class="text-[11px] font-semibold"> Prazo </span>
-
-            <span class="text-[11px] font-semibold"> Valor </span>
-
-            <span class="text-[11px] font-semibold"> Status </span>
-
-            <span class="text-[11px] font-semibold text-center"> Ações </span>
-
-            <span class="text-[11px] font-semibold text-center"> Mais </span>
-          </div>
-
-          <!--projetos-->
-          <div *ngFor="let projeto of projetos">
-            <!--linha principal-->
-            <div
-              class="grid grid-cols-[1.65fr_1fr_1.2fr_1fr_1fr_1fr_80px_45px] items-center px-4 py-3"
-            >
-              <!--nome projeto-->
-              <div class="flex items-center gap-3">
-                <div class="w-[2px] h-[30px] rounded-full" [class]="projeto.cor"></div>
-
-                <span class="text-[11px] font-medium">
-                  {{ projeto.nome }}
-                </span>
-              </div>
-
-              <span class="text-[11px]">
-                {{ projeto.gerente }}
-              </span>
-
-              <span class="text-[11px]">
-                {{ projeto.area }}
-              </span>
-
-              <span class="text-[11px]">
-                {{ projeto.prazo }}
-              </span>
-
-              <span class="text-[11px]">
-                {{ projeto.valor }}
-              </span>
-              <!--status-->
               <span
-                  class="text-[11px] font-medium"
-                  [class.text-[#d88900]]="projeto.status === 'Em andamento'"
-                  [class.text-[#168be8]]="projeto.status === 'A iniciar'"
-                  [class.text-[#36a82f]]="projeto.status === 'Concluído'"
+                class="text-[11px] font-medium truncate min-w-0"
               >
-                {{ projeto.status }}
+                {{ projeto.nome }}
               </span>
 
-              <!--acoes-->
-              <div class="flex items-center justify-center gap-2">
-                
-                <button type="button" class="w-7 h-7 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition">
-                  <img src="/assets/icons/editar.png" alt="Editar projeto" class="w-3.5 h-3.5" />
-                </button>
+            </div>
 
-                <button type="button" class="w-7 h-7 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition">
-                  <img src="/assets/icons/lixeira.png" alt="Excluir projeto" class="w-3.5 h-3.5" />
-                </button>
 
-              </div>
+            <!--gerente-->
+            <span
+              class="text-[11px] leading-[15px] min-w-0"
+            >
+              {{ projeto.gerente }}
+            </span>
 
-              <!--mais-->
+
+            <!--area-->
+            <span
+              class="text-[11px] truncate min-w-0"
+            >
+              {{ projeto.area }}
+            </span>
+
+
+            <!--prazo-->
+            <div
+              class="w-full flex items-center justify-center overflow-hidden"
+            >
+
+              <input
+                #prazoInput
+                type="date"
+                [value]="projeto.prazo"
+                (click)="abrirCalendario(prazoInput)"
+                (change)="alterarPrazo(projeto, $event)"
+                aria-label="Prazo do projeto"
+                class="prazo-input"
+              />
+
+            </div>
+
+
+            <!--valor-->
+            <span
+              class="text-[11px] whitespace-nowrap min-w-0 pl-1"
+            >
+              {{ projeto.valor }}
+            </span>
+
+
+            <!--status-->
+            <span
+              class="text-[11px] font-medium whitespace-nowrap min-w-0"
+              [class.text-[#d88900]]="projeto.status === 'Em andamento'"
+              [class.text-[#168be8]]="projeto.status === 'A iniciar'"
+              [class.text-[#36a82f]]="projeto.status === 'Concluído'"
+            >
+              {{ projeto.status }}
+            </span>
+
+
+            <!--acoes-->
+            <div
+              class="flex items-center justify-center gap-2"
+            >
+
               <button
                 type="button"
-                class="flex justify-center items-center"
-                (click)="abrirProjeto(projeto)"
+                class="w-[27px] h-[27px] shrink-0 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition"
               >
+
+                <img
+                  src="/assets/icons/editar.png"
+                  alt="Editar projeto"
+                  class="w-[13px] h-[13px]"
+                />
+
+              </button>
+
+
+              <button
+                type="button"
+                class="w-[27px] h-[27px] shrink-0 rounded-[8px] border border-[#d4d6d8] flex items-center justify-center hover:bg-white/60 transition"
+              >
+
+                <img
+                  src="/assets/icons/lixeira.png"
+                  alt="Excluir projeto"
+                  class="w-[13px] h-[13px]"
+                />
+
+              </button>
+
+            </div>
+
+
+            <!--mais-->
+            <button
+              type="button"
+              class="w-full flex items-center justify-center"
+              (click)="abrirProjeto(projeto)"
+            >
+
+              @if (!projeto.aberto) {
+
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
-                  class="w-4 h-4 text-black"
+                  class="w-3.5 h-3.5 text-black"
                 >
-                  <path *ngIf="!projeto.aberto" d="m6 9 6 6 6-6" />
-
-                  <path *ngIf="projeto.aberto" d="m18 15-6-6-6 6" />
+                  <path d="m6 9 6 6 6-6"></path>
                 </svg>
-              </button>
-            </div>
 
-            <!--detalhes do projeto-->
+              } @else {
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="w-3.5 h-3.5 text-black"
+                >
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
+
+              }
+
+            </button>
+
+          </div>
+
+
+          <!--detalhes do projeto-->
+          @if (projeto.aberto) {
+
             <div
-              *ngIf="projeto.aberto"
-              class="grid grid-cols-2 gap-12 px-4 py-2 bg-[#e5e7e9]"
+              class="grid grid-cols-[1fr_1.08fr] gap-10 px-4 pb-5"
             >
 
-              <!--membros alocados-->
-              <div class="border-l border-[#cfd1d3] pl-4 ml-1">
+              <!--membros-->
+              <div
+                class="border-l border-[#cfd1d3] pl-4 ml-1 min-h-[48px]"
+              >
 
                 <p class="text-[10px] font-medium mb-2">
                   Membros Alocados:
                 </p>
 
-                <p
-                  *ngFor="let membro of projeto.membros"
-                  class="text-[10px] leading-[18px]"
-                >
-                  {{ membro }}
-                </p>
+
+                @if (projeto.membros.length > 0) {
+
+                  @for (
+                    membro of projeto.membros;
+                    track membro
+                  ) {
+
+                    <p class="text-[10px] leading-[17px]">
+                      {{ membro }}
+                    </p>
+
+                  }
+
+                } @else {
+
+                  <p
+                    class="text-[10px] leading-[17px] text-black/60"
+                  >
+                    Nenhum membro carregado.
+                  </p>
+
+                }
 
               </div>
+
 
               <!--descricao-->
               <div>
@@ -194,16 +370,24 @@
                   Descrição do Projeto:
                 </p>
 
-                <p class="text-[10px] leading-[16px] max-w-[430px]">
+                <p
+                  class="text-[10px] leading-[16px] max-w-[400px]"
+                >
                   {{ projeto.descricao }}
                 </p>
 
               </div>
 
             </div>
-          </div>
+
+          }
+
         </div>
-      </div>
+
+      }
+
     </section>
+
   </main>
+
 </div>

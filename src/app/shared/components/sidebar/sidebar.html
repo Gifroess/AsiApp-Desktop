@@ -1,15 +1,11 @@
 <!-- menu lateral do sistema -->
 <aside
   class="sidebar-container
-         w-[250px]
-         h-full
          flex
          flex-col
-         px-10
-         py-12
-         text-white
-         shrink-0
-         self-stretch"
+         px-8
+         py-10
+         text-white"
 >
 
 
@@ -24,14 +20,18 @@
         class="w-7 h-7"
       >
 
-      <h1 class="text-[17px] font-bold leading-tight">
+      <h1
+        class="text-[16px] font-bold leading-tight"
+      >
         AsiApp
       </h1>
 
     </div>
 
 
-    <p class="text-[10px] text-white/90 leading-tight">
+    <p
+      class="text-[9px] text-white/90 leading-tight"
+    >
       Um aplicativo de Asimembros<br>
       para Asimembros
     </p>
@@ -39,17 +39,11 @@
   </div>
 
 
-  <!--
-    botões desabilitados enquanto as telas
-    correspondentes ainda não estão disponíveis
-  -->
+  <!--navegacao-->
+  <nav class="mt-8">
 
 
-  <!-- navegação principal -->
-  <nav class="mt-9">
-
-
-    <!-- home -->
+    <!--home-->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
@@ -57,7 +51,7 @@
     </div>
 
 
-    <!-- gestão de pessoas -->
+    <!--gestao de pessoas-->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
@@ -65,7 +59,7 @@
     </div>
 
 
-    <!-- gestão de projetos -->
+    <!--gestao de projetos-->
     <div
       class="menu-item cursor-pointer"
       [class.ativo]="paginaAtiva === 'projetos'"
@@ -75,7 +69,7 @@
     </div>
 
 
-    <!-- gestão financeira -->
+    <!--gestao financeira-->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
@@ -83,7 +77,7 @@
     </div>
 
 
-    <!-- menu de postagem -->
+    <!--menu de postagem-->
     <div
       class="menu-item opacity-50 cursor-not-allowed"
     >
@@ -93,19 +87,22 @@
   </nav>
 
 
-  <!-- perfil do usuário -->
+  <!--perfil-->
   <div
-    class="mt-auto flex items-center gap-3 cursor-pointer"
+    class="mt-auto flex items-center gap-2.5 cursor-pointer"
     (click)="navegar('/perfil')"
   >
 
     <img
       [src]="usuario()?.photoUrl || 'assets/icons/icone-perfil.png'"
       alt="Foto de perfil"
-      class="w-10 h-10 rounded-full object-cover"
+      class="w-9 h-9 rounded-full object-cover shrink-0"
     >
 
-    <p class="text-[11px] leading-relaxed text-white">
+
+    <p
+      class="text-[10px] leading-tight text-white truncate"
+    >
       {{ usuario()?.name || 'Usuário' }}
     </p>
 
