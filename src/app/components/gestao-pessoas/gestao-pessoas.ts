@@ -1,16 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Membro, Role, ROLES_NIVEL_DIRETORIA, ROLES_NIVEL_GERENCIA } from '../../shared/interfaces/membro-interface';
 import { MembrosService } from '../../shared/services/membros.service';
 import { AuthService } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-gestao-pessoas',
-  standalone: false,
+  standalone: false, 
   templateUrl: './gestao-pessoas.html',
   styleUrls: ['./gestao-pessoas.scss'],
 })
-export class GestaoPessoas implements OnInit {
+export class GestaoPessoas implements OnInit, OnDestroy {
   membros: Membro[] = [];
+
+  private membrosOriginais: Membro[] = [];
+  private membrosSub?: Subscription;
+
   termoBusca = '';
   carregando = false;
 
@@ -30,6 +35,7 @@ export class GestaoPessoas implements OnInit {
   rolesDisponiveis: Role[] = [
     'Aguardando atribuição',
     'Membro',
+    'RH',
     'Gerência',
     'Vice-Presidência',
     'Diretoria',
@@ -42,38 +48,39 @@ export class GestaoPessoas implements OnInit {
     private readonly authService: AuthService
   ) {}
 
-  // TOGGLE PRA TESTE DE FRONT: true = ignora o login real e força podeEditar=true,
-  private readonly FORCAR_PODE_EDITAR_PARA_TESTE = true;
-
   ngOnInit(): void {
-    if (this.FORCAR_PODE_EDITAR_PARA_TESTE) {
-      this.podeEditar = true;
-    } else {
 
-      this.authService.getUserData().subscribe((usuario) => {
-        this.podeEditar = !!usuario && this.rolesComPermissaoEdicao.includes(usuario.role);
-      });
-    }
+    this.authService.getUserData().subscribe((usuario) => {
+      this.podeEditar = !!usuario && this.rolesComPermissaoEdicao.includes(usuario.role);
+    });
 
     this.carregarMembros();
   }
 
   carregarMembros(): void {
     this.carregando = true;
-    this.membrosService.listar().subscribe((membros) => {
-      this.membros = membros;
+
+    this.membrosSub = this.membrosService.listar().subscribe((membros) => {
+      this.membrosOriginais = membros;
+      this.membros = this.filtrarLocalmente(this.termoBusca);
       this.carregando = false;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.membrosSub?.unsubscribe();
+  }
+
+  private filtrarLocalmente(termo: string): Membro[] {
+    const termoLower = termo.trim().toLowerCase();
+    return termoLower
+      ? this.membrosOriginais.filter((m) => m.name.toLowerCase().includes(termoLower))
+      : this.membrosOriginais;
   }
 
   pesquisar(): void {
-    this.carregando = true;
-    this.membrosService.buscarPorNome(this.termoBusca).subscribe((membros) => {
-      this.membros = membros;
-      this.carregando = false;
-    });
+    this.membros = this.filtrarLocalmente(this.termoBusca);
   }
-
 
   editarMembro(membro: Membro): void {
     if (!this.podeEditar) return;
@@ -102,20 +109,24 @@ export class GestaoPessoas implements OnInit {
 
   async alternarStatus(membro: Membro): Promise<void> {
     if (!this.podeEditar || this.membroEmEdicaoId !== membro.id) return;
-    const novoStatus: Membro['status'] = membro.status === 'Ativo' ? 'Inativo' : 'Ativo';
+    const novoStatus: Membro['status'] = this.statusEfetivo(membro) === 'Ativo' ? 'Inativo' : 'Ativo';
     await this.membrosService.atualizarStatus(membro.id, novoStatus);
     membro.status = novoStatus;
   }
 
-  // "Excluir" na UI = soft delete: só marca o membro como Inativo, sem apagar
-  // o documento do Firestore (para não perder histórico de dados, como quem fez login, etc).
+  //soft delete: só marca o membro como Inativo, sem apagar
+  // o documento do Firestore 
   async removerMembro(membro: Membro): Promise<void> {
     if (!this.podeEditar) return;
-    if (membro.status === 'Inativo') return; // já está inativo, nada a fazer
+    if (this.statusEfetivo(membro) === 'Inativo') return; // já está inativo, nada a fazer
     if (!confirm(`Desativar ${membro.name}? Ele deixará de aparecer como membro ativo.`)) return;
 
     await this.membrosService.atualizarStatus(membro.id, 'Inativo');
     membro.status = 'Inativo';
+  }
+
+  trackPorId(_index: number, membro: Membro): string {
+    return membro.id;
   }
 
   corRole(role: Role): string {
@@ -124,6 +135,12 @@ export class GestaoPessoas implements OnInit {
     return 'text-black';
   }
 
+  // Membros criados direto no Firebase Console podem não ter o campo `status`
+  // ainda. Tratamos ausência como 'Ativo' (assumindo que quem está cadastrado
+  // na empresa está ativo, a menos que alguém explicitamente marque Inativo).
+  statusEfetivo(membro: Membro): Membro['status'] {
+    return membro.status ?? 'Ativo';
+  }
 
   corBarra(role: Role): string {
     if (ROLES_NIVEL_DIRETORIA.includes(role)) return 'bg-yellow-400';

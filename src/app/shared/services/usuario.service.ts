@@ -11,12 +11,10 @@ export class UsuarioService {
     private firestore: AngularFirestore
   ) {}
 
-  // Atualiza o nome no documento do Firestore 
   async atualizarNome(uid: string, novoNome: string): Promise<void> {
-    await this.firestore.collection('usuarios').doc(uid).update({ name: novoNome });
+    await this.firestore.collection('users').doc(uid).update({ name: novoNome });
   }
 
-  // Troca senha - exige reautenticação recente 
   async trocarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
     const user = await this.afAuth.currentUser;
     if (!user || !user.email) {
@@ -28,8 +26,7 @@ export class UsuarioService {
     await user.updatePassword(novaSenha);
   }
 
-  // Atualiza a URL da foto no documento do usuário
   async atualizarFotoUrl(uid: string, url: string): Promise<void> {
-    await this.firestore.collection('usuarios').doc(uid).update({ fotoUrl: url });
+    await this.firestore.collection('users').doc(uid).update({ fotoUrl: url });
   }
 }

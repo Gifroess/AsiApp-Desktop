@@ -26,7 +26,7 @@
           <input
             type="text"
             [(ngModel)]="termoBusca"
-            (keyup.enter)="pesquisar()"
+            (ngModelChange)="pesquisar()"
             placeholder="Pesquise o nome do membro"
             class="flex-1 rounded-l-lg bg-white/80 px-4 text-[11px] text-black placeholder:text-gray-400 outline-none"
           />
@@ -102,10 +102,10 @@
 
           <!--membros-->
           <div
-            *ngFor="let membro of membros"
+            *ngFor="let membro of membros; trackBy: trackPorId"
             class="grid grid-cols-[2fr_1.2fr_1.3fr_1fr_75px] items-center px-5 py-4 border-b border-gray-100"
           >
-            <!--nome-->
+            <!--nome com barrinha colorida por cargo-->
             <div class="flex items-center gap-3">
               <div class="w-1 h-8 rounded-full" [ngClass]="corBarra(membro.role)"></div>
 
@@ -149,15 +149,15 @@
               [disabled]="!podeEditar || membroEmEdicaoId !== membro.id"
               [title]="membroEmEdicaoId === membro.id ? 'Clique para alternar' : 'Clique em editar para alterar o status'"
               class="text-[11px] font-medium w-fit disabled:cursor-default"
-              [ngClass]="membro.status === 'Ativo' ? 'text-green-600' : 'text-red-500'"
+              [ngClass]="statusEfetivo(membro) === 'Ativo' ? 'text-green-600' : 'text-red-500'"
             >
-              {{ membro.status }}
+              {{ statusEfetivo(membro) }}
             </button>
 
-            <!--acoes-->
+            <!--acoes: so aparecem/funcionam para quem tem permissao-->
             <div class="flex items-center justify-center gap-3">
               <ng-container *ngIf="podeEditar">
-                <!--modo normal: lapis + lixeira-->
+                <!--modo normal-->
                 <ng-container *ngIf="membroEmEdicaoId !== membro.id">
                   <button
                     type="button"
@@ -174,21 +174,18 @@
                   <button
                     type="button"
                     (click)="removerMembro(membro)"
-                    [disabled]="membro.status === 'Inativo'"
-                    [title]="membro.status === 'Inativo' ? 'Já está inativo' : 'Desativar membro'"
+                    [disabled]="statusEfetivo(membro) === 'Inativo'"
+                    [title]="statusEfetivo(membro) === 'Inativo' ? 'Já está inativo' : 'Desativar membro'"
                     class="hover:opacity-70 transition text-gray-600 disabled:opacity-30 disabled:hover:opacity-30"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-4 h-4">
-                    <path d="M3 6h18" />
-                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                    <path d="M10 11v6" />
-                    <path d="M14 11v6" />
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="m5.5 5.5 13 13" />
                     </svg>
                   </button>
                 </ng-container>
 
-                <!--modo edicao -->
+                <!--modo edicao-->
                 <ng-container *ngIf="membroEmEdicaoId === membro.id">
                   <button
                     type="button"
