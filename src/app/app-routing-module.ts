@@ -6,6 +6,8 @@ import { Cadastro } from './components/cadastro/cadastro';
 import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
 import { Perfil } from './components/perfil/perfil';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
+import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
+import { authGuard } from './shared/guards/auth.guard';
 
 
 const routes: Routes = [
@@ -29,7 +31,7 @@ const routes: Routes = [
   },
 
 
-  //recuperação de senha
+  //recuperacao de senha
   {
     path: 'recuperar-senha',
     component: RecuperarSenha
@@ -39,14 +41,24 @@ const routes: Routes = [
   //perfil
   {
     path: 'perfil',
-    component: Perfil
+    component: Perfil,
+    canActivate: [authGuard]
   },
 
 
-  //gestão de projetos
+  //gestao de projetos
   {
     path: 'projetos',
-    component: GestaoProjetos
+    component: GestaoProjetos,
+    canActivate: [authGuard]
+  },
+
+
+  //gestao de pessoas
+  {
+    path: 'pessoas',
+    component: GestaoPessoas,
+    canActivate: [authGuard]
   },
 
 

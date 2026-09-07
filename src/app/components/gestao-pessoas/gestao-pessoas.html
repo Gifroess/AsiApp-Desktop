@@ -1,0 +1,220 @@
+<!--tela de gestao de pessoas-->
+<div class="h-screen flex bg-white overflow-hidden">
+  <app-sidebar paginaAtiva="pessoas"></app-sidebar>
+
+  <!--conteudo principal-->
+  <main
+    class="flex-1 h-full overflow-y-auto bg-white px-12 py-8 xl:px-[76px] xl:py-[36px] flex flex-col"
+  >
+    <!--cabecalho da pagina-->
+    <header class="mb-5">
+      <p class="text-[10px] tracking-[4px] text-black mb-1">GESTÃO</p>
+
+      <h1 class="text-[20px] font-bold text-black leading-tight">Gestão de Pessoas</h1>
+
+      <p class="text-[13px] text-black mt-2">
+        Acompanhe e gerencie todos os membros da empresa!
+      </p>
+    </header>
+
+    <!--container de pessoas-->
+    <section class="bg-[#e5e7e9] rounded-[14px] p-5">
+      <!--acoes principais-->
+      <div class="flex items-center gap-4 mb-5">
+        <!--barra de pesquisa-->
+        <div class="flex flex-1 min-w-0 h-[42px]">
+          <input
+            type="text"
+            [(ngModel)]="termoBusca"
+            (ngModelChange)="pesquisar()"
+            placeholder="Pesquise o nome do membro"
+            class="flex-1 rounded-l-lg bg-white/80 px-4 text-[11px] text-black placeholder:text-gray-400 outline-none"
+          />
+
+          <button
+            type="button"
+            (click)="pesquisar()"
+            class="w-[55px] flex items-center justify-center rounded-r-lg bg-[#d1d3d5]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              class="w-4 h-4 text-black"
+            >
+              <circle cx="11" cy="11" r="7"></circle>
+
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!--legenda de cargos-->
+        <div class="flex items-center gap-4 whitespace-nowrap">
+          <span class="flex items-center gap-1.5 text-[11px] text-black">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            Diretores
+          </span>
+
+          <span class="flex items-center gap-1.5 text-[11px] text-black">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+            Gerentes
+          </span>
+
+          <span class="flex items-center gap-1.5 text-[11px] text-black">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            Membros
+          </span>
+        </div>
+      </div>
+
+      <!--lista de membros-->
+      <div class="overflow-x-auto w-full">
+        <div class="bg-white rounded-lg overflow-hidden w-full min-w-[750px]">
+          <!--cabecalho da tabela-->
+          <div
+            class="grid grid-cols-[2fr_1.2fr_1.3fr_1fr_75px] items-center px-5 py-3 border-b border-gray-200"
+          >
+            <span class="text-[11px] font-semibold">Nome do membro</span>
+
+            <span class="text-[11px] font-semibold">Cargo</span>
+
+            <span class="text-[11px] font-semibold">Área</span>
+
+            <span class="text-[11px] font-semibold">Status</span>
+
+            <span class="text-[11px] font-semibold text-center">Ações</span>
+          </div>
+
+          <!--estado vazio / carregando-->
+          <div *ngIf="carregando" class="px-5 py-6 text-[11px] text-gray-400">
+            Carregando membros...
+          </div>
+
+          <div
+            *ngIf="!carregando && membros.length === 0"
+            class="px-5 py-6 text-[11px] text-gray-400"
+          >
+            Nenhum membro encontrado.
+          </div>
+
+          <!--membros-->
+          <div
+            *ngFor="let membro of membros; trackBy: trackPorId"
+            class="grid grid-cols-[2fr_1.2fr_1.3fr_1fr_75px] items-center px-5 py-4 border-b border-gray-100"
+          >
+            <!--nome com barrinha colorida por cargo-->
+            <div class="flex items-center gap-3">
+              <div class="w-1 h-8 rounded-full" [ngClass]="corBarra(membro.role)"></div>
+
+              <span class="text-[11px] font-medium">{{ membro.name }}</span>
+            </div>
+
+            <!--cargo-->
+            <span
+              *ngIf="membroEmEdicaoId !== membro.id"
+              class="text-[11px] font-semibold"
+              [ngClass]="corRole(membro.role)"
+            >
+              {{ membro.role }}
+            </span>
+
+            <select
+              *ngIf="membroEmEdicaoId === membro.id"
+              [(ngModel)]="roleEmEdicao"
+              class="text-[11px] rounded border border-gray-300 px-1 py-0.5 w-fit bg-white"
+            >
+              <option *ngFor="let role of rolesDisponiveis" [value]="role">{{ role }}</option>
+            </select>
+
+            <!--area-->
+            <span *ngIf="membroEmEdicaoId !== membro.id" class="text-[11px]">
+              {{ membro.area || '—' }}
+            </span>
+
+            <input
+              *ngIf="membroEmEdicaoId === membro.id"
+              type="text"
+              [(ngModel)]="areaEmEdicao"
+              placeholder="Área"
+              class="text-[11px] rounded border border-gray-300 px-2 py-0.5 w-fit outline-none"
+            />
+
+            <!--status-->
+            <button
+              type="button"
+              (click)="alternarStatus(membro)"
+              [disabled]="!podeEditar || membroEmEdicaoId !== membro.id"
+              [title]="membroEmEdicaoId === membro.id ? 'Clique para alternar' : 'Clique em editar para alterar o status'"
+              class="text-[11px] font-medium w-fit disabled:cursor-default"
+              [ngClass]="statusEfetivo(membro) === 'Ativo' ? 'text-green-600' : 'text-red-500'"
+            >
+              {{ statusEfetivo(membro) }}
+            </button>
+
+            <!--acoes: so aparecem/funcionam para quem tem permissao-->
+            <div class="flex items-center justify-center gap-3">
+              <ng-container *ngIf="podeEditar">
+                <!--modo normal-->
+                <ng-container *ngIf="membroEmEdicaoId !== membro.id">
+                  <button
+                    type="button"
+                    (click)="editarMembro(membro)"
+                    title="Editar membro"
+                    class="hover:opacity-70 transition text-gray-600"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-4 h-4">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="removerMembro(membro)"
+                    [disabled]="statusEfetivo(membro) === 'Inativo'"
+                    [title]="statusEfetivo(membro) === 'Inativo' ? 'Já está inativo' : 'Desativar membro'"
+                    class="hover:opacity-70 transition text-gray-600 disabled:opacity-30 disabled:hover:opacity-30"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-4 h-4">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="m5.5 5.5 13 13" />
+                    </svg>
+                  </button>
+                </ng-container>
+
+                <!--modo edicao-->
+                <ng-container *ngIf="membroEmEdicaoId === membro.id">
+                  <button
+                    type="button"
+                    (click)="salvarEdicao(membro)"
+                    title="Salvar"
+                    class="hover:opacity-70 transition text-green-600"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="cancelarEdicao()"
+                    title="Cancelar"
+                    class="hover:opacity-70 transition text-red-500"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                      <path d="M18 6 6 18" />
+                      <path d="M6 6l12 12" />
+                    </svg>
+                  </button>
+                </ng-container>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

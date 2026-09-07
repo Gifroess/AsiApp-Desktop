@@ -46,7 +46,9 @@ export class AuthService {
   ): Promise<void> {
 
     if (password !== confirmPassword) {
-      throw new Error('As senhas não coincidem.');
+      throw new Error(
+        'As senhas não coincidem.'
+      );
     }
 
     if (!this.isCorporateEmail(email)) {
@@ -55,20 +57,27 @@ export class AuthService {
       );
     }
 
-    const emailFormatado = email
-      .trim()
-      .toLowerCase();
+    const emailFormatado =
+      email
+        .trim()
+        .toLowerCase();
 
-    const userCredential = await runInInjectionContext(
-      this.injector,
-      () =>
-        this.auth.createUserWithEmailAndPassword(
-          emailFormatado,
-          password
-        )
-    );
 
-    const user = userCredential.user;
+    const userCredential =
+      await runInInjectionContext(
+        this.injector,
+        () =>
+          this.auth
+            .createUserWithEmailAndPassword(
+              emailFormatado,
+              password
+            )
+      );
+
+
+    const user =
+      userCredential.user;
+
 
     if (!user) {
       throw new Error(
@@ -76,34 +85,52 @@ export class AuthService {
       );
     }
 
+
     const userData: UserInterface = {
-      name: name.trim(),
-      email: emailFormatado,
-      role: 'Membro',
-      photoUrl: null
+
+      name:
+        name.trim(),
+
+      email:
+        emailFormatado,
+
+      role:
+        'Membro',
+
+      status:
+        'Ativo',
+
+      photoUrl:
+        null
     };
 
-    //salva os dados usando o mesmo uid do Authentication
+
+    //salva os dados usando o mesmo uid do authentication
     await runInInjectionContext(
       this.injector,
-      () => this.salvarDados(
-        user.uid,
-        userData
-      )
+      () =>
+        this.salvarDados(
+          user.uid,
+          userData
+        )
     );
 
-    //envia o e-mail de verificação
-    await user.sendEmailVerification();
 
-    //encerra a sessão até a confirmação do e-mail
+    //envia o e-mail de verificacao
+    await user
+      .sendEmailVerification();
+
+
+    //encerra a sessao ate a confirmacao do e-mail
     await runInInjectionContext(
       this.injector,
-      () => this.auth.signOut()
+      () =>
+        this.auth.signOut()
     );
   }
 
 
-  //salva os dados na coleção compartilhada com o mobile
+  //salva os dados na colecao compartilhada
   private salvarDados(
     id: string,
     user: UserInterface
@@ -119,7 +146,7 @@ export class AuthService {
   }
 
 
-  //valida o domínio corporativo
+  //valida o dominio corporativo
   private isCorporateEmail(
     email: string
   ): boolean {
@@ -127,7 +154,9 @@ export class AuthService {
     return email
       .trim()
       .toLowerCase()
-      .endsWith('@asimovjr.com.br');
+      .endsWith(
+        '@asimovjr.com.br'
+      );
   }
 
 
@@ -144,20 +173,28 @@ export class AuthService {
       );
     }
 
-    const emailFormatado = email
-      .trim()
-      .toLowerCase();
 
-    const userCredential = await runInInjectionContext(
-      this.injector,
-      () =>
-        this.auth.signInWithEmailAndPassword(
-          emailFormatado,
-          password
-        )
-    );
+    const emailFormatado =
+      email
+        .trim()
+        .toLowerCase();
 
-    const user = userCredential.user;
+
+    const userCredential =
+      await runInInjectionContext(
+        this.injector,
+        () =>
+          this.auth
+            .signInWithEmailAndPassword(
+              emailFormatado,
+              password
+            )
+      );
+
+
+    const user =
+      userCredential.user;
+
 
     if (!user) {
       throw new Error(
@@ -165,37 +202,52 @@ export class AuthService {
       );
     }
 
-    //impede login antes da confirmação do e-mail
+
+    //impede login antes da confirmacao do e-mail
     if (!user.emailVerified) {
 
       await runInInjectionContext(
         this.injector,
-        () => this.auth.signOut()
+        () =>
+          this.auth.signOut()
       );
+
 
       throw new Error(
         'E-mail ainda não verificado. Confira sua caixa de entrada.'
       );
     }
 
-    //temporariamente direciona para gestão de projetos
-    await this.router.navigate(['/projetos']);
+
+    await this.router
+      .navigate(['/projetos']);
   }
 
 
   // ---------- LOGIN COM GOOGLE ----------
 
-  async loginWithGoogle(): Promise<void> {
+  async loginWithGoogle():
+    Promise<void> {
 
     const provider =
-      new firebase.auth.GoogleAuthProvider();
+      new firebase.auth
+        .GoogleAuthProvider();
 
-    const userCredential = await runInInjectionContext(
-      this.injector,
-      () => this.auth.signInWithPopup(provider)
-    );
 
-    const user = userCredential.user;
+    const userCredential =
+      await runInInjectionContext(
+        this.injector,
+        () =>
+          this.auth
+            .signInWithPopup(
+              provider
+            )
+      );
+
+
+    const user =
+      userCredential.user;
+
 
     if (!user) {
       throw new Error(
@@ -203,35 +255,44 @@ export class AuthService {
       );
     }
 
-    //google só pode ser usado por usuários já cadastrados
-    const userDoc = await runInInjectionContext(
-      this.injector,
-      () =>
-        firstValueFrom(
-          this.firestore
-            .collection<UserInterface>('users')
-            .doc(user.uid)
-            .get()
-        )
-    );
+
+    //google so pode ser usado por usuarios ja cadastrados
+    const userDoc =
+      await runInInjectionContext(
+        this.injector,
+        () =>
+          firstValueFrom(
+            this.firestore
+              .collection<UserInterface>(
+                'users'
+              )
+              .doc(user.uid)
+              .get()
+          )
+      );
+
 
     if (!userDoc.exists) {
 
       await runInInjectionContext(
         this.injector,
-        () => this.auth.signOut()
+        () =>
+          this.auth.signOut()
       );
+
 
       throw new Error(
         'E-mail não cadastrado. Realize o cadastro antes de entrar com o Google.'
       );
     }
 
-    await this.router.navigate(['/projetos']);
+
+    await this.router
+      .navigate(['/projetos']);
   }
 
 
-  // ---------- RECUPERAÇÃO DE SENHA ----------
+  // ---------- RECUPERACAO DE SENHA ----------
 
   async redefinirSenha(
     email: string
@@ -243,74 +304,99 @@ export class AuthService {
       );
     }
 
+
     await runInInjectionContext(
       this.injector,
       () =>
-        this.auth.sendPasswordResetEmail(
-          email.trim().toLowerCase()
-        )
+        this.auth
+          .sendPasswordResetEmail(
+            email
+              .trim()
+              .toLowerCase()
+          )
     );
   }
 
 
   // ---------- LOGOUT ----------
 
-  async logout(): Promise<void> {
+  async logout():
+    Promise<void> {
 
     await runInInjectionContext(
       this.injector,
-      () => this.auth.signOut()
+      () =>
+        this.auth.signOut()
     );
 
-    await this.router.navigate(['/']);
+
+    await this.router
+      .navigate(['/']);
   }
 
 
-  // ---------- DADOS DO USUÁRIO ----------
+  // ---------- DADOS DO USUARIO ----------
 
-  getUserData(): Observable<UserInterface | null> {
+  getUserData():
+    Observable<UserInterface | null> {
 
-    return this.auth.authState.pipe(
+    return this.auth
+      .authState
+      .pipe(
 
-      switchMap(user => {
+        switchMap(user => {
 
-        if (!user) {
-          return of(null);
-        }
+          if (!user) {
+            return of(null);
+          }
 
-        return runInInjectionContext(
-          this.injector,
-          () =>
-            this.firestore
-              .collection<UserInterface>('users')
-              .doc(user.uid)
-              .valueChanges()
-        );
-      }),
 
-      map(data => data ?? null)
-    );
+          return runInInjectionContext(
+            this.injector,
+            () =>
+              this.firestore
+                .collection<UserInterface>(
+                  'users'
+                )
+                .doc(user.uid)
+                .valueChanges()
+          );
+        }),
+
+        map(data =>
+          data ?? null
+        )
+
+      );
   }
 
 
   // ---------- UID ----------
 
-  async getUid(): Promise<string | null> {
+  async getUid():
+    Promise<string | null> {
 
-    const user = await firstValueFrom(
-      this.auth.authState
-    );
+    const user =
+      await firstValueFrom(
+        this.auth.authState
+      );
+
 
     return user?.uid ?? null;
   }
 
 
-  // ---------- AUTENTICAÇÃO ----------
+  // ---------- AUTENTICACAO ----------
 
-  isAuthenticated(): Observable<boolean> {
+  isAuthenticated():
+    Observable<boolean> {
 
-    return this.auth.authState.pipe(
-      map(user => !!user)
-    );
+    return this.auth
+      .authState
+      .pipe(
+        map(user =>
+          !!user
+        )
+      );
   }
 }
