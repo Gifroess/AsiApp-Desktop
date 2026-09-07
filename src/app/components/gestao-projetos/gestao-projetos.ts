@@ -19,9 +19,7 @@ import {
   UsuarioProjeto
 } from '../../shared/services/project.service';
 
-import {
-  ProjectInterface
-} from '../../shared/interfaces/project-interface';
+import { ProjectInterface } from '../../shared/interfaces/project-interface';
 
 
 interface Projeto {
@@ -61,160 +59,161 @@ interface FiltrosProjeto {
 export class GestaoProjetos implements OnInit {
 
   projetos = signal<Projeto[]>([]);
-
   usuarios = signal<UsuarioProjeto[]>([]);
 
   textoPesquisa = signal('');
-
   termoPesquisa = signal('');
 
   modalProjetoAberto = signal(false);
-
   modalFiltrosAberto = signal(false);
-
   modalExclusaoAberto = signal(false);
+
+  equipeAberta = signal(false);
 
   modoEdicao = signal(false);
 
-  projetoEditandoId = signal<string | null>(null);
+  projetoEditandoId =
+    signal<string | null>(null);
 
-  projetoParaExcluir = signal<Projeto | null>(null);
+  projetoParaExcluir =
+    signal<Projeto | null>(null);
 
   isSalvando = signal(false);
-
   isExcluindo = signal(false);
 
   mensagemErroProjeto = signal('');
-
   mensagemErroExclusao = signal('');
 
   formProjeto: FormGroup;
-
   formFiltros: FormGroup;
 
 
-  filtrosAtivos = signal<FiltrosProjeto>({
-    area: '',
-    dataInicio: '',
-    dataFim: '',
-    valorMin: '',
-    valorMax: ''
-  });
+  filtrosAtivos =
+    signal<FiltrosProjeto>({
+      area: '',
+      dataInicio: '',
+      dataFim: '',
+      valorMin: '',
+      valorMax: ''
+    });
 
 
-  areasDisponiveis = computed(() => {
+  areasDisponiveis =
+    computed(() => {
 
-    const areas = this.projetos()
-      .map(projeto => projeto.area)
-      .filter(area =>
-        !!area &&
-        area !== '-'
-      );
-
-    return [
-      ...new Set(areas)
-    ].sort();
-  });
-
-
-  projetosFiltrados = computed(() => {
-
-    const termo =
-      this.normalizarTexto(
-        this.termoPesquisa()
-      );
-
-    const filtros =
-      this.filtrosAtivos();
-
-
-    return this.projetos()
-      .filter(projeto => {
-
-        //pesquisa
-        if (termo) {
-
-          const campos = [
-            projeto.nome,
-            projeto.cliente,
-            projeto.gerente,
-            projeto.area,
-            projeto.status
-          ].map(campo =>
-            this.normalizarTexto(campo)
+      const areas =
+        this.projetos()
+          .map(projeto => projeto.area)
+          .filter(area =>
+            !!area &&
+            area !== '-'
           );
 
+      return [
+        ...new Set(areas)
+      ].sort();
+    });
 
+
+  projetosFiltrados =
+    computed(() => {
+
+      const termo =
+        this.normalizarTexto(
+          this.termoPesquisa()
+        );
+
+      const filtros =
+        this.filtrosAtivos();
+
+
+      return this.projetos()
+        .filter(projeto => {
+
+          //pesquisa
+          if (termo) {
+
+            const campos = [
+              projeto.nome,
+              projeto.cliente,
+              projeto.gerente,
+              projeto.area,
+              projeto.status
+            ].map(campo =>
+              this.normalizarTexto(campo)
+            );
+
+
+            if (
+              !campos.some(campo =>
+                campo.includes(termo)
+              )
+            ) {
+              return false;
+            }
+          }
+
+
+          //area
           if (
-            !campos.some(campo =>
-              campo.includes(termo)
+            filtros.area &&
+            projeto.area !== filtros.area
+          ) {
+            return false;
+          }
+
+
+          //data inicial
+          if (
+            filtros.dataInicio &&
+            (
+              !projeto.prazo ||
+              projeto.prazo < filtros.dataInicio
             )
           ) {
             return false;
           }
-        }
 
 
-        //area
-        if (
-          filtros.area &&
-          projeto.area !== filtros.area
-        ) {
-          return false;
-        }
+          //data final
+          if (
+            filtros.dataFim &&
+            (
+              !projeto.prazo ||
+              projeto.prazo > filtros.dataFim
+            )
+          ) {
+            return false;
+          }
 
 
-        //data inicial
-        if (
-          filtros.dataInicio &&
-          (
-            !projeto.prazo ||
-            projeto.prazo < filtros.dataInicio
-          )
-        ) {
-          return false;
-        }
+          const valor =
+            this.converterValorParaNumero(
+              projeto.valor
+            );
 
 
-        //data final
-        if (
-          filtros.dataFim &&
-          (
-            !projeto.prazo ||
-            projeto.prazo > filtros.dataFim
-          )
-        ) {
-          return false;
-        }
+          //valor minimo
+          if (
+            filtros.valorMin &&
+            valor < Number(filtros.valorMin)
+          ) {
+            return false;
+          }
 
 
-        const valor =
-          this.converterValorParaNumero(
-            projeto.valor
-          );
+          //valor maximo
+          if (
+            filtros.valorMax &&
+            valor > Number(filtros.valorMax)
+          ) {
+            return false;
+          }
 
 
-        //valor minimo
-        if (
-          filtros.valorMin &&
-          valor < Number(filtros.valorMin)
-        ) {
-          return false;
-        }
-
-
-        //valor maximo
-        if (
-          filtros.valorMax &&
-          valor > Number(filtros.valorMax)
-        ) {
-          return false;
-        }
-
-
-        return true;
-      });
-  });
+          return true;
+        });
+    });
 
 
   constructor(
@@ -335,7 +334,8 @@ export class GestaoProjetos implements OnInit {
 
 
               convertido.aberto =
-                estadosAbertos.get(project.id)
+                estadosAbertos
+                  .get(project.id)
                 ?? false;
 
 
@@ -450,7 +450,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //atualiza o texto digitado na pesquisa
+  //filtra enquanto o usuario digita
   atualizarTextoPesquisa(
     event: Event
   ): void {
@@ -472,7 +472,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //aplica a pesquisa
+  //mantem o botao da lupa funcional
   pesquisar(): void {
 
     this.termoPesquisa.set(
@@ -490,6 +490,8 @@ export class GestaoProjetos implements OnInit {
     this.projetoEditandoId.set(
       null
     );
+
+    this.equipeAberta.set(false);
 
     this.mensagemErroProjeto.set(
       ''
@@ -536,9 +538,20 @@ export class GestaoProjetos implements OnInit {
       projeto.id || null
     );
 
+    this.equipeAberta.set(false);
+
     this.mensagemErroProjeto.set(
       ''
     );
+
+
+    //o gerente nao precisa ficar
+    //tambem marcado no seletor de equipe
+    const membrosSemGerente =
+      projeto.membroIds
+        .filter(id =>
+          id !== projeto.gerenteId
+        );
 
 
     this.formProjeto.reset({
@@ -556,7 +569,7 @@ export class GestaoProjetos implements OnInit {
         projeto.gerenteId,
 
       memberIds:
-        [...projeto.membroIds],
+        membrosSemGerente,
 
       deadline:
         projeto.prazo,
@@ -594,6 +607,8 @@ export class GestaoProjetos implements OnInit {
     }
 
 
+    this.equipeAberta.set(false);
+
     this.modalProjetoAberto.set(
       false
     );
@@ -601,6 +616,115 @@ export class GestaoProjetos implements OnInit {
     this.mensagemErroProjeto.set(
       ''
     );
+  }
+
+
+  //abre ou fecha o seletor de equipe
+  alternarSeletorEquipe(): void {
+
+    this.equipeAberta.update(
+      aberto => !aberto
+    );
+  }
+
+
+  //fecha o seletor
+  fecharSeletorEquipe(): void {
+
+    this.equipeAberta.set(false);
+  }
+
+
+  //remove da equipe quem passou a ser gerente
+  aoAlterarGerente(): void {
+
+    const gerenteId =
+      this.formProjeto
+        .get('managerId')
+        ?.value;
+
+
+    if (!gerenteId) {
+      return;
+    }
+
+
+    const control =
+      this.formProjeto
+        .get('memberIds');
+
+
+    const atuais: string[] =
+      control?.value || [];
+
+
+    if (
+      atuais.includes(
+        gerenteId
+      )
+    ) {
+
+      control?.setValue(
+        atuais.filter(id =>
+          id !== gerenteId
+        )
+      );
+    }
+  }
+
+
+  //texto exibido no campo equipe
+  textoEquipeSelecionada(): string {
+
+    const ids: string[] =
+      this.formProjeto
+        .get('memberIds')
+        ?.value || [];
+
+
+    if (
+      ids.length === 0
+    ) {
+      return 'Selecione os membros';
+    }
+
+
+    const nomes =
+      ids
+        .map(id =>
+          this.usuarios()
+            .find(usuario =>
+              usuario.id === id
+            )
+            ?.name
+        )
+        .filter(
+          (
+            nome
+          ): nome is string =>
+            !!nome
+        );
+
+
+    if (
+      nomes.length === 0
+    ) {
+      return 'Selecione os membros';
+    }
+
+
+    if (
+      nomes.length <= 2
+    ) {
+      return nomes.join(', ');
+    }
+
+
+    return `${
+      nomes
+        .slice(0, 2)
+        .join(', ')
+    } +${nomes.length - 2}`;
   }
 
 
@@ -619,7 +743,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //marca ou desmarca um membro
+  //marca ou desmarca membro
   alternarMembro(
     id: string,
     event: Event
@@ -714,7 +838,7 @@ export class GestaoProjetos implements OnInit {
 
     try {
 
-      //inclui o gerente na equipe
+      //o gerente sempre faz parte do projeto
       const memberIds =
         [
           ...new Set([
@@ -809,6 +933,8 @@ export class GestaoProjetos implements OnInit {
           );
       }
 
+
+      this.equipeAberta.set(false);
 
       this.modalProjetoAberto.set(
         false
@@ -1040,6 +1166,22 @@ export class GestaoProjetos implements OnInit {
     const valor =
       input.value;
 
+    const anterior =
+      projeto.prazo;
+
+
+    this.projetos.update(
+      projetos =>
+        projetos.map(item =>
+          item.id === projeto.id
+            ? {
+                ...item,
+                prazo: valor
+              }
+            : item
+        )
+    );
+
 
     try {
 
@@ -1063,6 +1205,19 @@ export class GestaoProjetos implements OnInit {
       console.error(
         'Erro ao atualizar prazo:',
         erro
+      );
+
+
+      this.projetos.update(
+        projetos =>
+          projetos.map(item =>
+            item.id === projeto.id
+              ? {
+                  ...item,
+                  prazo: anterior
+                }
+              : item
+          )
       );
     }
   }
@@ -1134,7 +1289,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //converte status da tela para o firebase
+  //status usado pelo firebase
   private statusParaFirebase(
     status: string
   ): string {
@@ -1153,7 +1308,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //define cor visual
+  //cor visual da tabela
   private corPorStatus(
     status: string
   ): string {
@@ -1172,7 +1327,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //define cor salva no firebase
+  //cor salva no firebase
   private corFirebasePorStatus(
     status: string
   ): string {
@@ -1191,7 +1346,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //formata o prazo para o input
+  //formata prazo para input
   private formatarPrazoParaInput(
     deadline:
       ProjectInterface['deadline']
@@ -1211,8 +1366,7 @@ export class GestaoProjetos implements OnInit {
       deadline instanceof Date
     ) {
 
-      data =
-        deadline;
+      data = deadline;
 
     } else if (
       typeof deadline === 'object' &&
@@ -1254,7 +1408,7 @@ export class GestaoProjetos implements OnInit {
   ): number {
 
     let texto =
-      (valor || '')
+      String(valor || '')
         .replace('R$', '')
         .trim();
 
@@ -1285,7 +1439,7 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //prepara valor para campo de edicao
+  //prepara valor para edicao
   private valorParaInput(
     valor: string
   ): string {
@@ -1298,19 +1452,17 @@ export class GestaoProjetos implements OnInit {
   }
 
 
-  //padroniza valor salvo no firebase
+  //padroniza valor salvo
   private formatarValorFirebase(
     valor: string | number
   ): string {
 
     const numero =
-      Number(valor);
+      this.converterValorParaNumero(
+        String(valor)
+      );
 
 
-    return `R$ ${
-      Number.isNaN(numero)
-        ? '0.00'
-        : numero.toFixed(2)
-    }`;
+    return `R$ ${numero.toFixed(2)}`;
   }
 }
