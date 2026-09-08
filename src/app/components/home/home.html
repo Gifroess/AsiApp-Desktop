@@ -1,0 +1,140 @@
+<!--tela home-->
+<div
+  class="min-h-screen flex bg-white overflow-x-hidden"
+>
+
+  <app-sidebar
+    paginaAtiva="home"
+  ></app-sidebar>
+
+
+  <!--conteudo principal-->
+  <main
+    class="flex-1
+           min-w-0
+           min-h-screen
+           bg-white
+           px-10
+           py-8
+           xl:px-[68px]
+           xl:py-[36px]"
+  >
+
+
+    <!--cabecalho-->
+    <header
+      class="mb-7"
+    >
+
+      <p
+        class="text-[10px]
+               tracking-[4px]
+               text-black
+               mb-1"
+      >
+        HOME
+      </p>
+
+
+      <h1
+        class="text-[20px]
+               font-bold
+               text-black
+               leading-tight"
+      >
+        Bem vindo,
+        “{{ usuario()?.name || 'Nome do Membro' }}”!
+      </h1>
+
+
+      <p
+        class="text-[13px]
+               text-black
+               mt-2"
+      >
+        Acompanhe os processos da empresa hoje
+      </p>
+
+    </header>
+
+
+    <!--progressao geral-->
+    <section>
+
+      <h2
+        class="text-[14px]
+               font-medium
+               mb-3"
+      >
+        Progressão Geral
+      </h2>
+
+
+      <div
+        class="w-full
+               min-h-[190px]
+               bg-[#e5e7e9]
+               rounded-[14px]"
+      >
+      </div>
+
+    </section>
+
+
+    <!--portal bj-->
+    <section
+      class="mt-4"
+    >
+
+      <div
+        class="w-full
+               min-h-[330px]
+               bg-[#e5e7e9]
+               rounded-[14px]"
+      >
+
+        <h2
+          class="text-[11px]
+                 font-medium
+                 px-5
+                 pt-4"
+        >
+          Portal BJ
+        </h2>
+
+      </div>
+
+    </section>
+
+
+    <!--overview de projetos-->
+    <section
+      class="mt-12
+             -mx-10
+             xl:-mx-[68px]
+             px-10
+             xl:px-[68px]
+             py-6
+             bg-[#e5e7e9]"
+    >
+
+      <h2
+        class="text-[14px]
+               font-medium
+               mb-5"
+      >
+        Overview de Projetos
+      </h2>
+
+
+      <div
+        class="w-full
+               min-h-[260px]"
+      >
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

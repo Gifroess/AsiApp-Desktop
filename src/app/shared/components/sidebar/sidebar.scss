@@ -22,15 +22,16 @@
 
 .menu-item {
   width: 124px;
-
   padding: 14px 4px;
-
-  border-bottom:
-    1px solid rgba(255, 255, 255, 0.28);
-
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
   font-size: 11px;
   line-height: 1.2;
   font-weight: 400;
+  transition: opacity 0.2s ease;
+}
+
+.menu-item.cursor-pointer:hover {
+  opacity: 0.8;
 }
 
 .menu-item.ativo {

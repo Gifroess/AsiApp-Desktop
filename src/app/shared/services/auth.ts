@@ -220,7 +220,7 @@ export class AuthService {
 
 
     await this.router
-      .navigate(['/projetos']);
+      .navigate(['/home']);
   }
 
 
@@ -288,7 +288,7 @@ export class AuthService {
 
 
     await this.router
-      .navigate(['/projetos']);
+      .navigate(['/home']);
   }
 
 

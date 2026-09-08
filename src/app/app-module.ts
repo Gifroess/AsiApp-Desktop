@@ -20,17 +20,10 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { environment } from '../assets/environments/environment';
+import { Home } from './components/home/home';
 
 @NgModule({
-  declarations: [
-    App,
-    Login,
-    Cadastro,
-    GestaoProjetos,
-    GestaoPessoas,
-    Perfil,
-    Sidebar
-  ],
+  declarations: [App, Login, Cadastro, GestaoProjetos, GestaoPessoas, Perfil, Sidebar, Home],
 
   imports: [
     BrowserModule,
@@ -41,13 +34,11 @@ import { environment } from '../assets/environments/environment';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFirestoreModule,
-    AngularFireStorageModule
+    AngularFireStorageModule,
   ],
 
-  providers: [
-    provideBrowserGlobalErrorListeners()
-  ],
+  providers: [provideBrowserGlobalErrorListeners()],
 
-  bootstrap: [App]
+  bootstrap: [App],
 })
 export class AppModule {}
