@@ -4,7 +4,7 @@
   <app-sidebar paginaAtiva="home"></app-sidebar>
 
   <!-- conteudo principal -->
-  <main class="flex-1 min-w-0 min-h-screen bg-white px-10 py-8 xl:px-[68px] xl:py-[36px]">
+  <main class="flex-1 min-w-0 min-h-screen bg-white px-10 pt-8 pb-0 xl:px-[68px] xl:pt-[36px] xl:pb-0">
 
     <!-- cabecalho -->
     <header class="mb-7">
@@ -29,14 +29,11 @@
         <p class="text-[10px] font-medium text-black mb-1.5">Faturamento</p>
 
         <div class="relative w-full h-[40px] rounded-[8px] overflow-hidden bg-[#70afea]">
-
-          <!-- parte alcancada -->
           <div
             class="absolute inset-y-0 left-0 rounded-[8px] bg-[#168be8]"
             [style.width.%]="percentualMeta()"
           ></div>
 
-          <!-- informacoes da barra -->
           <div class="absolute inset-0 z-10 flex items-center justify-between px-4 text-white">
             <div>
               <p class="text-[9px] font-medium leading-tight">Alcançado</p>
@@ -54,7 +51,6 @@
           </div>
         </div>
 
-        <!-- informacoes inferiores -->
         <div class="flex items-center justify-between mt-2 px-0.5">
           <p class="text-[9px] text-black">
             GAP {{ formatarMoeda(gapMeta()) }}
@@ -70,11 +66,8 @@
       <!-- resumo -->
       <div class="grid grid-cols-3 gap-5 mt-3">
 
-        <!-- faturamento acumulado -->
         <article class="h-[99px] rounded-[14px] bg-[#e5e7e9] px-4 py-3 flex flex-col">
-          <p class="text-[10px] font-medium text-black">
-            Faturamento acumulado
-          </p>
+          <p class="text-[10px] font-medium text-black">Faturamento acumulado</p>
 
           <p class="text-[14px] font-semibold text-black text-center mt-4 leading-tight">
             {{ formatarMoeda(progressaoGeral().faturamentoAcumulado) }}
@@ -86,7 +79,6 @@
         </article>
 
 
-        <!-- meta anual -->
         <article class="h-[99px] rounded-[14px] bg-[#e5e7e9] px-4 py-3 flex flex-col">
           <p class="text-[10px] font-medium text-black">Meta Anual</p>
 
@@ -100,7 +92,6 @@
         </article>
 
 
-        <!-- projetos ativos -->
         <article class="h-[99px] rounded-[14px] bg-[#e5e7e9] px-4 py-3 flex flex-col">
           <p class="text-[10px] font-medium text-black">Projetos Ativos</p>
 
@@ -135,15 +126,12 @@
               [style.backgroundColor]="corIndicador(indicador.tipo)"
             >
 
-              <!-- titulo -->
               <h3 class="text-[9px] font-semibold text-white leading-[12px] truncate">
                 {{ indicador.nome }}
               </h3>
 
-
               <!-- progresso -->
               <div class="relative w-full h-[44px] mt-[10px] rounded-[7px] border border-white/45 overflow-hidden shrink-0">
-
                 <div
                   class="absolute inset-y-0 left-0 rounded-[6px]"
                   [style.width.%]="indicador.progresso"
@@ -155,7 +143,6 @@
                   <span class="text-[8.5px] font-medium">Meta</span>
                 </div>
               </div>
-
 
               <!-- gap -->
               <div class="mt-auto pt-[7px] border-t border-white/55 flex items-center justify-between text-white">
@@ -172,7 +159,6 @@
 
         <!-- legenda -->
         <div class="flex items-center gap-6 mt-5 px-2">
-
           <div class="flex items-center gap-2">
             <span class="w-[14px] h-[14px] rounded-[4px] bg-[#78c55d]"></span>
             <span class="text-[8.5px] text-black">Indicadores Essenciais</span>
@@ -182,20 +168,127 @@
             <span class="w-[14px] h-[14px] rounded-[4px] bg-[#168be8]"></span>
             <span class="text-[8.5px] text-black">Indicadores Complementares</span>
           </div>
-
         </div>
+
       </div>
     </section>
 
 
     <!-- overview de projetos -->
-    <section class="mt-12 -mx-10 xl:-mx-[68px] px-10 xl:px-[68px] py-6 bg-[#e5e7e9]">
+    <section class="overview-section mt-12 -mx-10 xl:-mx-[68px] px-10 xl:px-[68px] pt-7 bg-[#e5e7e9]">
 
       <h2 class="text-[15px] font-medium mb-5">
         Overview de Projetos
       </h2>
 
-      <div class="w-full min-h-[260px]">
+      <!-- lista de projetos -->
+      <div class="overview-scroll">
+
+        @for (projeto of projetosOverview(); track projeto.id) {
+
+          <article class="projeto-overview-card">
+
+            <!-- informacoes principais -->
+            <div class="flex items-start justify-between gap-6">
+
+              <div class="min-w-0">
+                <div class="flex items-center gap-7">
+                  <h3 class="text-[10px] font-medium text-black truncate">
+                    {{ projeto.nome }}
+                  </h3>
+
+                  <span class="text-[9px] text-black/45">
+                    {{ projeto.area }}
+                  </span>
+                </div>
+
+                <!-- gerente e equipe -->
+                <div class="flex items-center gap-5 mt-2">
+
+                  <div class="flex items-center gap-1.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      class="w-3 h-3 text-black"
+                    >
+                      <path d="M20 21a8 8 0 0 0-16 0"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+
+                    <span class="text-[9px] text-[#168be8]">
+                      {{ projeto.gerente }}
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-1.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      class="w-3 h-3 text-black"
+                    >
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+
+                    <span class="text-[9px] text-[#168be8]">
+                      {{ projeto.membros.length }}
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- orcamento -->
+              <p class="text-[9px] text-[#168be8] whitespace-nowrap">
+                Orçamento: {{ projeto.valor }}
+              </p>
+
+            </div>
+
+
+            <!-- detalhes -->
+            <div class="grid grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] gap-10 mt-4 items-start">
+
+              <!-- descricao -->
+              <p class="descricao-projeto text-[9px] leading-[14px] text-black">
+                {{ projeto.descricao }}
+              </p>
+
+              <!-- membros alocados -->
+              <div class="flex gap-3 text-[9px] leading-[14px] min-w-0">
+                <span class="font-medium shrink-0">Alocados:</span>
+
+                <span class="text-black">
+                  {{
+                    projeto.membros.length
+                      ? projeto.membros.join(', ')
+                      : 'Nenhum membro alocado.'
+                  }}
+                </span>
+              </div>
+
+            </div>
+
+          </article>
+
+        } @empty {
+
+          <div class="bg-white rounded-[14px] px-5 py-8 text-center">
+            <p class="text-[10px] text-black/50">
+              Nenhum projeto ativo encontrado.
+            </p>
+          </div>
+
+        }
+
       </div>
 
     </section>
