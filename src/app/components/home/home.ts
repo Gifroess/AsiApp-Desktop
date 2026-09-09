@@ -23,6 +23,19 @@ interface ProgressaoGeral {
 }
 
 
+type TipoIndicador =
+  | 'essencial'
+  | 'complementar';
+
+
+interface IndicadorPortal {
+  nome: string;
+  tipo: TipoIndicador;
+  progresso: number;
+  gap: string;
+}
+
+
 @Component({
   selector: 'app-home',
   standalone: false,
@@ -37,7 +50,7 @@ export class Home implements OnInit {
     );
 
 
-  //dados temporarios do prototipo
+  //dados temporarios da progressao geral
   //depois serao alimentados pelo firebase
   progressaoGeral =
     signal<ProgressaoGeral>({
@@ -58,6 +71,98 @@ export class Home implements OnInit {
         10.1
 
     });
+
+
+  //indicadores temporarios do portal bj
+  //a estrutura ja esta pronta para receber dados reais
+  indicadoresPortal =
+    signal<IndicadorPortal[]>([
+
+      {
+        nome:
+          'CSAT',
+
+        tipo:
+          'essencial',
+
+        progresso:
+          70,
+
+        gap:
+          'R$ 99.999,99'
+      },
+
+      {
+        nome:
+          'Tempo de Permanência no MEJ',
+
+        tipo:
+          'essencial',
+
+        progresso:
+          72,
+
+        gap:
+          'R$ 99.999,99'
+      },
+
+      {
+        nome:
+          'Engajamento com o MEJ',
+
+        tipo:
+          'essencial',
+
+        progresso:
+          73,
+
+        gap:
+          'R$ 99.999,99'
+      },
+
+      {
+        nome:
+          'Políticas de Diversidade e Inclusão',
+
+        tipo:
+          'complementar',
+
+        progresso:
+          70,
+
+        gap:
+          'R$ 99.999,99'
+      },
+
+      {
+        nome:
+          'Faturamento Colaborativo',
+
+        tipo:
+          'complementar',
+
+        progresso:
+          72,
+
+        gap:
+          'R$ 99.999,99'
+      },
+
+      {
+        nome:
+          'Projetos de Impacto',
+
+        tipo:
+          'complementar',
+
+        progresso:
+          73,
+
+        gap:
+          'R$ 99.999,99'
+      }
+
+    ]);
 
 
   //percentual atingido da meta anual
@@ -155,5 +260,27 @@ export class Home implements OnInit {
           maximumFractionDigits: 1
         }
       );
+  }
+
+
+  //define a cor principal do indicador
+  corIndicador(
+    tipo: TipoIndicador
+  ): string {
+
+    return tipo === 'essencial'
+      ? '#78c55d'
+      : '#3d98e8';
+  }
+
+
+  //define a cor interna da barra
+  corProgressoIndicador(
+    tipo: TipoIndicador
+  ): string {
+
+    return tipo === 'essencial'
+      ? '#6eaa5f'
+      : '#568ead';
   }
 }

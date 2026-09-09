@@ -1,454 +1,204 @@
-<!--tela home-->
-<div
-  class="min-h-screen flex bg-white overflow-x-hidden"
->
+<!-- tela home -->
+<div class="min-h-screen flex bg-white overflow-x-hidden">
 
-  <app-sidebar
-    paginaAtiva="home"
-  ></app-sidebar>
+  <app-sidebar paginaAtiva="home"></app-sidebar>
 
+  <!-- conteudo principal -->
+  <main class="flex-1 min-w-0 min-h-screen bg-white px-10 py-8 xl:px-[68px] xl:py-[36px]">
 
-  <!--conteudo principal-->
-  <main
-    class="flex-1
-           min-w-0
-           min-h-screen
-           bg-white
-           px-10
-           py-8
-           xl:px-[68px]
-           xl:py-[36px]"
-  >
+    <!-- cabecalho -->
+    <header class="mb-7">
+      <p class="text-[10px] tracking-[4px] text-black mb-1">HOME</p>
 
-
-    <!--cabecalho-->
-    <header
-      class="mb-7"
-    >
-
-      <p
-        class="text-[10px]
-               tracking-[4px]
-               text-black
-               mb-1"
-      >
-        HOME
-      </p>
-
-
-      <h1
-        class="text-[20px]
-               font-bold
-               text-black
-               leading-tight"
-      >
-        Bem vindo,
-        “{{ usuario()?.name || 'Nome do Membro' }}”!
+      <h1 class="text-[20px] font-bold text-black leading-tight">
+        Bem vindo, “{{ usuario()?.name || 'Nome do Membro' }}”!
       </h1>
 
-
-      <p
-        class="text-[13px]
-               text-black
-               mt-2"
-      >
+      <p class="text-[13px] text-black mt-2">
         Acompanhe os processos da empresa hoje
       </p>
-
     </header>
 
 
-    <!--progressao geral-->
+    <!-- progressao geral -->
     <section>
+      <h2 class="text-[15px] font-medium mb-3">Progressão Geral</h2>
 
-      <h2
-        class="text-[15px]
-               font-medium
-               mb-3"
-      >
-        Progressão Geral
-      </h2>
+      <!-- faturamento -->
+      <div class="w-full bg-[#e5e7e9] rounded-[14px] px-4 pt-3 pb-2">
+        <p class="text-[10px] font-medium text-black mb-1.5">Faturamento</p>
 
+        <div class="relative w-full h-[40px] rounded-[8px] overflow-hidden bg-[#70afea]">
 
-      <!--faturamento-->
-      <div
-        class="w-full
-               bg-[#e5e7e9]
-               rounded-[14px]
-               px-4
-               pt-3
-               pb-2"
-      >
-
-        <p
-          class="text-[10px]
-                 font-medium
-                 text-black
-                 mb-1.5"
-        >
-          Faturamento
-        </p>
-
-
-        <!--barra principal-->
-        <div
-          class="relative
-                 w-full
-                 h-[40px]
-                 rounded-[8px]
-                 overflow-hidden
-                 bg-[#70afea]"
-        >
-
-          <!--parte alcancada-->
+          <!-- parte alcancada -->
           <div
-            class="absolute
-                   inset-y-0
-                   left-0
-                   rounded-[8px]
-                   bg-[#168be8]"
+            class="absolute inset-y-0 left-0 rounded-[8px] bg-[#168be8]"
             [style.width.%]="percentualMeta()"
-          >
-          </div>
+          ></div>
 
-
-          <!--informacoes da barra-->
-          <div
-            class="absolute
-                   inset-0
-                   z-10
-                   flex
-                   items-center
-                   justify-between
-                   px-4
-                   text-white"
-          >
-
-            <!--alcancado-->
+          <!-- informacoes da barra -->
+          <div class="absolute inset-0 z-10 flex items-center justify-between px-4 text-white">
             <div>
-
-              <p
-                class="text-[9px]
-                       font-medium
-                       leading-tight"
-              >
-                Alcançado
+              <p class="text-[9px] font-medium leading-tight">Alcançado</p>
+              <p class="text-[10px] leading-tight mt-1">
+                {{ formatarMoeda(progressaoGeral().faturamentoAcumulado) }}
               </p>
-
-
-              <p
-                class="text-[10px]
-                       leading-tight
-                       mt-1"
-              >
-                {{
-                  formatarMoeda(
-                    progressaoGeral()
-                      .faturamentoAcumulado
-                  )
-                }}
-              </p>
-
             </div>
 
-
-            <!--meta-->
-            <div
-              class="text-right"
-            >
-
-              <p
-                class="text-[9px]
-                       font-medium
-                       leading-tight"
-              >
-                Meta
+            <div class="text-right">
+              <p class="text-[9px] font-medium leading-tight">Meta</p>
+              <p class="text-[10px] leading-tight mt-1">
+                {{ formatarMoeda(progressaoGeral().metaAnual) }}
               </p>
-
-
-              <p
-                class="text-[10px]
-                       leading-tight
-                       mt-1"
-              >
-                {{
-                  formatarMoeda(
-                    progressaoGeral()
-                      .metaAnual
-                  )
-                }}
-              </p>
-
             </div>
-
           </div>
-
         </div>
 
-
-        <!--informacoes inferiores-->
-        <div
-          class="flex
-                 items-center
-                 justify-between
-                 mt-2
-                 px-0.5"
-        >
-
-          <p
-            class="text-[9px]
-                   text-black"
-          >
-            GAP
-            {{
-              formatarMoeda(
-                gapMeta()
-              )
-            }}
+        <!-- informacoes inferiores -->
+        <div class="flex items-center justify-between mt-2 px-0.5">
+          <p class="text-[9px] text-black">
+            GAP {{ formatarMoeda(gapMeta()) }}
           </p>
 
-
-          <p
-            class="text-[9px]
-                   text-black"
-          >
-            {{
-              percentualMeta()
-                .toFixed(0)
-            }}% da meta atual
+          <p class="text-[9px] text-black">
+            {{ percentualMeta().toFixed(0) }}% da meta atual
           </p>
-
         </div>
-
       </div>
 
 
-      <!--cards de resumo-->
-      <div
-        class="grid
-               grid-cols-3
-               gap-5
-               mt-3"
-      >
+      <!-- resumo -->
+      <div class="grid grid-cols-3 gap-5 mt-3">
 
-
-        <!--faturamento acumulado-->
-        <article
-          class="h-[99px]
-                 rounded-[14px]
-                 bg-[#e5e7e9]
-                 px-4
-                 py-3
-                 flex
-                 flex-col"
-        >
-
-          <p
-            class="text-[10px]
-                   font-medium
-                   text-black"
-          >
+        <!-- faturamento acumulado -->
+        <article class="h-[99px] rounded-[14px] bg-[#e5e7e9] px-4 py-3 flex flex-col">
+          <p class="text-[10px] font-medium text-black">
             Faturamento acumulado
           </p>
 
-
-          <p
-            class="text-[14px]
-                   font-semibold
-                   text-black
-                   text-center
-                   mt-4
-                   leading-tight"
-          >
-            {{
-              formatarMoeda(
-                progressaoGeral()
-                  .faturamentoAcumulado
-              )
-            }}
+          <p class="text-[14px] font-semibold text-black text-center mt-4 leading-tight">
+            {{ formatarMoeda(progressaoGeral().faturamentoAcumulado) }}
           </p>
 
-
-          <p
-            class="text-[8.5px]
-                   text-[#168be8]
-                   mt-auto
-                   leading-tight"
-          >
-            +{{
-              formatarPercentual(
-                progressaoGeral()
-                  .variacaoAnual
-              )
-            }}% vs 2025
+          <p class="text-[8.5px] text-[#168be8] mt-auto leading-tight">
+            +{{ formatarPercentual(progressaoGeral().variacaoAnual) }}% vs 2025
           </p>
-
         </article>
 
 
-        <!--meta anual-->
-        <article
-          class="h-[99px]
-                 rounded-[14px]
-                 bg-[#e5e7e9]
-                 px-4
-                 py-3
-                 flex
-                 flex-col"
-        >
+        <!-- meta anual -->
+        <article class="h-[99px] rounded-[14px] bg-[#e5e7e9] px-4 py-3 flex flex-col">
+          <p class="text-[10px] font-medium text-black">Meta Anual</p>
 
-          <p
-            class="text-[10px]
-                   font-medium
-                   text-black"
-          >
-            Meta Anual
+          <p class="text-[14px] font-semibold text-black text-center mt-4 leading-tight">
+            {{ formatarMoeda(progressaoGeral().metaAnual) }}
           </p>
 
-
-          <p
-            class="text-[14px]
-                   font-semibold
-                   text-black
-                   text-center
-                   mt-4
-                   leading-tight"
-          >
-            {{
-              formatarMoeda(
-                progressaoGeral()
-                  .metaAnual
-              )
-            }}
+          <p class="text-[8.5px] text-[#168be8] mt-auto leading-tight">
+            Faltam {{ formatarMoeda(gapMeta()) }}
           </p>
-
-
-          <p
-            class="text-[8.5px]
-                   text-[#168be8]
-                   mt-auto
-                   leading-tight"
-          >
-            Faltam
-            {{
-              formatarMoeda(
-                gapMeta()
-              )
-            }}
-          </p>
-
         </article>
 
 
-        <!--projetos ativos-->
-        <article
-          class="h-[99px]
-                 rounded-[14px]
-                 bg-[#e5e7e9]
-                 px-4
-                 py-3
-                 flex
-                 flex-col"
-        >
+        <!-- projetos ativos -->
+        <article class="h-[99px] rounded-[14px] bg-[#e5e7e9] px-4 py-3 flex flex-col">
+          <p class="text-[10px] font-medium text-black">Projetos Ativos</p>
 
-          <p
-            class="text-[10px]
-                   font-medium
-                   text-black"
-          >
-            Projetos Ativos
+          <p class="text-[14px] font-semibold text-black text-center mt-4 leading-tight">
+            {{ progressaoGeral().projetosAtivos }}
           </p>
 
-
-          <p
-            class="text-[14px]
-                   font-semibold
-                   text-black
-                   text-center
-                   mt-4
-                   leading-tight"
-          >
-            {{
-              progressaoGeral()
-                .projetosAtivos
-            }}
+          <p class="text-[8.5px] text-[#168be8] mt-auto leading-tight">
+            {{ progressaoGeral().membrosAlocados }} Membros Alocados
           </p>
-
-
-          <p
-            class="text-[8.5px]
-                   text-[#168be8]
-                   mt-auto
-                   leading-tight"
-          >
-            {{
-              progressaoGeral()
-                .membrosAlocados
-            }}
-            Membros Alocados
-          </p>
-
         </article>
 
       </div>
-
     </section>
 
 
-    <!--portal bj-->
-    <section
-      class="mt-3"
-    >
+    <!-- portal bj -->
+    <section class="mt-3">
+      <div class="w-full bg-[#e5e7e9] rounded-[14px] px-4 pt-4 pb-4">
 
-      <div
-        class="w-full
-               min-h-[330px]
-               bg-[#e5e7e9]
-               rounded-[14px]"
-      >
-
-        <h2
-          class="text-[11px]
-                 font-medium
-                 px-5
-                 pt-4"
-        >
+        <h2 class="text-[11px] font-medium text-black mb-4">
           Portal BJ
         </h2>
 
-      </div>
+        <!-- indicadores -->
+        <div class="grid grid-cols-3 gap-x-4 gap-y-4">
 
+          @for (indicador of indicadoresPortal(); track indicador.nome) {
+
+            <article
+              class="h-[121px] rounded-[13px] px-4 pt-3 pb-2.5 flex flex-col shadow-[0_4px_10px_rgba(0,0,0,0.12)]"
+              [style.backgroundColor]="corIndicador(indicador.tipo)"
+            >
+
+              <!-- titulo -->
+              <h3 class="text-[9px] font-semibold text-white leading-[12px] truncate">
+                {{ indicador.nome }}
+              </h3>
+
+
+              <!-- progresso -->
+              <div class="relative w-full h-[44px] mt-[10px] rounded-[7px] border border-white/45 overflow-hidden shrink-0">
+
+                <div
+                  class="absolute inset-y-0 left-0 rounded-[6px]"
+                  [style.width.%]="indicador.progresso"
+                  [style.backgroundColor]="corProgressoIndicador(indicador.tipo)"
+                ></div>
+
+                <div class="absolute inset-0 z-10 flex items-center justify-between px-3 text-white">
+                  <span class="text-[8.5px] font-medium">Alcançado</span>
+                  <span class="text-[8.5px] font-medium">Meta</span>
+                </div>
+              </div>
+
+
+              <!-- gap -->
+              <div class="mt-auto pt-[7px] border-t border-white/55 flex items-center justify-between text-white">
+                <span class="text-[8px] font-semibold leading-none">GAP</span>
+                <span class="text-[8px] leading-none">{{ indicador.gap }}</span>
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+
+        <!-- legenda -->
+        <div class="flex items-center gap-6 mt-5 px-2">
+
+          <div class="flex items-center gap-2">
+            <span class="w-[14px] h-[14px] rounded-[4px] bg-[#78c55d]"></span>
+            <span class="text-[8.5px] text-black">Indicadores Essenciais</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="w-[14px] h-[14px] rounded-[4px] bg-[#168be8]"></span>
+            <span class="text-[8.5px] text-black">Indicadores Complementares</span>
+          </div>
+
+        </div>
+      </div>
     </section>
 
 
-    <!--overview de projetos-->
-    <section
-      class="mt-12
-             -mx-10
-             xl:-mx-[68px]
-             px-10
-             xl:px-[68px]
-             py-6
-             bg-[#e5e7e9]"
-    >
+    <!-- overview de projetos -->
+    <section class="mt-12 -mx-10 xl:-mx-[68px] px-10 xl:px-[68px] py-6 bg-[#e5e7e9]">
 
-      <h2
-        class="text-[15px]
-               font-medium
-               mb-5"
-      >
+      <h2 class="text-[15px] font-medium mb-5">
         Overview de Projetos
       </h2>
 
-
-      <div
-        class="w-full
-               min-h-[260px]"
-      >
+      <div class="w-full min-h-[260px]">
       </div>
 
     </section>
 
   </main>
-
 </div>
