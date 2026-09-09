@@ -62,7 +62,7 @@
     <section>
 
       <h2
-        class="text-[14px]
+        class="text-[15px]
                font-medium
                mb-3"
       >
@@ -70,12 +70,326 @@
       </h2>
 
 
+      <!--faturamento-->
       <div
         class="w-full
-               min-h-[190px]
                bg-[#e5e7e9]
-               rounded-[14px]"
+               rounded-[14px]
+               px-4
+               pt-3
+               pb-2"
       >
+
+        <p
+          class="text-[10px]
+                 font-medium
+                 text-black
+                 mb-1.5"
+        >
+          Faturamento
+        </p>
+
+
+        <!--barra principal-->
+        <div
+          class="relative
+                 w-full
+                 h-[40px]
+                 rounded-[8px]
+                 overflow-hidden
+                 bg-[#70afea]"
+        >
+
+          <!--parte alcancada-->
+          <div
+            class="absolute
+                   inset-y-0
+                   left-0
+                   rounded-[8px]
+                   bg-[#168be8]"
+            [style.width.%]="percentualMeta()"
+          >
+          </div>
+
+
+          <!--informacoes da barra-->
+          <div
+            class="absolute
+                   inset-0
+                   z-10
+                   flex
+                   items-center
+                   justify-between
+                   px-4
+                   text-white"
+          >
+
+            <!--alcancado-->
+            <div>
+
+              <p
+                class="text-[9px]
+                       font-medium
+                       leading-tight"
+              >
+                Alcançado
+              </p>
+
+
+              <p
+                class="text-[10px]
+                       leading-tight
+                       mt-1"
+              >
+                {{
+                  formatarMoeda(
+                    progressaoGeral()
+                      .faturamentoAcumulado
+                  )
+                }}
+              </p>
+
+            </div>
+
+
+            <!--meta-->
+            <div
+              class="text-right"
+            >
+
+              <p
+                class="text-[9px]
+                       font-medium
+                       leading-tight"
+              >
+                Meta
+              </p>
+
+
+              <p
+                class="text-[10px]
+                       leading-tight
+                       mt-1"
+              >
+                {{
+                  formatarMoeda(
+                    progressaoGeral()
+                      .metaAnual
+                  )
+                }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!--informacoes inferiores-->
+        <div
+          class="flex
+                 items-center
+                 justify-between
+                 mt-2
+                 px-0.5"
+        >
+
+          <p
+            class="text-[9px]
+                   text-black"
+          >
+            GAP
+            {{
+              formatarMoeda(
+                gapMeta()
+              )
+            }}
+          </p>
+
+
+          <p
+            class="text-[9px]
+                   text-black"
+          >
+            {{
+              percentualMeta()
+                .toFixed(0)
+            }}% da meta atual
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!--cards de resumo-->
+      <div
+        class="grid
+               grid-cols-3
+               gap-5
+               mt-3"
+      >
+
+
+        <!--faturamento acumulado-->
+        <article
+          class="h-[99px]
+                 rounded-[14px]
+                 bg-[#e5e7e9]
+                 px-4
+                 py-3
+                 flex
+                 flex-col"
+        >
+
+          <p
+            class="text-[10px]
+                   font-medium
+                   text-black"
+          >
+            Faturamento acumulado
+          </p>
+
+
+          <p
+            class="text-[14px]
+                   font-semibold
+                   text-black
+                   text-center
+                   mt-4
+                   leading-tight"
+          >
+            {{
+              formatarMoeda(
+                progressaoGeral()
+                  .faturamentoAcumulado
+              )
+            }}
+          </p>
+
+
+          <p
+            class="text-[8.5px]
+                   text-[#168be8]
+                   mt-auto
+                   leading-tight"
+          >
+            +{{
+              formatarPercentual(
+                progressaoGeral()
+                  .variacaoAnual
+              )
+            }}% vs 2025
+          </p>
+
+        </article>
+
+
+        <!--meta anual-->
+        <article
+          class="h-[99px]
+                 rounded-[14px]
+                 bg-[#e5e7e9]
+                 px-4
+                 py-3
+                 flex
+                 flex-col"
+        >
+
+          <p
+            class="text-[10px]
+                   font-medium
+                   text-black"
+          >
+            Meta Anual
+          </p>
+
+
+          <p
+            class="text-[14px]
+                   font-semibold
+                   text-black
+                   text-center
+                   mt-4
+                   leading-tight"
+          >
+            {{
+              formatarMoeda(
+                progressaoGeral()
+                  .metaAnual
+              )
+            }}
+          </p>
+
+
+          <p
+            class="text-[8.5px]
+                   text-[#168be8]
+                   mt-auto
+                   leading-tight"
+          >
+            Faltam
+            {{
+              formatarMoeda(
+                gapMeta()
+              )
+            }}
+          </p>
+
+        </article>
+
+
+        <!--projetos ativos-->
+        <article
+          class="h-[99px]
+                 rounded-[14px]
+                 bg-[#e5e7e9]
+                 px-4
+                 py-3
+                 flex
+                 flex-col"
+        >
+
+          <p
+            class="text-[10px]
+                   font-medium
+                   text-black"
+          >
+            Projetos Ativos
+          </p>
+
+
+          <p
+            class="text-[14px]
+                   font-semibold
+                   text-black
+                   text-center
+                   mt-4
+                   leading-tight"
+          >
+            {{
+              progressaoGeral()
+                .projetosAtivos
+            }}
+          </p>
+
+
+          <p
+            class="text-[8.5px]
+                   text-[#168be8]
+                   mt-auto
+                   leading-tight"
+          >
+            {{
+              progressaoGeral()
+                .membrosAlocados
+            }}
+            Membros Alocados
+          </p>
+
+        </article>
+
       </div>
 
     </section>
@@ -83,7 +397,7 @@
 
     <!--portal bj-->
     <section
-      class="mt-4"
+      class="mt-3"
     >
 
       <div
@@ -119,7 +433,7 @@
     >
 
       <h2
-        class="text-[14px]
+        class="text-[15px]
                font-medium
                mb-5"
       >
