@@ -2,7 +2,15 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { combineLatest } from 'rxjs';
 
 import { AuthService } from '../../shared/services/auth';
+import { DashboardService } from '../../shared/services/dashboard.service';
 import { ProjectService, UsuarioProjeto } from '../../shared/services/project.service';
+
+import {
+  DashboardMetrics,
+  PortalBjIndicator,
+  PortalIndicatorType,
+  PortalIndicatorUnit
+} from '../../shared/interfaces/dashboard-interface';
 
 import { ProjectInterface } from '../../shared/interfaces/project-interface';
 import { UserInterface } from '../../shared/interfaces/user-interface';
@@ -16,11 +24,9 @@ interface ProgressaoGeral {
   variacaoAnual: number;
 }
 
-type TipoIndicador = 'essencial' | 'complementar';
-
 interface IndicadorPortal {
   nome: string;
-  tipo: TipoIndicador;
+  tipo: PortalIndicatorType;
   progresso: number;
   gap: string;
 }
@@ -44,57 +50,19 @@ interface ProjetoOverview {
 })
 export class Home implements OnInit {
 
+  private readonly anoAtual = new Date().getFullYear();
+
   usuario = signal<UserInterface | null>(null);
   projetosOverview = signal<ProjetoOverview[]>([]);
+  indicadoresPortal = signal<IndicadorPortal[]>([]);
 
-  //dados financeiros temporarios
   progressaoGeral = signal<ProgressaoGeral>({
-    faturamentoAcumulado: 99999.99,
-    metaAnual: 99999.99,
+    faturamentoAcumulado: 0,
+    metaAnual: 0,
     projetosAtivos: 0,
     membrosAlocados: 0,
-    variacaoAnual: 10.1
+    variacaoAnual: 0
   });
-
-  //indicadores temporarios do portal bj
-  indicadoresPortal = signal<IndicadorPortal[]>([
-    {
-      nome: 'CSAT',
-      tipo: 'essencial',
-      progresso: 70,
-      gap: 'R$ 99.999,99'
-    },
-    {
-      nome: 'Tempo de Permanência no MEJ',
-      tipo: 'essencial',
-      progresso: 72,
-      gap: 'R$ 99.999,99'
-    },
-    {
-      nome: 'Engajamento com o MEJ',
-      tipo: 'essencial',
-      progresso: 73,
-      gap: 'R$ 99.999,99'
-    },
-    {
-      nome: 'Políticas de Diversidade e Inclusão',
-      tipo: 'complementar',
-      progresso: 70,
-      gap: 'R$ 99.999,99'
-    },
-    {
-      nome: 'Faturamento Colaborativo',
-      tipo: 'complementar',
-      progresso: 72,
-      gap: 'R$ 99.999,99'
-    },
-    {
-      nome: 'Projetos de Impacto',
-      tipo: 'complementar',
-      progresso: 73,
-      gap: 'R$ 99.999,99'
-    }
-  ]);
 
 
   percentualMeta = computed(() => {
@@ -111,22 +79,20 @@ export class Home implements OnInit {
 
   gapMeta = computed(() => {
     const dados = this.progressaoGeral();
-
-    return Math.max(
-      dados.metaAnual - dados.faturamentoAcumulado,
-      0
-    );
+    return Math.max(dados.metaAnual - dados.faturamentoAcumulado, 0);
   });
 
 
   constructor(
     private authService: AuthService,
+    private dashboardService: DashboardService,
     private projectService: ProjectService
   ) {}
 
 
   ngOnInit(): void {
     this.carregarUsuario();
+    this.carregarDashboard();
     this.carregarProjetos();
   }
 
@@ -139,7 +105,65 @@ export class Home implements OnInit {
   }
 
 
-  //carrega os projetos e usuarios do firebase
+  //carrega os dados financeiros e indicadores
+  private carregarDashboard(): void {
+    combineLatest([
+      this.dashboardService.listarMetricas(this.anoAtual),
+      this.dashboardService.listarIndicadores(this.anoAtual)
+    ]).subscribe({
+      next: ([metricas, indicadores]) => {
+        if (metricas) {
+          this.atualizarMetricas(metricas);
+        }
+
+        const indicadoresConvertidos = indicadores.map(
+          indicador => this.converterIndicador(indicador)
+        );
+
+        this.indicadoresPortal.set(indicadoresConvertidos);
+      },
+
+      error: erro => {
+        console.error('Erro ao carregar indicadores da home:', erro);
+      }
+    });
+  }
+
+
+  //atualiza o resumo financeiro
+  private atualizarMetricas(metricas: DashboardMetrics): void {
+    const variacao = this.calcularVariacaoAnual(
+      metricas.currentRevenue,
+      metricas.previousYearRevenue
+    );
+
+    this.progressaoGeral.update(dados => ({
+      ...dados,
+      faturamentoAcumulado: metricas.currentRevenue,
+      metaAnual: metricas.annualGoal,
+      variacaoAnual: variacao
+    }));
+  }
+
+
+  //adapta o indicador do firebase para o card
+  private converterIndicador(indicador: PortalBjIndicator): IndicadorPortal {
+    const progresso = indicador.goal > 0
+      ? Math.min((indicador.achieved / indicador.goal) * 100, 100)
+      : 0;
+
+    const gap = Math.max(indicador.goal - indicador.achieved, 0);
+
+    return {
+      nome: indicador.name,
+      tipo: indicador.type,
+      progresso,
+      gap: this.formatarValorIndicador(gap, indicador.unit)
+    };
+  }
+
+
+  //carrega os projetos e usuarios
   private carregarProjetos(): void {
     combineLatest([
       this.projectService.listarProjetos(),
@@ -187,11 +211,8 @@ export class Home implements OnInit {
   }
 
 
-  //atualiza os numeros de projetos da progressao geral
-  private atualizarResumoProjetos(
-    projetos: ProjectInterface[]
-  ): void {
-
+  //atualiza os numeros de projetos
+  private atualizarResumoProjetos(projetos: ProjectInterface[]): void {
     const membrosUnicos = new Set<string>();
 
     projetos.forEach(projeto => {
@@ -203,6 +224,16 @@ export class Home implements OnInit {
       projetosAtivos: projetos.length,
       membrosAlocados: membrosUnicos.size
     }));
+  }
+
+
+  //calcula a variacao em relacao ao ano anterior
+  private calcularVariacaoAnual(atual: number, anterior: number): number {
+    if (anterior <= 0) {
+      return 0;
+    }
+
+    return ((atual - anterior) / anterior) * 100;
   }
 
 
@@ -218,6 +249,22 @@ export class Home implements OnInit {
   }
 
 
+  //formata os valores dos indicadores
+  private formatarValorIndicador(valor: number, unidade: PortalIndicatorUnit): string {
+    if (unidade === 'moeda') {
+      return this.formatarMoeda(valor);
+    }
+
+    if (unidade === 'percentual') {
+      return `${this.formatarPercentual(valor)}%`;
+    }
+
+    return valor.toLocaleString('pt-BR', {
+      maximumFractionDigits: 2
+    });
+  }
+
+
   //formata o valor salvo nos projetos
   private formatarValorProjeto(valor?: string): string {
     if (!valor) {
@@ -227,14 +274,10 @@ export class Home implements OnInit {
     let texto = valor.replace('R$', '').trim();
 
     if (texto.includes(',')) {
-      texto = texto
-        .replace(/\./g, '')
-        .replace(',', '.');
+      texto = texto.replace(/\./g, '').replace(',', '.');
     }
 
-    const numero = Number(
-      texto.replace(/[^\d.-]/g, '')
-    );
+    const numero = Number(texto.replace(/[^\d.-]/g, ''));
 
     return Number.isNaN(numero)
       ? valor
@@ -261,7 +304,7 @@ export class Home implements OnInit {
 
 
   //define a cor principal do indicador
-  corIndicador(tipo: TipoIndicador): string {
+  corIndicador(tipo: PortalIndicatorType): string {
     return tipo === 'essencial'
       ? '#78c55d'
       : '#3d98e8';
@@ -269,7 +312,7 @@ export class Home implements OnInit {
 
 
   //define a cor interna da barra
-  corProgressoIndicador(tipo: TipoIndicador): string {
+  corProgressoIndicador(tipo: PortalIndicatorType): string {
     return tipo === 'essencial'
       ? '#6eaa5f'
       : '#568ead';
