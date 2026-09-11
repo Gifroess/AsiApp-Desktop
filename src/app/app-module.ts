@@ -11,6 +11,7 @@ import { Cadastro } from './components/cadastro/cadastro';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
 import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
 import { Perfil } from './components/perfil/perfil';
+import { GestaoFinanceira } from './components/gestao-financeira/gestao-financeira';
 
 import { Sidebar } from './shared/components/sidebar/sidebar';
 
@@ -23,7 +24,7 @@ import { environment } from '../assets/environments/environment';
 import { Home } from './components/home/home';
 
 @NgModule({
-  declarations: [App, Login, Cadastro, GestaoProjetos, GestaoPessoas, Perfil, Sidebar, Home],
+  declarations: [App, Login, Cadastro, GestaoProjetos, GestaoPessoas, Perfil, Sidebar, Home, GestaoFinanceira],
 
   imports: [
     BrowserModule,

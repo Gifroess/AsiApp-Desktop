@@ -1,0 +1,687 @@
+<div class="min-h-screen flex bg-white overflow-x-hidden">
+
+  <!-- SIDEBAR -->
+  <app-sidebar paginaAtiva="financeiro"></app-sidebar>
+
+
+  <!-- CONTEÚDO -->
+  <main
+    class="flex-1 min-w-0 min-h-screen bg-white px-10 py-8 xl:px-[68px] xl:py-[36px]"
+  >
+
+    <!-- CABEÇALHO -->
+    <header class="mb-5">
+
+      <p class="text-[10px] tracking-[4px] text-black mb-1">
+        GESTÃO
+      </p>
+
+      <h1 class="text-[20px] font-bold text-black leading-tight">
+        Gestão Financeira
+      </h1>
+
+      <p class="text-[13px] text-black mt-2">
+        Acompanhe e gerencie as movimentações financeiras da empresa!
+      </p>
+
+    </header>
+
+
+    <!-- RESUMO -->
+    <section class="grid grid-cols-3 gap-4 mb-5">
+
+      <!-- ENTRADAS -->
+      <div class="resumo-card">
+
+        <p class="resumo-label">
+          ENTRADAS
+        </p>
+
+        <p class="resumo-valor text-green-600">
+          {{ formatarMoeda(totalEntradas()) }}
+        </p>
+
+      </div>
+
+
+      <!-- SAÍDAS -->
+      <div class="resumo-card">
+
+        <p class="resumo-label">
+          SAÍDAS
+        </p>
+
+        <p class="resumo-valor text-red-500">
+          {{ formatarMoeda(totalSaidas()) }}
+        </p>
+
+      </div>
+
+
+      <!-- SALDO -->
+      <div class="resumo-card">
+
+        <p class="resumo-label">
+          SALDO
+        </p>
+
+        <p
+          class="resumo-valor"
+          [class.text-green-600]="saldo() >= 0"
+          [class.text-red-500]="saldo() < 0"
+        >
+          {{ formatarMoeda(saldo()) }}
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ÁREA PRINCIPAL -->
+    <section
+      class="w-full min-w-0 bg-[#e5e7e9] rounded-[14px] p-[18px]"
+    >
+
+      <!-- AÇÕES -->
+      <div
+        class="flex items-center gap-3 mb-5"
+      >
+
+        <!-- PESQUISA -->
+        <div class="flex-1 relative">
+
+          <input
+            type="text"
+            [value]="textoPesquisa()"
+            (input)="textoPesquisa.set($any($event.target).value); atualizarTextoPesquisa()"
+            (keyup.enter)="pesquisar()"
+            placeholder="Pesquise um lançamento"
+            class="w-full h-[41px] rounded-[7px] bg-white border-0 outline-none pl-4 pr-10 text-[10px] text-black placeholder:text-gray-400"
+          >
+
+          <svg
+            class="absolute right-3 top-1/2 -translate-y-1/2 w-[16px] h-[16px] text-gray-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+          </svg>
+
+        </div>
+
+
+        <!-- CADASTRAR ENTRADA -->
+        <button
+          type="button"
+          class="h-[41px] px-5 rounded-[7px] bg-gradient-to-r  from-[#168be8] to-[#00365f] text-white text-[10px] font-semibold whitespace-nowrap"
+        >
+          <span class="mr-1 text-[13px]">+</span>
+          Cadastrar Entrada
+        </button>
+
+
+        <!-- NOTA FISCAL -->
+        <button
+          type="button"
+          class="h-[41px] px-5 rounded-[7px] bg-white text-black text-[10px] font-medium whitespace-nowrap flex items-center gap-2"
+        >
+
+          <svg
+            class="w-[14px] h-[14px]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path
+              d="M6 3h9l3 3v15H6z"
+            ></path>
+
+            <path
+              d="M14 3v4h4"
+            ></path>
+
+            <path
+              d="M9 12h6M9 15h6"
+            ></path>
+          </svg>
+
+          Nota Fiscal
+
+        </button>
+
+
+        <!-- FILTROS -->
+        <button
+          type="button"
+          (click)="abrirFiltros()"
+          class="h-[41px] px-5 rounded-[7px] bg-white text-black text-[10px] font-medium whitespace-nowrap flex items-center gap-2"
+        >
+
+          <img
+            src="/assets/icons/filtro.png"
+            alt=""
+            class="w-[13px] h-[13px]"
+          >
+
+          Filtros
+
+        </button>
+
+      </div>
+
+
+      <!-- ERRO -->
+      @if (erro()) {
+
+        <div
+          class="bg-red-100 text-red-700 rounded-[8px] px-4 py-3 text-[10px] mb-4"
+        >
+          {{ erro() }}
+        </div>
+
+      }
+
+
+      <!-- TABELA -->
+      <div class="overflow-x-auto w-full">
+
+        <div
+          class="bg-white rounded-[8px] overflow-hidden w-full min-w-[820px]"
+        >
+
+          <!-- CABEÇALHO -->
+          <div
+            class="grid grid-cols-[minmax(0,1.55fr)_minmax(0,.85fr)_minmax(0,1fr)_minmax(0,1.1fr)_105px_120px_34px] tabela-header"
+          >
+
+            <span>Lançamento</span>
+
+            <span>Tipo</span>
+
+            <span>Categoria</span>
+
+            <span>Fornecedor</span>
+
+            <span>Data</span>
+
+            <span>Valor</span>
+
+            <span></span>
+
+          </div>
+
+
+          <!-- CARREGANDO -->
+          @if (carregando()) {
+
+            <div
+              class="py-10 text-center text-[10px] text-gray-500"
+            >
+              Carregando lançamentos...
+            </div>
+
+          }
+
+          <!-- VAZIO -->
+          @else if (
+            consultaRealizada() &&
+            lancamentosFiltrados().length === 0
+          ) {
+
+            <div
+              class="py-10 text-center text-[10px] text-gray-500"
+            >
+              Nenhum lançamento encontrado.
+            </div>
+
+          }
+
+          <!-- LANÇAMENTOS -->
+          @else {
+
+            @for (
+              lancamento of lancamentosFiltrados();
+              track lancamento.id ?? $index
+            ) {
+
+              <!-- LINHA -->
+              <div
+                class="grid grid-cols-[minmax(0,1.55fr)_minmax(0,.85fr)_minmax(0,1fr)_minmax(0,1.1fr)_105px_120px_34px] tabela-linha"
+              >
+
+                <!-- TÍTULO -->
+                <div class="truncate font-medium">
+                  {{ lancamento.title || 'Sem título' }}
+                </div>
+
+
+                <!-- TIPO -->
+                <div
+                  [class.text-green-600]="lancamento.type === 'entrada'"
+                  [class.text-red-500]="lancamento.type === 'saida'"
+                  class="font-medium"
+                >
+                  {{ formatarTipo(lancamento.type) }}
+                </div>
+
+
+                <!-- CATEGORIA -->
+                <div class="truncate">
+                  {{ lancamento.category || '—' }}
+                </div>
+
+
+                <!-- FORNECEDOR -->
+                <div class="truncate">
+                  {{ lancamento.supplier || '—' }}
+                </div>
+
+
+                <!-- DATA -->
+                <div>
+                  {{ formatarData(lancamento.date) }}
+                </div>
+
+
+                <!-- VALOR -->
+                <div class="font-semibold">
+                  {{ formatarMoeda(lancamento.amount) }}
+                </div>
+
+
+                <!-- MAIS -->
+                <button
+                  type="button"
+                  (click)="abrirLancamento(lancamento.id)"
+                  class="w-[24px] h-[24px] rounded-[5px] flex items-center justify-center hover:bg-gray-100"
+                >
+
+                  <svg
+                    class="w-[13px] h-[13px] transition-transform"
+                    [class.rotate-180]="lancamentoEstaAberto(lancamento.id)"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+
+                </button>
+
+              </div>
+
+
+              <!-- DETALHES -->
+              @if (lancamentoEstaAberto(lancamento.id)) {
+
+                <div class="detalhes-lancamento">
+
+                  <div class="grid grid-cols-2 gap-x-10 gap-y-4">
+
+                    <!-- TÍTULO -->
+                    <div>
+
+                      <p class="detalhe-label">
+                        LANÇAMENTO
+                      </p>
+
+                      <p class="detalhe-valor">
+                        {{ lancamento.title || 'Sem título' }}
+                      </p>
+
+                    </div>
+
+
+                    <!-- VALOR -->
+                    <div>
+
+                      <p class="detalhe-label">
+                        VALOR
+                      </p>
+
+                      <p class="detalhe-valor">
+                        {{ formatarMoeda(lancamento.amount) }}
+                      </p>
+
+                    </div>
+
+
+                    <!-- TIPO -->
+                    <div>
+
+                      <p class="detalhe-label">
+                        TIPO
+                      </p>
+
+                      <p
+                        class="detalhe-valor"
+                        [class.text-green-600]="lancamento.type === 'entrada'"
+                        [class.text-red-500]="lancamento.type === 'saida'"
+                      >
+                        {{ formatarTipo(lancamento.type) }}
+                      </p>
+
+                    </div>
+
+
+                    <!-- CATEGORIA -->
+                    <div>
+
+                      <p class="detalhe-label">
+                        CATEGORIA
+                      </p>
+
+                      <p class="detalhe-valor">
+                        {{ lancamento.category || '—' }}
+                      </p>
+
+                    </div>
+
+
+                    <!-- FORNECEDOR -->
+                    <div>
+
+                      <p class="detalhe-label">
+                        FORNECEDOR
+                      </p>
+
+                      <p class="detalhe-valor">
+                        {{ lancamento.supplier || '—' }}
+                      </p>
+
+                    </div>
+
+
+                    <!-- DATA -->
+                    <div>
+
+                      <p class="detalhe-label">
+                        DATA
+                      </p>
+
+                      <p class="detalhe-valor">
+                        {{ formatarData(lancamento.date) }}
+                      </p>
+
+                    </div>
+
+
+                    <!-- ANEXO -->
+                    <div class="col-span-2">
+
+                      <p class="detalhe-label">
+                        DOCUMENTO
+                      </p>
+
+                      @if (lancamento.attachment) {
+
+                        <a
+                          [href]="lancamento.attachment"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="anexo-link"
+                        >
+                          Visualizar documento
+                        </a>
+
+                      } @else {
+
+                        <p class="detalhe-valor text-gray-400">
+                          Nenhum documento anexado
+                        </p>
+
+                      }
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              }
+
+            }
+
+          }
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- MODAL DE FILTROS -->
+  @if (modalFiltrosAberto()) {
+
+    <div
+      class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-6"
+      (click)="fecharFiltros()"
+    >
+
+      <div
+        class="w-full max-w-[430px] bg-[#f1f2f3] rounded-[16px] p-7 shadow-xl"
+        (click)="$event.stopPropagation()"
+      >
+
+        <!-- CABEÇALHO -->
+        <div class="flex items-start justify-between mb-6">
+
+          <div>
+
+            <h2 class="text-[15px] font-bold text-black">
+              Filtros
+            </h2>
+
+            <p class="text-[10px] text-gray-500 mt-1">
+              Refine a busca pelos lançamentos financeiros.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            (click)="fecharFiltros()"
+            class="w-[26px] h-[26px] rounded-full flex items-center justify-center hover:bg-white"
+          >
+
+            <svg
+              class="w-[14px] h-[14px]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+
+          </button>
+
+        </div>
+
+
+        <!-- FORMULÁRIO -->
+        <form
+          [formGroup]="formFiltros"
+          class="grid grid-cols-2 gap-4"
+        >
+
+          <!-- TIPO -->
+          <div class="campo-filtro">
+
+            <label>
+              Tipo
+            </label>
+
+            <select formControlName="type">
+
+              <option value="">
+                Todos
+              </option>
+
+              <option value="entrada">
+                Entrada
+              </option>
+
+              <option value="saida">
+                Saída
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- CATEGORIA -->
+          <div class="campo-filtro">
+
+            <label>
+              Categoria
+            </label>
+
+            <select formControlName="category">
+
+              <option value="">
+                Todas
+              </option>
+
+              @for (
+                categoria of categoriasDisponiveis();
+                track categoria
+              ) {
+
+                <option [value]="categoria">
+                  {{ categoria }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <!-- FORNECEDOR -->
+          <div class="campo-filtro col-span-2">
+
+            <label>
+              Fornecedor
+            </label>
+
+            <input
+              type="text"
+              formControlName="supplier"
+              placeholder="Nome do fornecedor"
+            >
+
+          </div>
+
+
+          <!-- VALOR MÍNIMO -->
+          <div class="campo-filtro">
+
+            <label>
+              Valor mínimo
+            </label>
+
+            <input
+              type="number"
+              formControlName="minAmount"
+              min="0"
+              step="0.01"
+              placeholder="R$ 0,00"
+            >
+
+          </div>
+
+
+          <!-- VALOR MÁXIMO -->
+          <div class="campo-filtro">
+
+            <label>
+              Valor máximo
+            </label>
+
+            <input
+              type="number"
+              formControlName="maxAmount"
+              min="0"
+              step="0.01"
+              placeholder="R$ 0,00"
+            >
+
+          </div>
+
+
+          <!-- DATA INICIAL -->
+          <div class="campo-filtro">
+
+            <label>
+              Data inicial
+            </label>
+
+            <input
+              type="date"
+              formControlName="startDate"
+            >
+
+          </div>
+
+
+          <!-- DATA FINAL -->
+          <div class="campo-filtro">
+
+            <label>
+              Data final
+            </label>
+
+            <input
+              type="date"
+              formControlName="endDate"
+            >
+
+          </div>
+
+        </form>
+
+
+        <!-- AÇÕES -->
+        <div
+          class="flex justify-end gap-3 mt-7"
+        >
+
+          <button
+            type="button"
+            (click)="limparFiltros()"
+            class="h-[36px] px-5 rounded-[7px] bg-white text-black text-[10px] font-medium"
+          >
+            Limpar
+          </button>
+
+          <button
+            type="button"
+            (click)="aplicarFiltros()"
+            class="h-[36px] px-6 rounded-[7px] bg-black text-white text-[10px] font-medium"
+          >
+            Aplicar Filtros
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

@@ -3,89 +3,30 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { Login } from './components/login/login';
 import { Cadastro } from './components/cadastro/cadastro';
-import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
-import { Home } from './components/home/home';
 import { Perfil } from './components/perfil/perfil';
+import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
 import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
 import { authGuard } from './shared/guards/auth.guard';
-
+import { GestaoFinanceira } from './components/gestao-financeira/gestao-financeira';
+import { financeiroGuard } from './shared/guards/financeiro.guard';
+import { Home } from './components/home/home';
 
 const routes: Routes = [
+  { path: '', component: Login },
+  { path: 'cadastro', component: Cadastro },
+  { path: 'recuperar-senha', component: RecuperarSenha },
+  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
+  { path: 'projetos', component: GestaoProjetos, canActivate: [authGuard] },
+  { path: 'pessoas', component: GestaoPessoas, canActivate: [authGuard] },
+  { path: 'gestao-financeira', component: GestaoFinanceira, canActivate: [financeiroGuard] },
+  { path: 'home', component: Home, canActivate: [authGuard] },
 
-  //login
-  {
-    path: '',
-    component: Login
-  },
-
-  {
-    path: 'login',
-    component: Login
-  },
-
-
-  //cadastro
-  {
-    path: 'cadastro',
-    component: Cadastro
-  },
-
-
-  //recuperacao de senha
-  {
-    path: 'recuperar-senha',
-    component: RecuperarSenha
-  },
-
-
-  //home
-  {
-    path: 'home',
-    component: Home,
-    canActivate: [authGuard]
-  },
-
-
-  //perfil
-  {
-    path: 'perfil',
-    component: Perfil,
-    canActivate: [authGuard]
-  },
-
-
-  //gestao de projetos
-  {
-    path: 'projetos',
-    component: GestaoProjetos,
-    canActivate: [authGuard]
-  },
-
-
-  //gestao de pessoas
-  {
-    path: 'pessoas',
-    component: GestaoPessoas,
-    canActivate: [authGuard]
-  },
-
-
-  //redireciona rotas inexistentes para o login
-  {
-    path: '**',
-    redirectTo: ''
-  }
 
 ];
 
-
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes)
-  ],
-  exports: [
-    RouterModule
-  ]
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
 })
 export class AppRoutingModule {}

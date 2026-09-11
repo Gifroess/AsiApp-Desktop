@@ -1,29 +1,8 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  OnDestroy,
-  OnInit
-} from '@angular/core';
-
-import {
-  Subscription
-} from 'rxjs';
-
-import {
-  Membro,
-  Role,
-  ROLES_NIVEL_DIRETORIA,
-  ROLES_NIVEL_GERENCIA
-} from '../../shared/interfaces/membro-interface';
-
-import {
-  MembrosService
-} from '../../shared/services/membros.service';
-
-import {
-  AuthService
-} from '../../shared/services/auth';
-
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { Membro, Role, ROLES_NIVEL_DIRETORIA, ROLES_NIVEL_GERENCIA } from '../../shared/interfaces/membro-interface';
+import { MembrosService } from '../../shared/services/membros.service';
+import { AuthService } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-gestao-pessoas',
