@@ -8,6 +8,7 @@ import { Home } from './components/home/home';
 import { Perfil } from './components/perfil/perfil';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
 import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
+import { MenuPostagem } from './components/menu-postagem/menu-postagem';
 import { authGuard } from './shared/guards/auth.guard';
 
 
@@ -67,6 +68,14 @@ const routes: Routes = [
   {
     path: 'pessoas',
     component: GestaoPessoas,
+    canActivate: [authGuard]
+  },
+
+  
+  //menu de postagem
+  {
+    path: 'postagens',
+    component: MenuPostagem,
     canActivate: [authGuard]
   },
 

@@ -88,7 +88,9 @@
 
     <!--menu de postagem-->
     <div
-      class="menu-item opacity-50 cursor-not-allowed"
+      class="menu-item cursor-pointer"
+      [class.ativo]="paginaAtiva === 'postagens'"
+      (click)="navegar('/postagens')"
     >
       Menu de Postagem
     </div>

@@ -21,9 +21,20 @@ import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { environment } from '../assets/environments/environment';
 import { Home } from './components/home/home';
+import { MenuPostagem } from './components/menu-postagem/menu-postagem';
 
 @NgModule({
-  declarations: [App, Login, Cadastro, GestaoProjetos, GestaoPessoas, Perfil, Sidebar, Home],
+  declarations: [
+    App,
+    Login,
+    Cadastro,
+    GestaoProjetos,
+    GestaoPessoas,
+    Perfil,
+    Sidebar,
+    Home,
+    MenuPostagem,
+  ],
 
   imports: [
     BrowserModule,

@@ -1,0 +1,212 @@
+<div class="pagina-postagens">
+  <app-sidebar paginaAtiva="postagens"></app-sidebar>
+
+  <main class="menu-postagem">
+    <button class="voltar-btn" type="button" (click)="voltar()" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="conteudo">
+
+      <!-- cabecalho -->
+      <header class="cabecalho-menu">
+        <p class="cabecalho-eyebrow">MENU DE POSTAGEM</p>
+        <h1 class="cabecalho-titulo">Calendário</h1>
+        <p class="cabecalho-subtitulo">
+          Troque de aba para acompanhar todos os conteúdos!
+        </p>
+      </header>
+
+      <div class="calendario-layout">
+
+        <!-- bloco do calendario -->
+        <section class="calendario-card">
+          <div class="calendario">
+            <div class="calendario-header">
+              <button type="button" (click)="mesAnterior()" aria-label="Mês anterior">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <h2>{{ nomeMes() }}</h2>
+
+              <button type="button" (click)="proximoMes()" aria-label="Próximo mês">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="dias-semana">
+              @for (dia of diasSemana; track dia) {
+                <span>{{ dia }}</span>
+              }
+            </div>
+
+            <div class="grade-calendario">
+              @for (dia of diasCalendario(); track dia.data.getTime()) {
+                <button
+                  type="button"
+                  class="dia"
+                  [class.outro-mes]="!dia.mesAtual"
+                  [class.hoje]="dia.hoje"
+                  [class.selecionado]="dia.selecionado"
+                  (click)="selecionarDia(dia)">
+                  <span>{{ dia.numero }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- cadastro de evento -->
+          <div class="cadastro-evento">
+            <strong class="cadastro-titulo">Cadastre um Evento:</strong>
+
+            <div class="campo-nome">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="4" y="5" width="16" height="15" rx="2"
+                  stroke="currentColor" stroke-width="1.4"/>
+                <path d="M8 3V7M16 3V7M4 10H20"
+                  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+
+              <input type="text" placeholder="Nome do Evento">
+            </div>
+
+            <div class="linha-dados">
+              <label class="campo-data">
+                <span>Data:</span>
+
+                <input
+                  #dataEvento
+                  type="date"
+                  [value]="dataSelecionadaInput()"
+                  (change)="selecionarDataInput(dataEvento.value)">
+              </label>
+
+              <label class="campo-horario">
+                <span>Horário:</span>
+
+                <input
+                  #horarioEvento
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="5"
+                  placeholder="--:--"
+                  autocomplete="off"
+                  (input)="formatarHorario(horarioEvento)">
+              </label>
+            </div>
+
+            <div class="campo-area">
+              <span>Áreas:</span>
+
+              <div class="seletor-area">
+                <button
+                  class="seletor-area-btn"
+                  type="button"
+                  (click)="alternarSeletorAreas()">
+
+                  <span>{{ textoAreaSelecionada() }}</span>
+
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M7 10L12 15L17 10"
+                      stroke="currentColor" stroke-width="1.7"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                @if (seletorAreasAberto()) {
+                  <div class="opcoes-area">
+                    @for (area of areas; track area.nome) {
+                      <button type="button" (click)="selecionarArea(area.nome)">
+                        <span class="opcao-cor" [style.backgroundColor]="area.cor"></span>
+                        <span>{{ area.nome }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- acao de cadastro -->
+          <div class="acoes-cadastro">
+            <button class="adicionar-evento" type="button" aria-label="Adicionar evento">
+              +
+            </button>
+          </div>
+        </section>
+
+        <!-- legenda -->
+        <aside class="legenda">
+          @for (area of areas; track area.nome) {
+            <div class="legenda-item">
+              <span class="legenda-cor" [style.backgroundColor]="area.cor"></span>
+              <span>{{ area.nome }}</span>
+            </div>
+          }
+        </aside>
+      </div>
+
+      <!-- eventos do dia -->
+      <section class="eventos-dia">
+        <p class="eventos-titulo">
+          Listagem de eventos para o dia {{ dataSelecionadaFormatada() }}:
+        </p>
+
+        <div class="lista-eventos">
+          @for (evento of eventosExemplo; track evento.id) {
+            <article class="evento-card">
+              <div class="evento-icone">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="4" y="5" width="16" height="15" rx="2"
+                    stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M8 3V7M16 3V7M4 10H20"
+                    stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+              </div>
+
+              <div class="evento-info">
+                <strong>“{{ evento.nome }}”</strong>
+                <span>{{ evento.horario }} - “{{ evento.areas.join(', ') }}”</span>
+              </div>
+
+              <div class="evento-acoes">
+                <button type="button" aria-label="Editar evento">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M13.5 6.5L17.5 10.5M5 19L8.5 18.3L18.3 8.5C19.2 7.6 19.2 6.2 18.3 5.3C17.4 4.4 16 4.4 15.1 5.3L5.3 15.1L5 19Z"
+                      stroke="currentColor" stroke-width="1.4"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                <button type="button" aria-label="Excluir evento">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 7H19M9 7V4H15V7M7 7L8 20H16L17 7M10 11V16M14 11V16"
+                      stroke="currentColor" stroke-width="1.4"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- transicao para o feed -->
+    <button class="transicao-feed" type="button" aria-label="Ir para Feed Social">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </main>
+</div>
