@@ -18,6 +18,7 @@ interface EventoLista {
   id: number;
   nome: string;
   horario: string;
+  data: Date;
   areas: string[];
 }
 
@@ -38,6 +39,10 @@ export class MenuPostagem {
   dataSelecionada = signal(new Date());
   seletorAreasAberto = signal(false);
   areaSelecionada = signal('');
+  nomeEvento = signal('');
+  horarioDigitado = signal('');
+
+  eventos = signal<EventoLista[]>([]);
 
   diasSemana = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
 
@@ -56,22 +61,6 @@ export class MenuPostagem {
     { nome: 'Outros', cor: '#a8aab6' }
   ];
 
-  //eventos temporarios para validar a listagem
-  eventosExemplo: EventoLista[] = [
-    {
-      id: 1,
-      nome: 'Evento 1',
-      horario: '18:00',
-      areas: ['Área1', 'Área2', 'Área3']
-    },
-    {
-      id: 2,
-      nome: 'Evento 2',
-      horario: '18:00',
-      areas: ['Área1', 'Área2', 'Área3']
-    }
-  ];
-
   nomeMes = computed(() =>
     this.mesExibido().toLocaleDateString('pt-BR', {
       month: 'long',
@@ -88,28 +77,39 @@ export class MenuPostagem {
 
   dataSelecionadaInput = computed(() => {
     const data = this.dataSelecionada();
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
 
-    return `${ano}-${mes}-${dia}`;
+    return `${data.getFullYear()}-${String(
+      data.getMonth() + 1
+    ).padStart(2, '0')}-${String(
+      data.getDate()
+    ).padStart(2, '0')}`;
   });
 
   textoAreaSelecionada = computed(() =>
     this.areaSelecionada() || 'Selecione uma área'
   );
 
-  diasCalendario = computed(() => this.gerarDiasCalendario());
+  diasCalendario = computed(() =>
+    this.gerarDiasCalendario()
+  );
+
+  eventosDoDia = computed(() =>
+    this.eventos().filter(evento =>
+      this.mesmaData(evento.data, this.dataSelecionada())
+    )
+  );
 
   constructor(private location: Location) {}
 
-  //monta os dias exibidos no calendario
+  //gera os dias exibidos no calendário
   private gerarDiasCalendario(): DiaCalendario[] {
+
     const mes = this.mesExibido();
     const selecionada = this.dataSelecionada();
 
     const ano = mes.getFullYear();
     const numeroMes = mes.getMonth();
+
     const primeiroDia = new Date(ano, numeroMes, 1);
     const ultimoDia = new Date(ano, numeroMes + 1, 0);
 
@@ -118,7 +118,12 @@ export class MenuPostagem {
     const totalCelulas = Math.ceil(totalDias / 7) * 7;
 
     return Array.from({ length: totalCelulas }, (_, indice) => {
-      const data = new Date(ano, numeroMes, indice - diasAntes + 1);
+
+      const data = new Date(
+        ano,
+        numeroMes,
+        indice - diasAntes + 1
+      );
 
       return {
         data,
@@ -130,76 +135,129 @@ export class MenuPostagem {
     });
   }
 
-  //seleciona um dia do calendario
+  //seleciona um dia do calendário
   selecionarDia(dia: DiaCalendario): void {
+
     this.dataSelecionada.set(dia.data);
 
     if (!dia.mesAtual) {
       this.mesExibido.set(
-        new Date(dia.data.getFullYear(), dia.data.getMonth(), 1)
+        new Date(
+          dia.data.getFullYear(),
+          dia.data.getMonth(),
+          1
+        )
       );
     }
   }
 
-  //altera a data pelo formulario
+  //altera a data pelo campo do formulário
   selecionarDataInput(valor: string): void {
+
     const [ano, mes, dia] = valor.split('-').map(Number);
 
     if (!ano || !mes || !dia) return;
 
     const data = new Date(ano, mes - 1, dia);
+
     this.dataSelecionada.set(data);
     this.mesExibido.set(new Date(ano, mes - 1, 1));
   }
 
-  //volta um mes
+  //adiciona um novo evento na lista local
+  adicionarEvento(): void {
+
+    if (
+      !this.nomeEvento() ||
+      !this.horarioDigitado() ||
+      !this.areaSelecionada()
+    ) {
+      alert('Preencha todos os campos do evento.');
+      return;
+    }
+
+    const novoEvento: EventoLista = {
+      id: Date.now(),
+      nome: this.nomeEvento(),
+      horario: this.horarioDigitado(),
+      data: this.dataSelecionada(),
+      areas: [this.areaSelecionada()]
+    };
+
+    this.eventos.update(lista => [
+      ...lista,
+      novoEvento
+    ]);
+
+    this.nomeEvento.set('');
+    this.horarioDigitado.set('');
+    this.areaSelecionada.set('');
+  }
+
+  atualizarNomeEvento(valor: string): void {
+    this.nomeEvento.set(valor);
+  }
+
+  //troca o mês exibido
   mesAnterior(): void {
+
     const mes = this.mesExibido();
 
     this.mesExibido.set(
-      new Date(mes.getFullYear(), mes.getMonth() - 1, 1)
+      new Date(
+        mes.getFullYear(),
+        mes.getMonth() - 1,
+        1
+      )
     );
   }
 
-  //avanca um mes
   proximoMes(): void {
+
     const mes = this.mesExibido();
 
     this.mesExibido.set(
-      new Date(mes.getFullYear(), mes.getMonth() + 1, 1)
+      new Date(
+        mes.getFullYear(),
+        mes.getMonth() + 1,
+        1
+      )
     );
   }
 
-  //abre ou fecha a lista de areas
   alternarSeletorAreas(): void {
-    this.seletorAreasAberto.update(aberto => !aberto);
+    this.seletorAreasAberto.update(valor => !valor);
   }
 
-  //seleciona uma area
   selecionarArea(area: string): void {
     this.areaSelecionada.set(area);
     this.seletorAreasAberto.set(false);
   }
 
-  //formata o horario enquanto o usuario digita
+  //formata o horário durante a digitação
   formatarHorario(input: HTMLInputElement): void {
-    let numeros = input.value.replace(/\D/g, '').slice(0, 4);
+
+    let numeros = input.value
+      .replace(/\D/g, '')
+      .slice(0, 4);
 
     if (numeros.length > 2) {
       numeros = `${numeros.slice(0, 2)}:${numeros.slice(2)}`;
     }
 
     input.value = numeros;
+    this.horarioDigitado.set(numeros);
   }
 
-  //compara duas datas
   private mesmaData(dataA: Date, dataB: Date): boolean {
-    return dataA.getFullYear() === dataB.getFullYear()
-      && dataA.getMonth() === dataB.getMonth()
-      && dataA.getDate() === dataB.getDate();
+
+    return (
+      dataA.getFullYear() === dataB.getFullYear() &&
+      dataA.getMonth() === dataB.getMonth() &&
+      dataA.getDate() === dataB.getDate()
+    );
   }
 
-  //volta para a tela anterior
   voltar(): void {
     this.location.back();
   }
