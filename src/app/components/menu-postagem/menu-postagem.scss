@@ -5,14 +5,13 @@
 .pagina-postagens {
   --largura-transicao: clamp(105px, 8vw, 130px);
   --largura-scroll: 8px;
-
   width: 100%;
   height: 100vh;
   overflow: hidden;
   background: #fff;
 }
 
-/* container das duas telas */
+/* estrutura das duas telas */
 .telas-postagem {
   position: relative;
   height: 100vh;
@@ -21,19 +20,18 @@
   background: #fff;
 }
 
-/* calendario e feed ocupam exatamente a mesma area */
 .tela-calendario,
 .tela-feed {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100vh;
+  overflow: hidden;
   box-sizing: border-box;
   transition: transform 0.55s cubic-bezier(0.77, 0, 0.18, 1);
   will-change: transform;
 }
 
-/* estado inicial */
 .tela-calendario {
   transform: translateX(0);
 }
@@ -42,7 +40,6 @@
   transform: translateX(100%);
 }
 
-/* estado quando o feed entra */
 .telas-postagem.feed-ativo {
   .tela-calendario {
     transform: translateX(-100%);
@@ -53,16 +50,24 @@
   }
 }
 
-/* =========================
-   calendario
-========================= */
-
-.menu-postagem {
+/* area responsável pelo scroll */
+.tela-scroll {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.menu-postagem {
+  background: #fff;
+}
+
+.scroll-calendario {
   padding: 36px calc(36px + var(--largura-transicao)) 34px 68px;
   background: #fff;
-
   scrollbar-width: thin;
   scrollbar-color: #8a9096 #050505;
 
@@ -88,6 +93,10 @@
     display: none;
   }
 }
+
+/* =========================
+   calendario
+========================= */
 
 .conteudo {
   width: 820px;
@@ -622,17 +631,19 @@
   }
 }
 
-/* faixa preta que abre o feed */
+/* faixa preta fora do scroll */
 .transicao-feed {
   position: absolute;
   top: 0;
-  right: 0;
-  z-index: 30;
+  right: var(--largura-scroll);
+  bottom: 0;
+  z-index: 50;
   width: var(--largura-transicao);
-  height: 100vh;
   display: flex;
   justify-content: flex-start;
+  align-items: flex-start;
   padding: 30px 0 0 27px;
+  box-sizing: border-box;
   border: 0;
   border-radius: 15px 0 0 15px;
   background: #050505;
@@ -642,6 +653,7 @@
   svg {
     width: 20px;
     height: 20px;
+    flex: 0 0 auto;
   }
 }
 
@@ -650,12 +662,14 @@
 ========================= */
 
 .menu-feed {
-  overflow-x: hidden;
-  overflow-y: auto;
+  background: #050505;
+  color: #fff;
+}
+
+.scroll-feed {
   padding: 36px calc(var(--largura-transicao) + 70px) 34px 68px;
   background: #050505;
   color: #fff;
-
   scrollbar-width: thin;
   scrollbar-color: #8a9096 #fff;
 
@@ -671,6 +685,14 @@
     background: #8a9096;
     border: 2px solid #fff;
     border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a1a6ab;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
   }
 }
 
@@ -863,17 +885,19 @@
   }
 }
 
-/* faixa branca que volta ao calendario */
+/* faixa branca fora do scroll */
 .transicao-calendario {
   position: absolute;
   top: 0;
-  right: 0;
-  z-index: 30;
+  right: var(--largura-scroll);
+  bottom: 0;
+  z-index: 50;
   width: var(--largura-transicao);
-  height: 100vh;
   display: flex;
   justify-content: flex-start;
+  align-items: flex-start;
   padding: 30px 0 0 27px;
+  box-sizing: border-box;
   border: 0;
   border-radius: 15px 0 0 15px;
   background: #fff;
@@ -883,7 +907,17 @@
   svg {
     width: 20px;
     height: 20px;
+    flex: 0 0 auto;
   }
+}
+
+/* impede clique na faixa da tela escondida */
+.telas-postagem.feed-ativo .tela-calendario .transicao-feed {
+  pointer-events: none;
+}
+
+.telas-postagem:not(.feed-ativo) .tela-feed .transicao-calendario {
+  pointer-events: none;
 }
 
 /* =========================
@@ -895,8 +929,8 @@
     --largura-transicao: 105px;
   }
 
-  .menu-postagem,
-  .menu-feed {
+  .scroll-calendario,
+  .scroll-feed {
     padding-left: 48px;
   }
 
