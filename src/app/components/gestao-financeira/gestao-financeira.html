@@ -259,16 +259,35 @@
                 >
 
                   <!-- LANÇAMENTO -->
-                  <div class="min-w-0">
-                    <p class="font-medium truncate">
+                  <div class="flex items-center gap-3 min-w-0">
+
+                    <!-- barrinha colorida por tipo -->
+                    <div
+                      class="w-[2px] h-[30px] rounded-full shrink-0"
+                      [ngClass]="
+                        lancamento.type === 'entrada'
+                          ? 'bg-green-600'
+                          : 'bg-orange-500'
+                      "
+                    ></div>
+
+                    <p class="font-medium truncate min-w-0">
                       {{ lancamento.title }}
                     </p>
+
                   </div>
 
 
                   <!-- TIPO -->
                   <div>
-                    <span class="font-medium">
+                    <span
+                      class="font-medium"
+                      [ngClass]="
+                        lancamento.type === 'entrada'
+                          ? 'text-green-600'
+                          : 'text-orange-500'
+                      "
+                    >
                       {{
                         lancamento.type === 'entrada'
                           ? 'Entrada'
@@ -484,6 +503,218 @@
       </div>
 
     </section>
+<!-- RELATÓRIOS -->
+<section class="mt-10">
+  <h2 class="text-[15px] font-medium mb-4">Relatórios</h2>
+
+  <!-- Fluxo de caixa -->
+  <div class="w-full bg-[#e5e7e9] rounded-[14px] px-4 pt-4 pb-4">
+
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <p class="text-[10px] tracking-[2px] text-black mb-1">
+          FLUXO DE CAIXA
+        </p>
+
+        <h3 class="text-[14px] font-medium text-black">
+          Movimentação financeira por período
+        </h3>
+      </div>
+    </div>
+
+    <!-- Período -->
+    <div class="flex items-end gap-3 mb-5">
+
+      <!-- Data inicial -->
+      <div class="flex flex-col">
+        <label
+          for="dataInicioRelatorio"
+          class="text-[10px] font-medium text-black mb-1.5"
+        >
+          Data inicial
+        </label>
+
+        <input
+          id="dataInicioRelatorio"
+          type="date"
+          [value]="dataInicioRelatorio()"
+          (input)="dataInicioRelatorio.set($any($event.target).value)"
+          class="h-[34px] w-[150px] rounded-[8px] bg-white px-3 text-[10px] text-black outline-none border border-transparent focus:border-[#168be8]"
+        />
+      </div>
+
+      <!-- Data final -->
+      <div class="flex flex-col">
+        <label
+          for="dataFimRelatorio"
+          class="text-[10px] font-medium text-black mb-1.5"
+        >
+          Data final
+        </label>
+
+        <input
+          id="dataFimRelatorio"
+          type="date"
+          [value]="dataFimRelatorio()"
+          (input)="dataFimRelatorio.set($any($event.target).value)"
+          class="h-[34px] w-[150px] rounded-[8px] bg-white px-3 text-[10px] text-black outline-none border border-transparent focus:border-[#168be8]"
+        />
+      </div>
+
+      <!-- Botão -->
+      <button
+        type="button"
+        (click)="gerarRelatorio()"
+        class="h-[34px] px-4 rounded-[8px] bg-gradient-to-r from-[#168be8] to-[#00365f] text-[10px] font-medium text-white hover:bg-[#0f7dd3] transition"
+      >
+        Gerar relatório
+      </button>
+
+    </div>
+
+    <!-- Erro do relatório -->
+    @if (erroRelatorio()) {
+      <div class="mb-5 rounded-[8px] bg-red-100 px-4 py-3">
+        <p class="text-[10px] text-red-600">
+          {{ erroRelatorio() }}
+        </p>
+      </div>
+    }
+
+    <!-- Resumo do período -->
+    @if (relatorioGerado()) {
+
+      <div class="grid grid-cols-3 gap-5 mb-5">
+
+        <!-- Entradas -->
+        <div class="bg-white rounded-[10px] px-4 py-3">
+          <p class="text-[9px] text-black mb-1">
+            Entradas no período
+          </p>
+
+          <p class="text-[15px] font-bold text-green-600">
+            {{ entradasRelatorio() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+        <!-- Saídas -->
+        <div class="bg-white rounded-[10px] px-4 py-3">
+          <p class="text-[9px] text-black mb-1">
+            Saídas no período
+          </p>
+
+          <p class="text-[15px] font-bold text-orange-500">
+            {{ saidasRelatorio() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+        <!-- Saldo -->
+        <div class="bg-white rounded-[10px] px-4 py-3">
+          <p class="text-[9px] text-black mb-1">
+            Saldo do período
+          </p>
+
+          <p
+            class="text-[15px] font-bold"
+            [ngClass]="
+              saldoRelatorio() >= 0
+                ? 'text-green-600'
+                : 'text-orange-500'
+            "
+          >
+            {{ saldoRelatorio() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Tabela do fluxo de caixa -->
+      <div class="w-full overflow-x-auto">
+
+        <div class="min-w-[650px]">
+
+          <!-- Cabeçalho da tabela -->
+          <div class="grid grid-cols-4 px-4 py-2 text-[10px] text-black">
+            <div>Data</div>
+            <div>Entradas</div>
+            <div>Saídas</div>
+            <div class="text-right">
+              Saldo acumulado
+            </div>
+          </div>
+
+          <!-- Dados do relatório -->
+          <div class="bg-white rounded-lg overflow-hidden">
+
+            @if (fluxoCaixa().length > 0) {
+
+              @for (dia of fluxoCaixa(); track dia.data.getTime()) {
+
+                <div
+                  class="grid grid-cols-4 items-center px-4 py-3 text-[11px] border-b border-[#e5e7e9] last:border-b-0"
+                >
+
+                  <!-- Data -->
+                  <div>
+                    {{ dia.data | date:'dd/MM/yyyy' }}
+                  </div>
+
+                  <!-- Entradas -->
+                  <div class="font-medium text-green-600">
+                    {{ dia.entradas | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </div>
+
+                  <!-- Saídas -->
+                  <div class="font-medium text-orange-500">
+                    {{ dia.saidas | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </div>
+
+                  <!-- Saldo acumulado -->
+                  <div
+                    class="text-right font-medium"
+                    [ngClass]="
+                      dia.saldo >= 0
+                        ? 'text-black'
+                        : 'text-orange-500'
+                    "
+                  >
+                    {{ dia.saldo | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </div>
+
+                </div>
+
+              }
+
+            } @else {
+
+              <div class="flex items-center justify-center py-6">
+                <p class="text-[11px] text-black">
+                  Não há movimentações financeiras no período selecionado.
+                </p>
+              </div>
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    } @else {
+
+      <!-- Estado inicial -->
+      <div class="flex items-center justify-center py-6">
+        <p class="text-[11px] text-black">
+          Selecione um período para gerar o relatório.
+        </p>
+      </div>
+
+    }
+
+  </div>
+</section>
 
   </main>
 </div>

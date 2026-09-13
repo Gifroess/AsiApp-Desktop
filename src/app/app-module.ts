@@ -22,6 +22,11 @@ import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { environment } from '../assets/environments/environment';
 import { Home } from './components/home/home';
+import { registerLocaleData } from '@angular/common';
+import{CommonModule} from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+
+registerLocaleData(localePt, 'pt-BR');
 
 @NgModule({
   declarations: [App, Login, Cadastro, GestaoProjetos, GestaoPessoas, Perfil, Sidebar, Home, GestaoFinanceira],
@@ -31,6 +36,7 @@ import { Home } from './components/home/home';
     ReactiveFormsModule,
     AppRoutingModule,
     FormsModule,
+    CommonModule,
 
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,

@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+
 import { FinancialService, FinancialFilters } from '../../shared/services/financial.service';
 import { FinancialEntry, FinancialEntryType} from '../../shared/interfaces/financial-interface';
+
 import { StorageService } from '../../shared/services/storage.service';
 import { AuthService } from '../../shared/services/auth';
-
 
 interface FiltrosFinanceiros {
   type: FinancialEntryType | '';
@@ -17,1222 +18,743 @@ interface FiltrosFinanceiros {
   endDate: string;
 }
 
-
-@Component({
-  selector: 'app-gestao-financeira',
-  standalone: false,
-  templateUrl: './gestao-financeira.html',
-  styleUrl: './gestao-financeira.scss'
-})
-
-
-export class GestaoFinanceira implements OnInit, OnDestroy {
-
-
-  // LISTAGEM
-  lancamentos = signal<FinancialEntry[]>([]);
-
-  carregando = signal(false);
-
-  consultaRealizada = signal(false);
-
-  erro = signal('');
-
-  sucesso = signal('');
-
-
-  // PESQUISA
-  textoPesquisa = signal('');
-
-  termoPesquisa = signal('');
-
-
-  // FILTROS
-  modalFiltrosAberto = signal(false);
-
-  formFiltros: FormGroup;
-
-  filtrosAtivos = signal<FiltrosFinanceiros>({
-    type: '',
-    category: '',
-    supplier: '',
-    minAmount: '',
-    maxAmount: '',
-    startDate: '',
-    endDate: ''
-  });
-
-
-  categorias = [
-    'Operacional',
-    'Administrativo',
-    'Pessoal',
-    'Marketing',
-    'Projetos',
-    'Impostos',
-    'Outros'
-  ];
-
-
-  categoriasDisponiveis = computed(() => {
-
-    const categoriasFirestore = this.lancamentos()
-      .map(lancamento => lancamento.category)
-      .filter(Boolean);
-
-    return [
-      ...new Set([
-        ...this.categorias,
-        ...categoriasFirestore
-      ])
-    ].sort();
-  });
-
-
-  // LINHAS EXPANDIDAS
-  lancamentosAbertos = signal<string[]>([]);
-
-
-  // MODAL CADASTRAR ENTRADA
-  modalCadastroAberto = signal(false);
-
-  salvandoCadastro = signal(false);
-
-  formCadastro: FormGroup;
-
-  // MODAL NOTA FISCAL
-  modalNotaFiscalAberto = signal(false);
-
-  enviandoNotaFiscal = signal(false);
-
-  arquivoSelecionado = signal<File | null>(null);
-
-  nomeArquivo = signal('');
-
-
-  formNotaFiscal: FormGroup;
-
-  private lancamentosSubscription?: Subscription;
-
-
-  constructor(
-    private fb: FormBuilder,
-    private financialService: FinancialService,
-    private storageService: StorageService,
-    private authService: AuthService
-  ) {
-
-    // FORMULÁRIO DE FILTROS
-    this.formFiltros = this.fb.group({
-      type: [''],
-      category: [''],
-      supplier: [''],
-      minAmount: [''],
-      maxAmount: [''],
-      startDate: [''],
-      endDate: ['']
-    });
-
-
-    // FORMULÁRIO DE CADASTRO
-    this.formCadastro = this.fb.group({
-
-      title: [
-        '',
-        [
-          Validators.required
-        ]
-      ],
-
-      supplier: [
-        '',
-        [
-          Validators.required
-        ]
-      ],
-
-      amount: [
-        '',
-        [
-          Validators.required,
-          Validators.min(0.01)
-        ]
-      ],
-
-      type: [
-        'entrada',
-        [
-          Validators.required
-        ]
-      ],
-
-      category: [
-        'Operacional',
-        [
-          Validators.required
-        ]
-      ],
-
-      date: [
-        this.obterDataAtualInput(),
-        [
-          Validators.required
-        ]
-      ]
-
-    });
-
-
-    // FORMULÁRIO DE NOTA FISCAL
-    this.formNotaFiscal = this.fb.group({
-
-      title: [
-        '',
-        [
-          Validators.required
-        ]
-      ],
-
-      supplier: [
-        '',
-        [
-          Validators.required
-        ]
-      ],
-
-      amount: [
-        '',
-        [
-          Validators.required,
-          Validators.min(0.01)
-        ]
-      ],
-
-      type: [
-        'entrada',
-        [
-          Validators.required
-        ]
-      ],
-
-      category: [
-        'Faturamento',
-        [
-          Validators.required
-        ]
-      ],
-
-      date: [
-        this.obterDataAtualInput(),
-        [
-          Validators.required
-        ]
-      ]
-
-    });
-
-  }
-
-
-  // CICLO DE VIDA
-  ngOnInit(): void {
-
-    this.buscarLancamentos();
-
-  }
-
-
-  ngOnDestroy(): void {
-
-    this.lancamentosSubscription?.unsubscribe();
-
-  }
-
-
-  // PESQUISA
-  atualizarTextoPesquisa(): void {
-
-    this.termoPesquisa.set(
-      this.textoPesquisa().trim()
-    );
-
-  }
-
-
-  pesquisar(): void {
-
-    this.termoPesquisa.set(
-      this.textoPesquisa().trim()
-    );
-
-  }
-
-
-  // LANÇAMENTOS FILTRADOS
-  lancamentosFiltrados = computed(() => {
-
-    const termo = this.normalizarTexto(
-      this.termoPesquisa()
-    );
-
-
-    if (!termo) {
-
-      return this.lancamentos();
-
-    }
-
-
-    return this.lancamentos().filter(lancamento => {
-
-      const texto = [
-
-        lancamento.title,
-
-        lancamento.category,
-
-        lancamento.supplier,
-
-        this.formatarTipo(lancamento.type),
-
-        this.formatarData(lancamento.date)
-
-      ]
-        .filter(Boolean)
-        .join(' ');
-
-
-      return this.normalizarTexto(texto)
-        .includes(termo);
-
-    });
-
-  });
-
-
-  // TOTAIS
-  totalEntradas = computed(() =>
-
-    this.lancamentosFiltrados()
-      .filter(
-        lancamento =>
-          lancamento.type === 'entrada'
-      )
-      .reduce(
-        (total, lancamento) =>
-          total + Number(lancamento.amount || 0),
-        0
-      )
-
-  );
-
-
-  totalSaidas = computed(() =>
-
-    this.lancamentosFiltrados()
-      .filter(
-        lancamento =>
-          lancamento.type === 'saida'
-      )
-      .reduce(
-        (total, lancamento) =>
-          total + Number(lancamento.amount || 0),
-        0
-      )
-
-  );
-
-
-  saldo = computed(() =>
-
-    this.totalEntradas()
-    -
-    this.totalSaidas()
-
-  );
-
-
-  // BUSCAR LANÇAMENTOS
-  buscarLancamentos(): void {
-
-    this.carregando.set(true);
-
-    this.erro.set('');
-
-    this.lancamentosSubscription?.unsubscribe();
-
-
-    const filtrosAtuais =
-      this.filtrosAtivos();
-
-
-    const filtros: FinancialFilters = {
-
-      type: filtrosAtuais.type,
-
-      category:
-        filtrosAtuais.category.trim(),
-
-      supplier:
-        filtrosAtuais.supplier.trim(),
-
-      minAmount:
-        this.converterNumero(
-          filtrosAtuais.minAmount
-        ),
-
-      maxAmount:
-        this.converterNumero(
-          filtrosAtuais.maxAmount
-        ),
-
-      startDate:
-        filtrosAtuais.startDate
-          ? this.converterData(
-              filtrosAtuais.startDate
-            )
-          : null,
-
-      endDate:
-        filtrosAtuais.endDate
-          ? this.converterData(
-              filtrosAtuais.endDate
-            )
-          : null
-
-    };
-
-
-    this.lancamentosSubscription =
-      this.financialService
-        .listarLancamentos(filtros)
-        .subscribe({
-
-          next: lancamentos => {
-
-            const ordenados =
-              [...lancamentos].sort(
-                (a, b) =>
-                  this.obterData(b.date).getTime()
-                  -
-                  this.obterData(a.date).getTime()
-              );
-
-
-            this.lancamentos.set(
-              ordenados
-            );
-
-
-            this.carregando.set(false);
-
-            this.consultaRealizada.set(true);
-
-          },
-
-
-          error: erro => {
-
-            console.error(
-              'Erro ao carregar lançamentos financeiros:',
-              erro
-            );
-
-
-            this.erro.set(
-              'Não foi possível carregar os lançamentos financeiros.'
-            );
-
-
-            this.lancamentos.set([]);
-
-            this.carregando.set(false);
-
-            this.consultaRealizada.set(true);
-
-          }
-
-        });
-
-  }
-
-
-  // FILTROS
-  abrirFiltros(): void {
-
-    const filtros =
-      this.filtrosAtivos();
-
-
-    this.formFiltros.reset({
-
-      type: filtros.type,
-
-      category: filtros.category,
-
-      supplier: filtros.supplier,
-
-      minAmount: filtros.minAmount,
-
-      maxAmount: filtros.maxAmount,
-
-      startDate: filtros.startDate,
-
-      endDate: filtros.endDate
-
-    });
-
-
-    this.modalFiltrosAberto.set(true);
-
-  }
-
-
-  fecharFiltros(): void {
-
-    this.modalFiltrosAberto.set(false);
-
-  }
-
-
-  aplicarFiltros(): void {
-
-    const valores =
-      this.formFiltros.getRawValue();
-
-
-    const filtros: FiltrosFinanceiros = {
-
-      type:
-        valores.type || '',
-
-      category:
-        (valores.category || '').trim(),
-
-      supplier:
-        (valores.supplier || '').trim(),
-
-      minAmount:
-        valores.minAmount || '',
-
-      maxAmount:
-        valores.maxAmount || '',
-
-      startDate:
-        valores.startDate || '',
-
-      endDate:
-        valores.endDate || ''
-
-    };
-
-
-    this.filtrosAtivos.set(
-      filtros
-    );
-
-
-    this.modalFiltrosAberto.set(
-      false
-    );
-
-
-    this.buscarLancamentos();
-
-  }
-
-
-  limparFiltros(): void {
-
-    const filtrosVazios:
-      FiltrosFinanceiros = {
-
-        type: '',
-
-        category: '',
-
-        supplier: '',
-
-        minAmount: '',
-
-        maxAmount: '',
-
-        startDate: '',
-
-        endDate: ''
-
-      };
-
-
-    this.formFiltros.reset(
-      filtrosVazios
-    );
-
-
-    this.filtrosAtivos.set(
-      filtrosVazios
-    );
-
-
-    this.buscarLancamentos();
-
-  }
-
-
-  // DETALHES
-  abrirLancamento(id?: string): void {
-
-    if (!id) {
-
-      return;
-
-    }
-
-
-    this.lancamentosAbertos.update(
-      ids => {
-
-        if (ids.includes(id)) {
-
-          return ids.filter(
-            item => item !== id
-          );
-
-        }
-
-
-        return [
-          ...ids,
-          id
-        ];
-
-      }
-    );
-
-  }
-
-
-  lancamentoEstaAberto(
-    id?: string
-  ): boolean {
-
-    if (!id) {
-
-      return false;
-
-    }
-
-
-    return this.lancamentosAbertos()
-      .includes(id);
-
-  }
-
-
-  // CADASTRAR ENTRADA
-  abrirCadastro(): void {
-
-    this.erro.set('');
-
-    this.sucesso.set('');
-
-
-    this.formCadastro.reset({
-
-      title: '',
-
+interface FluxoCaixaDia {
+  data: Date;
+  entradas: number;
+  saidas: number;
+  saldo: number;
+}
+
+  @Component({
+    selector: 'app-gestao-financeira',
+    standalone: false,
+    templateUrl: './gestao-financeira.html',
+    styleUrl: './gestao-financeira.scss'
+  })
+  export class GestaoFinanceira implements OnInit, OnDestroy {
+
+    // LISTAGEM
+    lancamentos = signal<FinancialEntry[]>([]);
+    carregando = signal(false);
+    consultaRealizada = signal(false);
+    erro = signal('');
+    sucesso = signal('');
+
+    // PESQUISA
+    textoPesquisa = signal('');
+    termoPesquisa = signal('');
+
+    // FILTROS
+    modalFiltrosAberto = signal(false);
+    formFiltros: FormGroup;
+
+    filtrosAtivos = signal<FiltrosFinanceiros>({
+      type: '',
+      category: '',
       supplier: '',
-
-      amount: '',
-
-      type: 'entrada',
-
-      category: 'Operacional',
-
-      date: this.obterDataAtualInput()
-
+      minAmount: '',
+      maxAmount: '',
+      startDate: '',
+      endDate: ''
     });
 
-
-    this.modalCadastroAberto.set(
-      true
-    );
-
-  }
-
-
-  fecharCadastro(): void {
-
-    if (this.salvandoCadastro()) {
-
-      return;
-
-    }
-
-
-    this.modalCadastroAberto.set(
-      false
-    );
-
-  }
-
-
-  async cadastrarLancamento(): Promise<void> {
-
-    this.erro.set('');
-
-    this.sucesso.set('');
-
-
-    if (this.formCadastro.invalid) {
-
-      this.formCadastro.markAllAsTouched();
-
-      return;
-
-    }
-
-
-    this.salvandoCadastro.set(true);
-
-
-    try {
-
-      const valores =
-        this.formCadastro.getRawValue();
-
-
-      const lancamento:
-        Omit<FinancialEntry, 'id'> = {
-
-        title:
-          valores.title.trim(),
-
-        supplier:
-          valores.supplier.trim(),
-
-        amount:
-          Number(valores.amount),
-
-        type:
-          valores.type as FinancialEntryType,
-
-        category:
-          valores.category.trim(),
-
-        date:
-          this.converterData(
-            valores.date
-          ),
-
-        attachment:
-          null
-
-      };
-
-
-      await this.financialService
-        .adicionarLancamento(
-          lancamento
-        );
-
-
-      this.modalCadastroAberto.set(
-        false
-      );
-
-
-      this.sucesso.set(
-        'Lançamento cadastrado com sucesso.'
-      );
-
-
-      this.buscarLancamentos();
-
-
-    } catch (erro) {
-
-      console.error(
-        'Erro ao cadastrar lançamento:',
-        erro
-      );
-
-
-      this.erro.set(
-        'Não foi possível cadastrar o lançamento.'
-      );
-
-
-    } finally {
-
-      this.salvandoCadastro.set(false);
-
-    }
-
-  }
-
-
-  // NOTA FISCAL
-  abrirNotaFiscal(): void {
-
-    this.erro.set('');
-
-    this.sucesso.set('');
-
-    this.arquivoSelecionado.set(null);
-
-    this.nomeArquivo.set('');
-
-
-    this.formNotaFiscal.reset({
-
-      title: '',
-
-      supplier: '',
-
-      amount: '',
-
-      type: 'entrada',
-
-      category: 'Faturamento',
-
-      date: this.obterDataAtualInput()
-
-    });
-
-
-    this.modalNotaFiscalAberto.set(
-      true
-    );
-
-  }
-
-
-  fecharNotaFiscal(): void {
-
-    if (this.enviandoNotaFiscal()) {
-
-      return;
-
-    }
-
-
-    this.modalNotaFiscalAberto.set(
-      false
-    );
-
-    this.arquivoSelecionado.set(
-      null
-    );
-
-    this.nomeArquivo.set('');
-
-  }
-
-
-  selecionarArquivo(
-    event: Event
-  ): void {
-
-    const input =
-      event.target as HTMLInputElement;
-
-
-    const arquivo =
-      input.files?.[0];
-
-
-    if (!arquivo) {
-
-      return;
-
-    }
-
-
-    this.erro.set('');
-
-
-    const tiposPermitidos = [
-
-      'application/pdf',
-
-      'image/jpeg',
-
-      'image/png',
-
-      'image/webp',
-
-      'image/jpg'
-
+    categorias = [
+      'Operacional',
+      'Administrativo',
+      'Pessoal',
+      'Marketing',
+      'Projetos',
+      'Impostos',
+      'Outros'
     ];
 
+    categoriasDisponiveis = computed(() => {
+      const categoriasFirestore = this.lancamentos()
+        .map(lancamento => lancamento.category)
+        .filter(Boolean);
 
-    const tamanhoMaximo =
-      10 * 1024 * 1024;
+      return [...new Set([...this.categorias, ...categoriasFirestore])].sort();
+    });
 
+    // RELATÓRIOS
+    dataInicioRelatorio = signal('');
+    dataFimRelatorio = signal('');
+    relatorioGerado = signal(false);
+    carregandoRelatorio = signal(false);
+    erroRelatorio = signal('');
+    entradasRelatorio = signal(0);
+    saidasRelatorio = signal(0);
 
-    if (
-      !tiposPermitidos.includes(
-        arquivo.type
-      )
+    saldoRelatorio = computed(() =>
+      this.entradasRelatorio() - this.saidasRelatorio()
+    );
+
+    fluxoCaixa = signal<FluxoCaixaDia[]>([]);
+
+    // LINHAS EXPANDIDAS
+    lancamentosAbertos = signal<string[]>([]);
+
+    // MODAL CADASTRAR ENTRADA
+    modalCadastroAberto = signal(false);
+    salvandoCadastro = signal(false);
+    formCadastro: FormGroup;
+
+    // MODAL NOTA FISCAL
+    modalNotaFiscalAberto = signal(false);
+    enviandoNotaFiscal = signal(false);
+    arquivoSelecionado = signal<File | null>(null);
+    nomeArquivo = signal('');
+    formNotaFiscal: FormGroup;
+
+    // SUBSCRIPTIONS
+    private lancamentosSubscription?: Subscription;
+    private relatorioSubscription?: Subscription;
+
+    // CONSTRUTOR
+    constructor(
+      private fb: FormBuilder,
+      private financialService: FinancialService,
+      private storageService: StorageService,
+      private authService: AuthService
     ) {
 
-      this.erro.set(
-        'O arquivo deve ser uma imagem ou um PDF.'
-      );
+      // FORMULÁRIO DE FILTROS
+      this.formFiltros = this.fb.group({
+        type: [''],
+        category: [''],
+        supplier: [''],
+        minAmount: [''],
+        maxAmount: [''],
+        startDate: [''],
+        endDate: ['']
+      });
 
+      // FORMULÁRIO DE CADASTRO
+      this.formCadastro = this.fb.group({
+        title: ['', [Validators.required]],
+        supplier: ['', [Validators.required]],
+        amount: ['', [Validators.required, Validators.min(0.01)]],
+        type: ['entrada', [Validators.required]],
+        category: ['Operacional', [Validators.required]],
+        date: [this.obterDataAtualInput(), [Validators.required]]
+      });
 
-      input.value = '';
-
-      return;
-
+      // FORMULÁRIO DE NOTA FISCAL
+      this.formNotaFiscal = this.fb.group({
+        title: ['', [Validators.required]],
+        supplier: ['', [Validators.required]],
+        amount: ['', [Validators.required, Validators.min(0.01)]],
+        type: ['entrada', [Validators.required]],
+        category: ['Faturamento', [Validators.required]],
+        date: [this.obterDataAtualInput(), [Validators.required]]
+      });
     }
 
-
-    if (
-      arquivo.size > tamanhoMaximo
-    ) {
-
-      this.erro.set(
-        'O arquivo deve ter no máximo 10 MB.'
-      );
-
-
-      input.value = '';
-
-      return;
-
+    // =========================================================
+    // CICLO DE VIDA
+    // =========================================================
+    ngOnInit(): void {
+      this.buscarLancamentos();
     }
 
-
-    this.arquivoSelecionado.set(
-      arquivo
-    );
-
-
-    this.nomeArquivo.set(
-      arquivo.name
-    );
-
-  }
-
-
-  removerArquivo(): void {
-
-    this.arquivoSelecionado.set(
-      null
-    );
-
-    this.nomeArquivo.set('');
-
-  }
-
-
-  async cadastrarNotaFiscal(): Promise<void> {
-
-    this.erro.set('');
-
-    this.sucesso.set('');
-
-
-    if (this.formNotaFiscal.invalid) {
-
-      this.formNotaFiscal.markAllAsTouched();
-
-      return;
-
+    ngOnDestroy(): void {
+      this.lancamentosSubscription?.unsubscribe();
+      this.relatorioSubscription?.unsubscribe();
     }
 
-
-    const arquivo =
-      this.arquivoSelecionado();
-
-
-    if (!arquivo) {
-
-      this.erro.set(
-        'Selecione uma nota fiscal ou comprovante.'
-      );
-
-      return;
-
+    // =========================================================
+    // PESQUISA
+    // =========================================================
+    atualizarTextoPesquisa(): void {
+      this.termoPesquisa.set(this.textoPesquisa().trim());
     }
 
+    pesquisar(): void {
+      this.termoPesquisa.set(this.textoPesquisa().trim());
+    }
 
-    this.enviandoNotaFiscal.set(
-      true
-    );
+    // =========================================================
+    // LANÇAMENTOS FILTRADOS
+    // =========================================================
+    lancamentosFiltrados = computed(() => {
+      const termo = this.normalizarTexto(this.termoPesquisa());
 
-
-    try {
-
-      const uid =
-        await this.authService.getUid();
-
-
-      if (!uid) {
-
-        throw new Error(
-          'Usuário não autenticado.'
-        );
-
+      if (!termo) {
+        return this.lancamentos();
       }
 
+      return this.lancamentos().filter(lancamento => {
+        const texto = [
+          lancamento.title,
+          lancamento.category,
+          lancamento.supplier,
+          this.formatarTipo(lancamento.type),
+          this.formatarData(lancamento.date)
+        ]
+          .filter(Boolean)
+          .join(' ');
 
-      // 1. UPLOAD DO DOCUMENTO
-      const url =
-        await this.storageService
-          .uploadDocumentoFinanceiro(
-            uid,
-            arquivo
-          );
+        return this.normalizarTexto(texto).includes(termo);
+      });
+    });
 
+    // =========================================================
+    // TOTAIS DA LISTAGEM
+    // =========================================================
+    totalEntradas = computed(() =>
+      this.lancamentosFiltrados()
+        .filter(lancamento => lancamento.type === 'entrada')
+        .reduce((total, lancamento) => total + Number(lancamento.amount || 0), 0)
+    );
 
-      // 2. DADOS DO LANÇAMENTO
-      const valores =
-        this.formNotaFiscal.getRawValue();
+    totalSaidas = computed(() =>
+      this.lancamentosFiltrados()
+        .filter(lancamento => lancamento.type === 'saida')
+        .reduce((total, lancamento) => total + Number(lancamento.amount || 0), 0)
+    );
 
+    saldo = computed(() =>
+      this.totalEntradas() - this.totalSaidas()
+    );
 
-      const lancamento:
-        Omit<FinancialEntry, 'id'> = {
+    // =========================================================
+    // BUSCAR LANÇAMENTOS
+    // =========================================================
+    buscarLancamentos(): void {
+      this.carregando.set(true);
+      this.erro.set('');
+      this.lancamentosSubscription?.unsubscribe();
 
-        title:
-          valores.title.trim(),
+      const filtrosAtuais = this.filtrosAtivos();
 
-        supplier:
-          valores.supplier.trim(),
-
-        amount:
-          Number(valores.amount),
-
-        type:
-          valores.type as FinancialEntryType,
-
-        category:
-          valores.category.trim(),
-
-        date:
-          this.converterData(
-            valores.date
-          ),
-
-        attachment:
-          url
-
+      const filtros: FinancialFilters = {
+        type: filtrosAtuais.type,
+        category: filtrosAtuais.category.trim(),
+        supplier: filtrosAtuais.supplier.trim(),
+        minAmount: this.converterNumero(filtrosAtuais.minAmount),
+        maxAmount: this.converterNumero(filtrosAtuais.maxAmount),
+        startDate: filtrosAtuais.startDate
+          ? this.converterData(filtrosAtuais.startDate)
+          : null,
+        endDate: filtrosAtuais.endDate
+          ? this.converterData(filtrosAtuais.endDate)
+          : null
       };
 
-      // 3. SALVA NO FIRESTORE
-      await this.financialService
-        .adicionarLancamento(
-          lancamento
-        );
+      this.lancamentosSubscription = this.financialService
+        .listarLancamentos(filtros)
+        .subscribe({
+          next: lancamentos => {
+            const ordenados = [...lancamentos].sort(
+              (a, b) => this.obterData(b.date).getTime() - this.obterData(a.date).getTime()
+            );
 
+            this.lancamentos.set(ordenados);
+            this.carregando.set(false);
+            this.consultaRealizada.set(true);
+          },
 
-      // 4. FINALIZA
-      this.modalNotaFiscalAberto.set(
-        false
-      );
+          error: erro => {
+            console.error('Erro ao carregar lançamentos financeiros:', erro);
 
+            this.erro.set('Não foi possível carregar os lançamentos financeiros.');
+            this.lancamentos.set([]);
+            this.carregando.set(false);
+            this.consultaRealizada.set(true);
+          }
+        });
+    }
 
-      this.arquivoSelecionado.set(
-        null
-      );
+    // =========================================================
+    // RELATÓRIOS
+    // =========================================================
+    gerarRelatorio(): void {
+      this.erroRelatorio.set('');
 
+      const dataInicio = this.dataInicioRelatorio();
+      const dataFim = this.dataFimRelatorio();
 
-      this.nomeArquivo.set('');
+      // -------------------------------------------------------
+      // VALIDAÇÃO DAS DATAS
+      // -------------------------------------------------------
+      if (!dataInicio || !dataFim) {
+        this.erroRelatorio.set('Informe a data inicial e a data final.');
+        return;
+      }
 
+      const inicio = this.converterData(dataInicio);
+      const fim = this.converterData(dataFim);
 
-      this.sucesso.set(
-        'Nota fiscal cadastrada com sucesso.'
-      );
+      if (inicio > fim) {
+        this.erroRelatorio.set('A data inicial não pode ser posterior à data final.');
+        return;
+      }
 
+      // -------------------------------------------------------
+      // PREPARAÇÃO
+      // -------------------------------------------------------
+      this.carregandoRelatorio.set(true);
+      this.relatorioGerado.set(false);
+      this.relatorioSubscription?.unsubscribe();
+
+      // -------------------------------------------------------
+      // CONSULTA INDEPENDENTE DOS FILTROS DA TABELA
+      // -------------------------------------------------------
+      this.relatorioSubscription = this.financialService
+        .listarLancamentos({
+          startDate: inicio,
+          endDate: fim
+        })
+        .subscribe({
+          next: lancamentos => {
+            this.calcularRelatorio(lancamentos);
+
+            this.carregandoRelatorio.set(false);
+            this.relatorioGerado.set(true);
+          },
+
+          error: erro => {
+            console.error('Erro ao gerar relatório financeiro:', erro);
+
+            this.erroRelatorio.set('Não foi possível gerar o relatório financeiro.');
+            this.entradasRelatorio.set(0);
+            this.saidasRelatorio.set(0);
+            this.fluxoCaixa.set([]);
+            this.carregandoRelatorio.set(false);
+            this.relatorioGerado.set(false);
+          }
+        });
+    }
+
+    // =========================================================
+    // CALCULAR RELATÓRIO
+    // =========================================================
+    private calcularRelatorio(lancamentos: FinancialEntry[]): void {
+
+      // -------------------------------------------------------
+      // TOTAL DE ENTRADAS
+      // -------------------------------------------------------
+      const entradas = lancamentos
+        .filter(lancamento => lancamento.type === 'entrada')
+        .reduce((total, lancamento) => total + Number(lancamento.amount || 0), 0);
+
+      // -------------------------------------------------------
+      // TOTAL DE SAÍDAS
+      // -------------------------------------------------------
+      const saidas = lancamentos
+        .filter(lancamento => lancamento.type === 'saida')
+        .reduce((total, lancamento) => total + Number(lancamento.amount || 0), 0);
+
+      this.entradasRelatorio.set(entradas);
+      this.saidasRelatorio.set(saidas);
+
+      // -------------------------------------------------------
+      // AGRUPAMENTO POR DATA
+      // -------------------------------------------------------
+      const agrupado = new Map<string, FluxoCaixaDia>();
+
+      [...lancamentos]
+        .sort((a, b) => this.obterData(a.date).getTime() - this.obterData(b.date).getTime())
+        .forEach(lancamento => {
+          const data = this.obterData(lancamento.date);
+
+          const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+
+          if (!agrupado.has(chave)) {
+            agrupado.set(chave, {
+              data: new Date(data.getFullYear(), data.getMonth(), data.getDate()),
+              entradas: 0,
+              saidas: 0,
+              saldo: 0
+            });
+          }
+
+          const dia = agrupado.get(chave)!;
+
+          if (lancamento.type === 'entrada') {
+            dia.entradas += Number(lancamento.amount || 0);
+          } else {
+            dia.saidas += Number(lancamento.amount || 0);
+          }
+        });
+
+      // -------------------------------------------------------
+      // SALDO ACUMULADO
+      // -------------------------------------------------------
+      let saldoAcumulado = 0;
+
+      const fluxo = Array.from(agrupado.values())
+        .sort((a, b) => a.data.getTime() - b.data.getTime())
+        .map(dia => {
+          saldoAcumulado += dia.entradas - dia.saidas;
+
+          return {
+            ...dia,
+            saldo: saldoAcumulado
+          };
+        });
+
+      this.fluxoCaixa.set(fluxo);
+    }
+
+    // =========================================================
+    // FILTROS
+    // =========================================================
+    abrirFiltros(): void {
+      const filtros = this.filtrosAtivos();
+
+      this.formFiltros.reset({
+        type: filtros.type,
+        category: filtros.category,
+        supplier: filtros.supplier,
+        minAmount: filtros.minAmount,
+        maxAmount: filtros.maxAmount,
+        startDate: filtros.startDate,
+        endDate: filtros.endDate
+      });
+
+      this.modalFiltrosAberto.set(true);
+    }
+
+    fecharFiltros(): void {
+      this.modalFiltrosAberto.set(false);
+    }
+
+    aplicarFiltros(): void {
+      const valores = this.formFiltros.getRawValue();
+
+      const filtros: FiltrosFinanceiros = {
+        type: valores.type || '',
+        category: (valores.category || '').trim(),
+        supplier: (valores.supplier || '').trim(),
+        minAmount: valores.minAmount || '',
+        maxAmount: valores.maxAmount || '',
+        startDate: valores.startDate || '',
+        endDate: valores.endDate || ''
+      };
+
+      this.filtrosAtivos.set(filtros);
+      this.modalFiltrosAberto.set(false);
 
       this.buscarLancamentos();
-
-
-    } catch (erro) {
-
-      console.error(
-        'Erro ao cadastrar nota fiscal:',
-        erro
-      );
-
-
-      this.erro.set(
-        'Não foi possível cadastrar a nota fiscal.'
-      );
-
-
-    } finally {
-
-      this.enviandoNotaFiscal.set(
-        false
-      );
-
     }
 
-  }
+    limparFiltros(): void {
+      const filtrosVazios: FiltrosFinanceiros = {
+        type: '',
+        category: '',
+        supplier: '',
+        minAmount: '',
+        maxAmount: '',
+        startDate: '',
+        endDate: ''
+      };
 
-  // FORMATAÇÃO
-  formatarMoeda(
-    valor: number
-  ): string {
+      this.formFiltros.reset(filtrosVazios);
+      this.filtrosAtivos.set(filtrosVazios);
 
-    return new Intl.NumberFormat(
-      'pt-BR',
-      {
+      this.buscarLancamentos();
+    }
+
+    // =========================================================
+    // DETALHES
+    // =========================================================
+    abrirLancamento(id?: string): void {
+      if (!id) {
+        return;
+      }
+
+      this.lancamentosAbertos.update(ids => {
+        if (ids.includes(id)) {
+          return ids.filter(item => item !== id);
+        }
+
+        return [...ids, id];
+      });
+    }
+
+    lancamentoEstaAberto(id?: string): boolean {
+      if (!id) {
+        return false;
+      }
+
+      return this.lancamentosAbertos().includes(id);
+    }
+
+    // =========================================================
+    // CADASTRAR ENTRADA
+    // =========================================================
+    abrirCadastro(): void {
+      this.erro.set('');
+      this.sucesso.set('');
+
+      this.formCadastro.reset({
+        title: '',
+        supplier: '',
+        amount: '',
+        type: 'entrada',
+        category: 'Operacional',
+        date: this.obterDataAtualInput()
+      });
+
+      this.modalCadastroAberto.set(true);
+    }
+
+    fecharCadastro(): void {
+      if (this.salvandoCadastro()) {
+        return;
+      }
+
+      this.modalCadastroAberto.set(false);
+    }
+
+    async cadastrarLancamento(): Promise<void> {
+      this.erro.set('');
+      this.sucesso.set('');
+
+      if (this.formCadastro.invalid) {
+        this.formCadastro.markAllAsTouched();
+        return;
+      }
+
+      this.salvandoCadastro.set(true);
+
+      try {
+        const valores = this.formCadastro.getRawValue();
+
+        const lancamento: Omit<FinancialEntry, 'id'> = {
+          title: valores.title.trim(),
+          supplier: valores.supplier.trim(),
+          amount: Number(valores.amount),
+          type: valores.type as FinancialEntryType,
+          category: valores.category.trim(),
+          date: this.converterData(valores.date),
+          attachment: null
+        };
+
+        await this.financialService.adicionarLancamento(lancamento);
+
+        this.modalCadastroAberto.set(false);
+        this.sucesso.set('Lançamento cadastrado com sucesso.');
+
+        this.buscarLancamentos();
+
+      } catch (erro) {
+        console.error('Erro ao cadastrar lançamento:', erro);
+        this.erro.set('Não foi possível cadastrar o lançamento.');
+
+      } finally {
+        this.salvandoCadastro.set(false);
+      }
+    }
+
+    // =========================================================
+    // NOTA FISCAL
+    // =========================================================
+    abrirNotaFiscal(): void {
+      this.erro.set('');
+      this.sucesso.set('');
+      this.arquivoSelecionado.set(null);
+      this.nomeArquivo.set('');
+
+      this.formNotaFiscal.reset({
+        title: '',
+        supplier: '',
+        amount: '',
+        type: 'entrada',
+        category: 'Faturamento',
+        date: this.obterDataAtualInput()
+      });
+
+      this.modalNotaFiscalAberto.set(true);
+    }
+
+    fecharNotaFiscal(): void {
+      if (this.enviandoNotaFiscal()) {
+        return;
+      }
+
+      this.modalNotaFiscalAberto.set(false);
+      this.arquivoSelecionado.set(null);
+      this.nomeArquivo.set('');
+    }
+
+    selecionarArquivo(event: Event): void {
+      const input = event.target as HTMLInputElement;
+      const arquivo = input.files?.[0];
+
+      if (!arquivo) {
+        return;
+      }
+
+      this.erro.set('');
+
+      const tiposPermitidos = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/jpg'
+      ];
+
+      const tamanhoMaximo = 10 * 1024 * 1024;
+
+      if (!tiposPermitidos.includes(arquivo.type)) {
+        this.erro.set('O arquivo deve ser uma imagem ou um PDF.');
+        input.value = '';
+        return;
+      }
+
+      if (arquivo.size > tamanhoMaximo) {
+        this.erro.set('O arquivo deve ter no máximo 10 MB.');
+        input.value = '';
+        return;
+      }
+
+      this.arquivoSelecionado.set(arquivo);
+      this.nomeArquivo.set(arquivo.name);
+    }
+
+    removerArquivo(): void {
+      this.arquivoSelecionado.set(null);
+      this.nomeArquivo.set('');
+    }
+
+    async cadastrarNotaFiscal(): Promise<void> {
+      this.erro.set('');
+      this.sucesso.set('');
+
+      if (this.formNotaFiscal.invalid) {
+        this.formNotaFiscal.markAllAsTouched();
+        return;
+      }
+
+      const arquivo = this.arquivoSelecionado();
+
+      if (!arquivo) {
+        this.erro.set('Selecione uma nota fiscal ou comprovante.');
+        return;
+      }
+
+      this.enviandoNotaFiscal.set(true);
+
+      try {
+        const uid = await this.authService.getUid();
+
+        if (!uid) {
+          throw new Error('Usuário não autenticado.');
+        }
+
+        // 1. UPLOAD DO DOCUMENTO
+        const url = await this.storageService.uploadDocumentoFinanceiro(uid, arquivo);
+
+        // 2. DADOS DO LANÇAMENTO
+        const valores = this.formNotaFiscal.getRawValue();
+
+        const lancamento: Omit<FinancialEntry, 'id'> = {
+          title: valores.title.trim(),
+          supplier: valores.supplier.trim(),
+          amount: Number(valores.amount),
+          type: valores.type as FinancialEntryType,
+          category: valores.category.trim(),
+          date: this.converterData(valores.date),
+          attachment: url
+        };
+
+        // 3. SALVA NO FIRESTORE
+        await this.financialService.adicionarLancamento(lancamento);
+
+        // 4. FINALIZA
+        this.modalNotaFiscalAberto.set(false);
+        this.arquivoSelecionado.set(null);
+        this.nomeArquivo.set('');
+
+        this.sucesso.set('Nota fiscal cadastrada com sucesso.');
+
+        this.buscarLancamentos();
+
+      } catch (erro) {
+        console.error('Erro ao cadastrar nota fiscal:', erro);
+        this.erro.set('Não foi possível cadastrar a nota fiscal.');
+
+      } finally {
+        this.enviandoNotaFiscal.set(false);
+      }
+    }
+
+    // =========================================================
+    // FORMATAÇÃO
+    // =========================================================
+    formatarMoeda(valor: number): string {
+      return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
+      }).format(valor || 0);
+    }
+
+    formatarTipo(tipo: FinancialEntryType): string {
+      return tipo === 'entrada' ? 'Entrada' : 'Saída';
+    }
+
+    formatarData(data: FinancialEntry['date']): string {
+      const dataConvertida = this.obterData(data);
+
+      if (isNaN(dataConvertida.getTime())) {
+        return '—';
       }
-    ).format(
-      valor || 0
-    );
 
-  }
-
-
-  formatarTipo(
-    tipo: FinancialEntryType
-  ): string {
-
-    return tipo === 'entrada'
-      ? 'Entrada'
-      : 'Saída';
-
-  }
-
-
-  formatarData(
-    data: FinancialEntry['date']
-  ): string {
-
-    const dataConvertida =
-      this.obterData(data);
-
-
-    if (
-      isNaN(
-        dataConvertida.getTime()
-      )
-    ) {
-
-      return '—';
-
+      return new Intl.DateTimeFormat('pt-BR').format(dataConvertida);
     }
 
+    obterData(data: FinancialEntry['date']): Date {
+      if (data instanceof Date) {
+        return data;
+      }
 
-    return new Intl.DateTimeFormat(
-      'pt-BR'
-    ).format(
-      dataConvertida
-    );
+      if (
+        data &&
+        typeof data === 'object' &&
+        'toDate' in data &&
+        typeof data.toDate === 'function'
+      ) {
+        return data.toDate();
+      }
 
-  }
-
-
-  obterData(
-    data: FinancialEntry['date']
-  ): Date {
-
-    if (data instanceof Date) {
-
-      return data;
-
+      return new Date(data as unknown as string);
     }
 
-
-    if (
-      data &&
-      typeof data === 'object' &&
-      'toDate' in data &&
-      typeof data.toDate === 'function'
-    ) {
-
-      return data.toDate();
-
+    // =========================================================
+    // AUXILIARES
+    // =========================================================
+    private converterData(valor: string): Date {
+      return new Date(`${valor}T12:00:00`);
     }
 
+    private converterNumero(valor: string): number | null {
+      if (!valor) {
+        return null;
+      }
 
-    return new Date(
-      data as unknown as string
-    );
+      const numero = Number(valor);
 
-  }
-
-
-  // AUXILIARES
-  private converterData(
-    valor: string
-  ): Date {
-
-    return new Date(
-      `${valor}T12:00:00`
-    );
-
-  }
-
-
-  private converterNumero(
-    valor: string
-  ): number | null {
-
-    if (!valor) {
-
-      return null;
-
+      return Number.isNaN(numero) ? null : numero;
     }
 
+    private normalizarTexto(texto: string): string {
+      return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
 
-    const numero =
-      Number(valor);
+    private obterDataAtualInput(): string {
+      const hoje = new Date();
 
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
 
-    return Number.isNaN(numero)
-      ? null
-      : numero;
-
+      return `${ano}-${mes}-${dia}`;
+    }
   }
-
-
-  private normalizarTexto(
-    texto: string
-  ): string {
-
-    return texto
-      .normalize('NFD')
-      .replace(
-        /[\u0300-\u036f]/g,
-        ''
-      )
-      .toLowerCase()
-      .trim();
-
-  }
-
-
-  private obterDataAtualInput(): string {
-
-    const hoje = new Date();
-
-
-    const ano =
-      hoje.getFullYear();
-
-
-    const mes =
-      String(
-        hoje.getMonth() + 1
-      ).padStart(2, '0');
-
-
-    const dia =
-      String(
-        hoje.getDate()
-      ).padStart(2, '0');
-
-
-    return `${ano}-${mes}-${dia}`;
-
-  }
-
-}
