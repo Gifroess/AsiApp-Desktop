@@ -10,6 +10,7 @@
   overflow-x: hidden;
   overflow-y: scroll;
   background: #fff;
+
   scrollbar-width: thin;
   scrollbar-color: #8a9096 #050505;
 }
@@ -36,8 +37,6 @@
   display: none;
 }
 
-
-/* estrutura da pagina */
 .menu-postagem {
   min-height: 100vh;
   margin-left: 220px;
@@ -53,8 +52,6 @@
   max-width: 100%;
 }
 
-
-/* voltar */
 .voltar-btn {
   position: absolute;
   top: 27px;
@@ -75,8 +72,6 @@
   }
 }
 
-
-/* cabecalho */
 .cabecalho-menu {
   margin-bottom: 20px;
 }
@@ -104,8 +99,6 @@
   color: #000;
 }
 
-
-/* estrutura do calendario */
 .calendario-layout {
   display: grid;
   grid-template-columns: 590px 175px;
@@ -119,8 +112,6 @@
   border-radius: 15px;
 }
 
-
-/* calendario */
 .calendario {
   padding: 9px 13px 11px;
   background: #fff;
@@ -191,7 +182,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   overflow: hidden;
-  border: 1px solid #eeeeee;
+  border: 1px solid #eee;
   border-radius: 7px;
 }
 
@@ -201,8 +192,8 @@
   place-items: center;
   padding: 0;
   border: 0;
-  border-right: 1px solid #eeeeee;
-  border-bottom: 1px solid #eeeeee;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
   background: #fff;
   color: #303030;
   font-family: inherit;
@@ -215,6 +206,8 @@
     height: 22px;
     display: grid;
     place-items: center;
+    box-sizing: border-box;
+    border: 1.5px solid transparent;
     border-radius: 50%;
   }
 
@@ -242,8 +235,9 @@
   }
 }
 
-
-/* cadastro de evento */
+.dia span.tem-evento {
+  border-style: solid;
+}
 
 .cadastro-evento {
   margin-top: 14px;
@@ -323,27 +317,22 @@
   }
 }
 
-.campo-horario {
-  input {
-    width: 48px;
-    padding: 1px 2px;
-    border-bottom: 1px solid transparent;
-    letter-spacing: 0.4px;
-    transition: border-color 0.15s ease;
+.campo-horario input {
+  width: 48px;
+  padding: 1px 2px;
+  border-bottom: 1px solid transparent;
+  letter-spacing: 0.4px;
+  transition: border-color 0.15s ease;
 
-    &:focus {
-      border-color: #c7c7c7;
-    }
+  &:focus {
+    border-color: #c7c7c7;
+  }
 
-    &::placeholder {
-      color: #686868;
-      opacity: 1;
-    }
+  &::placeholder {
+    color: #686868;
+    opacity: 1;
   }
 }
-
-
-/* seletor de areas */
 
 .campo-area {
   height: 20px;
@@ -388,12 +377,29 @@
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.11);
+  box-shadow: 0 8px 22px rgba(0,0,0,.11);
+
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ffffff;
+    border-radius: 999px;
+  }
 
   button {
     width: 100%;
     min-height: 27px;
-    display: flex;
+    display: grid;
+    grid-template-columns: 9px 1fr 14px;
     align-items: center;
     gap: 8px;
     padding: 5px 8px;
@@ -406,7 +412,8 @@
     color: #292929;
     cursor: pointer;
 
-    &:hover {
+    &:hover,
+    &.selecionada {
       background: #f3f3f3;
     }
   }
@@ -415,12 +422,14 @@
 .opcao-cor {
   width: 9px;
   height: 9px;
-  flex: 0 0 auto;
   border-radius: 3px;
 }
 
-
-/* botao adicionar */
+.check-area {
+  text-align: center;
+  color: #777;
+  font-size: 10px;
+}
 
 .acoes-cadastro {
   display: flex;
@@ -450,9 +459,6 @@
   }
 }
 
-
-/* legenda */
-
 .legenda {
   padding-top: 8px;
 }
@@ -475,9 +481,6 @@
   border-radius: 4px;
 }
 
-
-/* lista de eventos */
-
 .eventos-dia {
   width: 590px;
   margin-top: 23px;
@@ -499,15 +502,23 @@
 .evento-card {
   min-height: 46px;
   display: grid;
-  grid-template-columns: 31px 1fr auto;
+  grid-template-columns: 2px 31px 1fr auto;
   align-items: center;
-  padding: 4px 6px 4px 10px;
+  padding: 0 6px 0 0;
   border-radius: 7px;
   background: #e5e6e7;
 }
 
+.evento-cor {
+  width: 2px;
+  height: 30px;
+  justify-self: center;
+  border-radius: 999px;
+}
+
 .evento-icone {
   display: flex;
+  justify-content: center;
   align-items: center;
   color: #777c80;
 
@@ -539,6 +550,7 @@
 
 .evento-acoes {
   display: flex;
+  align-items: center;
   gap: 5px;
 
   button {
@@ -565,9 +577,6 @@
   }
 }
 
-
-/* transicao para o feed */
-
 .transicao-feed {
   position: fixed;
   top: 0;
@@ -589,9 +598,6 @@
     height: 20px;
   }
 }
-
-
-/* telas menores */
 
 @media (max-width: 1200px) {
   .pagina-postagens {
