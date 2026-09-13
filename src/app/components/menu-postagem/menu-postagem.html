@@ -1,334 +1,368 @@
 <div class="pagina-postagens">
   <app-sidebar paginaAtiva="postagens"></app-sidebar>
 
-  <main class="menu-postagem">
-    <button class="voltar-btn" type="button" (click)="voltar()" aria-label="Voltar">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+  <div class="telas-postagem" [class.feed-ativo]="abaAtiva() === 'feed'">
 
-    <div class="conteudo">
+    <!-- calendario -->
+    <main class="menu-postagem tela-calendario">
+      <button class="voltar-btn" type="button" (click)="voltar()" aria-label="Voltar">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
 
-      <header class="cabecalho-menu">
-        <p class="cabecalho-eyebrow">MENU DE POSTAGEM</p>
-        <h1 class="cabecalho-titulo">Calendário</h1>
-        <p class="cabecalho-subtitulo">
-          Troque de aba para acompanhar todos os conteúdos!
-        </p>
-      </header>
+      <div class="conteudo">
+        <header class="cabecalho-menu">
+          <p class="cabecalho-eyebrow">MENU DE POSTAGEM</p>
+          <h1 class="cabecalho-titulo">Calendário</h1>
+          <p class="cabecalho-subtitulo">Troque de aba para acompanhar todos os conteúdos!</p>
+        </header>
 
-      <div class="calendario-layout">
-
-        <section class="calendario-card">
-
-          <div class="calendario">
-
-            <div class="calendario-header">
-
-              <button type="button" (click)="mesAnterior()" aria-label="Mês anterior">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-
-              <h2>{{ nomeMes() }}</h2>
-
-              <button type="button" (click)="proximoMes()" aria-label="Próximo mês">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-
-            </div>
-
-
-            <div class="dias-semana">
-              @for (dia of diasSemana; track dia) {
-                <span>{{ dia }}</span>
-              }
-            </div>
-
-
-            <div class="grade-calendario">
-
-              @for (dia of diasCalendario(); track dia.data.getTime()) {
-
-                <button
-                  type="button"
-                  class="dia"
-                  [class.outro-mes]="!dia.mesAtual"
-                  [class.hoje]="dia.hoje"
-                  [class.selecionado]="dia.selecionado"
-                  (click)="selecionarDia(dia)">
-
-                  <span
-                    [class.tem-evento]="diaPossuiEvento(dia.data)"
-                    [style.borderColor]="diaPossuiEvento(dia.data) ? corDiaEvento(dia.data) : null">
-                    {{ dia.numero }}
-                  </span>
-
-                </button>
-
-              }
-
-            </div>
-
-          </div>
-
-
-          <div class="cadastro-evento">
-
-            <strong class="cadastro-titulo">
-              Cadastre um Evento:
-            </strong>
-
-
-            <div class="campo-nome">
-
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M8 3V7M16 3V7M4 10H20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-
-
-              <input
-                type="text"
-                placeholder="Nome do Evento"
-                [value]="nomeEvento()"
-                (input)="atualizarNomeEvento($any($event.target).value)">
-
-            </div>
-
-
-            <div class="linha-dados">
-
-              <label class="campo-data">
-
-                <span>Data:</span>
-
-                <input
-                  #dataEvento
-                  type="date"
-                  [value]="dataSelecionadaInput()"
-                  (change)="selecionarDataInput(dataEvento.value)">
-
-              </label>
-
-
-              <label class="campo-horario">
-
-                <span>Horário:</span>
-
-                <input
-                  #horarioInput
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="5"
-                  placeholder="--:--"
-                  [value]="horarioDigitado()"
-                  autocomplete="off"
-                  (input)="formatarHorario(horarioInput)">
-
-              </label>
-
-            </div>
-
-
-            <div class="campo-area">
-
-              <span>Áreas:</span>
-
-              <div class="seletor-area">
-
-                <button
-                  class="seletor-area-btn"
-                  type="button"
-                  (click)="alternarSeletorAreas()">
-
-                  <span>{{ textoAreaSelecionada() }}</span>
-
+        <div class="calendario-layout">
+          <section class="calendario-card">
+            <div class="calendario">
+              <div class="calendario-header">
+                <button type="button" (click)="mesAnterior()" aria-label="Mês anterior">
                   <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.7"
+                      stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-
                 </button>
 
+                <h2>{{ nomeMes() }}</h2>
 
-                @if (seletorAreasAberto()) {
-
-                  <div class="opcoes-area">
-
-                    @for (area of areas; track area.nome) {
-
-                      <button
-                        type="button"
-                        [class.selecionada]="areaSelecionada(area.nome)"
-                        (click)="selecionarArea(area.nome)">
-
-                        <span
-                          class="opcao-cor"
-                          [style.backgroundColor]="area.cor">
-                        </span>
-
-                        <span>
-                          {{ area.nome }}
-                        </span>
-
-                        <span class="check-area">
-                          @if (areaSelecionada(area.nome)) {
-                            ✓
-                          }
-                        </span>
-
-                      </button>
-
-                    }
-
-                  </div>
-
-                }
-
+                <button type="button" (click)="proximoMes()" aria-label="Próximo mês">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.7"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
               </div>
 
+              <div class="dias-semana">
+                @for (dia of diasSemana; track dia) {
+                  <span>{{ dia }}</span>
+                }
+              </div>
+
+              <div class="grade-calendario">
+                @for (dia of diasCalendario(); track dia.data.getTime()) {
+                  <button
+                    type="button"
+                    class="dia"
+                    [class.outro-mes]="!dia.mesAtual"
+                    [class.hoje]="dia.hoje"
+                    [class.selecionado]="dia.selecionado"
+                    (click)="selecionarDia(dia)">
+
+                    <span
+                      [class.tem-evento]="diaPossuiEvento(dia.data)"
+                      [style.borderColor]="diaPossuiEvento(dia.data) ? corDiaEvento(dia.data) : null">
+                      {{ dia.numero }}
+                    </span>
+                  </button>
+                }
+              </div>
             </div>
 
+            <div class="cadastro-evento">
+              <strong class="cadastro-titulo">
+                {{ eventoEditando() ? 'Editar Evento:' : 'Cadastre um Evento:' }}
+              </strong>
 
-          </div>
+              <div class="campo-nome">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="4" y="5" width="16" height="15" rx="2"
+                    stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M8 3V7M16 3V7M4 10H20" stroke="currentColor"
+                    stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
 
+                <input
+                  type="text"
+                  placeholder="Nome do Evento"
+                  [value]="nomeEvento()"
+                  (input)="atualizarNomeEvento($any($event.target).value)">
+              </div>
 
-          <div class="acoes-cadastro">
+              <div class="linha-dados">
+                <label class="campo-data">
+                  <span>Data:</span>
 
-            <button
-            class="adicionar-evento"
-            type="button"
-            (click)="adicionarEvento()">
-            {{ eventoEditando() ? '✓' : '+' }}
-            </button>
+                  <input
+                    #dataEvento
+                    type="date"
+                    [value]="dataSelecionadaInput()"
+                    (change)="selecionarDataInput(dataEvento.value)">
+                </label>
 
-          </div>
+                <label class="campo-horario">
+                  <span>Horário:</span>
 
+                  <input
+                    #horarioInput
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="5"
+                    placeholder="--:--"
+                    [value]="horarioDigitado()"
+                    autocomplete="off"
+                    (input)="formatarHorario(horarioInput)">
+                </label>
+              </div>
 
-        </section>
+              <div class="campo-area">
+                <span>Áreas:</span>
 
+                <div class="seletor-area">
+                  <button
+                    class="seletor-area-btn"
+                    type="button"
+                    (click)="alternarSeletorAreas()">
 
-        <aside class="legenda">
+                    <span>{{ textoAreaSelecionada() }}</span>
 
-          @for (area of areas; track area.nome) {
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M7 10L12 15L17 10" stroke="currentColor"
+                        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
 
-            <div class="legenda-item">
+                  @if (seletorAreasAberto()) {
+                    <div class="opcoes-area">
+                      @for (area of areas; track area.nome) {
+                        <button
+                          type="button"
+                          [class.selecionada]="areaSelecionada(area.nome)"
+                          (click)="selecionarArea(area.nome)">
 
-              <span
-                class="legenda-cor"
-                [style.backgroundColor]="area.cor">
-              </span>
+                          <span
+                            class="opcao-cor"
+                            [style.backgroundColor]="area.cor">
+                          </span>
 
-              <span>
-                {{ area.nome }}
-              </span>
+                          <span>{{ area.nome }}</span>
 
+                          <span class="check-area">
+                            @if (areaSelecionada(area.nome)) {
+                              ✓
+                            }
+                          </span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
 
-          }
+            <div class="acoes-cadastro">
+              <button
+                class="adicionar-evento"
+                type="button"
+                (click)="adicionarEvento()">
+                {{ eventoEditando() ? '✓' : '+' }}
+              </button>
+            </div>
+          </section>
 
-        </aside>
+          <aside class="legenda">
+            @for (area of areas; track area.nome) {
+              <div class="legenda-item">
+                <span
+                  class="legenda-cor"
+                  [style.backgroundColor]="area.cor">
+                </span>
 
-      </div>
+                <span>{{ area.nome }}</span>
+              </div>
+            }
+          </aside>
+        </div>
+
         <section class="eventos-dia">
-        <p class="eventos-titulo">
+          <p class="eventos-titulo">
             Listagem de eventos para o dia {{ dataSelecionadaFormatada() }}:
-        </p>
+          </p>
 
-        <div class="lista-eventos">
+          <div class="lista-eventos">
             @for (evento of eventosDoDia(); track evento.id) {
-            <article class="evento-card">
+              <article class="evento-card">
                 <div
-                class="evento-cor"
-                [style.backgroundColor]="corArea(evento.areas[0])">
+                  class="evento-cor"
+                  [style.backgroundColor]="corArea(evento.areas[0])">
                 </div>
 
                 <div class="evento-icone">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect
-                    x="4"
-                    y="5"
-                    width="16"
-                    height="15"
-                    rx="2"
-                    stroke="currentColor"
-                    stroke-width="1.4"/>
-
-                    <path
-                    d="M8 3V7M16 3V7M4 10H20"
-                    stroke="currentColor"
-                    stroke-width="1.4"
-                    stroke-linecap="round"/>
-                </svg>
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="5" width="16" height="15" rx="2"
+                      stroke="currentColor" stroke-width="1.4"/>
+                    <path d="M8 3V7M16 3V7M4 10H20"
+                      stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
                 </div>
 
                 <div class="evento-info">
-                <strong>{{ evento.titulo }}</strong>
-                <span>{{ evento.horario }} - {{ evento.areas.join(', ') }}</span>
+                  <strong>{{ evento.titulo }}</strong>
+                  <span>{{ evento.horario }} - {{ evento.areas.join(', ') }}</span>
                 </div>
 
                 <div class="evento-acoes">
-                <button
+                  <button
                     type="button"
                     aria-label="Editar evento"
                     (click)="editarEvento(evento)">
 
                     <svg viewBox="0 0 24 24" fill="none">
-                    <path
+                      <path
                         d="M13.5 6.5L17.5 10.5M5 19L8.5 18.3L18.3 8.5C19.2 7.6 19.2 6.2 18.3 5.3C17.4 4.4 16 4.4 15.1 5.3L5.3 15.1L5 19Z"
-                        stroke="currentColor"
-                        stroke-width="1.4"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"/>
+                        stroke="currentColor" stroke-width="1.4"
+                        stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                </button>
+                  </button>
 
-                <button
+                  <button
                     type="button"
                     aria-label="Excluir evento"
                     (click)="excluirEvento(evento.id)">
 
                     <svg viewBox="0 0 24 24" fill="none">
-                    <path
+                      <path
                         d="M5 7H19M9 7V4H15V7M7 7L8 20H16L17 7M10 11V16M14 11V16"
-                        stroke="currentColor"
-                        stroke-width="1.4"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"/>
+                        stroke="currentColor" stroke-width="1.4"
+                        stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                </button>
+                  </button>
                 </div>
-            </article>
+              </article>
             }
-        </div>
+          </div>
+        </section>
+      </div>
+
+      <button
+        class="transicao-feed"
+        type="button"
+        aria-label="Ir para Feed Social"
+        (click)="abrirFeed()">
+
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M9 18L15 12L9 6"
+            stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </main>
+
+
+    <!-- feed social -->
+    <main class="menu-feed tela-feed">
+      <button class="voltar-btn feed-voltar" type="button" (click)="voltar()" aria-label="Voltar">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6"
+            stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="feed-conteudo">
+        <header class="cabecalho-feed">
+          <p class="feed-eyebrow">MENU DE POSTAGEM</p>
+          <h1>Feed Social</h1>
+          <p>Troque de aba para acompanhar todos os conteúdos!</p>
+        </header>
+
+        <section class="feed-lista">
+          <article class="post-feed">
+            <div class="post-autor">
+              <div class="post-avatar"></div>
+
+              <div class="post-texto">
+                <strong>Nome do Membro</strong>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus
+                  ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus
+                  duis convallis.
+                </p>
+              </div>
+            </div>
+
+            <div class="post-imagem"></div>
+
+            <div class="post-acoes">
+              <button type="button" aria-label="Comentar">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M5 5H19V16H9L5 19V5Z"
+                    stroke="currentColor" stroke-width="1.4"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <button type="button" aria-label="Curtir">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 20S4 15.2 4 9.5C4 6.9 5.9 5 8.3 5C9.8 5 11.1 5.8 12 7C12.9 5.8 14.2 5 15.7 5C18.1 5 20 6.9 20 9.5C20 15.2 12 20 12 20Z"
+                    stroke="currentColor" stroke-width="1.4"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <article class="post-feed post-feed-texto">
+            <div class="post-autor">
+              <div class="post-avatar"></div>
+
+              <div class="post-texto">
+                <strong>Nome do Membro</strong>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus
+                  ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus
+                  duis convallis.
+                </p>
+              </div>
+            </div>
+          </article>
         </section>
 
-    </div>
+        <div class="criar-post">
+          <div class="campo-publicacao">
+            <input
+              type="text"
+              placeholder="O que você está pensando?">
 
+            <button
+              class="anexar-post"
+              type="button"
+              aria-label="Anexar arquivo">
 
-    <button
-      class="transicao-feed"
-      type="button"
-      aria-label="Ir para Feed Social">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M8.5 12.5L14.8 6.2C16.1 4.9 18.1 4.9 19.4 6.2C20.7 7.5 20.7 9.5 19.4 10.8L11 19.2C9.2 21 6.3 21 4.5 19.2C2.7 17.4 2.7 14.5 4.5 12.7L12.4 4.8"
+                  stroke="currentColor" stroke-width="1.4"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
 
-      <svg viewBox="0 0 24 24" fill="none">
+          <button class="publicar-post" type="button">
+            Publicar
+          </button>
+        </div>
+      </div>
 
-        <path
-          d="M9 18L15 12L9 6"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"/>
+      <button
+        class="transicao-calendario"
+        type="button"
+        aria-label="Ir para Calendário"
+        (click)="abrirCalendario()">
 
-      </svg>
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M9 18L15 12L9 6"
+            stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </main>
 
-    </button>
-
-
-  </main>
-
+  </div>
 </div>

@@ -6,45 +6,87 @@
   --largura-transicao: clamp(105px, 8vw, 130px);
   --largura-scroll: 8px;
 
+  width: 100%;
   height: 100vh;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* container das duas telas */
+.telas-postagem {
+  position: relative;
+  height: 100vh;
+  margin-left: 220px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* calendario e feed ocupam exatamente a mesma area */
+.tela-calendario,
+.tela-feed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  transition: transform 0.55s cubic-bezier(0.77, 0, 0.18, 1);
+  will-change: transform;
+}
+
+/* estado inicial */
+.tela-calendario {
+  transform: translateX(0);
+}
+
+.tela-feed {
+  transform: translateX(100%);
+}
+
+/* estado quando o feed entra */
+.telas-postagem.feed-ativo {
+  .tela-calendario {
+    transform: translateX(-100%);
+  }
+
+  .tela-feed {
+    transform: translateX(0);
+  }
+}
+
+/* =========================
+   calendario
+========================= */
+
+.menu-postagem {
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
+  padding: 36px calc(36px + var(--largura-transicao)) 34px 68px;
   background: #fff;
 
   scrollbar-width: thin;
   scrollbar-color: #8a9096 #050505;
-}
 
-.pagina-postagens::-webkit-scrollbar {
-  width: var(--largura-scroll);
-}
+  &::-webkit-scrollbar {
+    width: var(--largura-scroll);
+  }
 
-.pagina-postagens::-webkit-scrollbar-track {
-  background: #050505;
-}
+  &::-webkit-scrollbar-track {
+    background: #050505;
+  }
 
-.pagina-postagens::-webkit-scrollbar-thumb {
-  background: #8a9096;
-  border: 2px solid #050505;
-  border-radius: 999px;
-}
+  &::-webkit-scrollbar-thumb {
+    background: #8a9096;
+    border: 2px solid #050505;
+    border-radius: 999px;
+  }
 
-.pagina-postagens::-webkit-scrollbar-thumb:hover {
-  background: #a1a6ab;
-}
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a1a6ab;
+  }
 
-.pagina-postagens::-webkit-scrollbar-button {
-  display: none;
-}
-
-.menu-postagem {
-  min-height: 100vh;
-  margin-left: 220px;
-  margin-right: calc(var(--largura-transicao) + var(--largura-scroll));
-  padding: 36px 36px 34px 68px;
-  box-sizing: border-box;
-  position: relative;
-  background: #fff;
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 }
 
 .conteudo {
@@ -240,10 +282,10 @@
 }
 
 .cadastro-evento {
-  margin-top: 14px;
-  padding: 11px 15px 10px;
   position: relative;
   z-index: 3;
+  margin-top: 14px;
+  padding: 11px 15px 10px;
   background: #fff;
   border-radius: 9px;
   font-size: 10.5px;
@@ -377,10 +419,9 @@
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 8px 22px rgba(0,0,0,.11);
-
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.11);
   scrollbar-width: thin;
-  scrollbar-color: #ffffff transparent;
+  scrollbar-color: #fff transparent;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -391,7 +432,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #ffffff;
+    background: #fff;
     border-radius: 999px;
   }
 
@@ -505,7 +546,7 @@
   display: grid;
   grid-template-columns: 31px 1fr auto;
   align-items: center;
-  padding: 0 6px 0 2px;
+  padding: 0 6px 0 3px;
   overflow: hidden;
   border-radius: 7px;
   background: #e5e6e7;
@@ -516,7 +557,7 @@
   top: 0;
   bottom: 0;
   left: 0;
-  width: 2.5px;
+  width: 3px;
   border-radius: 7px 0 0 7px;
 }
 
@@ -581,11 +622,12 @@
   }
 }
 
+/* faixa preta que abre o feed */
 .transicao-feed {
-  position: fixed;
+  position: absolute;
   top: 0;
-  right: var(--largura-scroll);
-  z-index: 20;
+  right: 0;
+  z-index: 30;
   width: var(--largura-transicao);
   height: 100vh;
   display: flex;
@@ -603,14 +645,259 @@
   }
 }
 
+/* =========================
+   feed social
+========================= */
+
+.menu-feed {
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 36px calc(var(--largura-transicao) + 70px) 34px 68px;
+  background: #050505;
+  color: #fff;
+
+  scrollbar-width: thin;
+  scrollbar-color: #8a9096 #fff;
+
+  &::-webkit-scrollbar {
+    width: var(--largura-scroll);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #fff;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #8a9096;
+    border: 2px solid #fff;
+    border-radius: 999px;
+  }
+}
+
+.feed-voltar {
+  color: #fff;
+}
+
+.feed-conteudo {
+  width: 720px;
+  max-width: 100%;
+}
+
+.cabecalho-feed {
+  padding-bottom: 19px;
+  border-bottom: 1px solid #343434;
+
+  .feed-eyebrow {
+    margin: 0 0 4px;
+    font-size: 10px;
+    line-height: 1.2;
+    letter-spacing: 4px;
+    color: #fff;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  > p {
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #fff;
+  }
+}
+
+.feed-lista {
+  padding-top: 20px;
+}
+
+.post-feed {
+  margin-bottom: 23px;
+  padding-bottom: 23px;
+  border-bottom: 1px solid #343434;
+}
+
+.post-autor {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+}
+
+.post-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #d7d7d7;
+}
+
+.post-texto {
+  min-width: 0;
+
+  strong {
+    font-size: 10.5px;
+    line-height: 1.2;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  p {
+    margin: 7px 0 0;
+    font-size: 10px;
+    line-height: 1.45;
+    color: #fff;
+  }
+}
+
+.post-imagem {
+  width: calc(100% - 46px);
+  height: 320px;
+  margin: 10px 0 0 46px;
+  border-radius: 12px;
+  background: #e5e6e7;
+}
+
+.post-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+
+  button {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #bfc1c3;
+    cursor: pointer;
+
+    &:hover {
+      color: #fff;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+.post-feed-texto {
+  padding-bottom: 19px;
+}
+
+.criar-post {
+  display: grid;
+  grid-template-columns: 1fr 85px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.campo-publicacao {
+  height: 34px;
+  display: grid;
+  grid-template-columns: 1fr 34px;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #303030;
+
+  input {
+    min-width: 0;
+    padding: 0 14px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    font-size: 10px;
+
+    &::placeholder {
+      color: #777;
+    }
+  }
+}
+
+.anexar-post {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8d9093;
+  cursor: pointer;
+
+  &:hover {
+    color: #fff;
+  }
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.publicar-post {
+  height: 34px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 7px;
+  background: #0073c9;
+  color: #fff;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #0080df;
+  }
+}
+
+/* faixa branca que volta ao calendario */
+.transicao-calendario {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 30;
+  width: var(--largura-transicao);
+  height: 100vh;
+  display: flex;
+  justify-content: flex-start;
+  padding: 30px 0 0 27px;
+  border: 0;
+  border-radius: 15px 0 0 15px;
+  background: #fff;
+  color: #999da1;
+  cursor: pointer;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* =========================
+   responsividade
+========================= */
+
 @media (max-width: 1200px) {
   .pagina-postagens {
     --largura-transicao: 105px;
   }
 
-  .menu-postagem {
+  .menu-postagem,
+  .menu-feed {
     padding-left: 48px;
-    padding-right: 28px;
   }
 
   .conteudo {
@@ -626,7 +913,12 @@
     width: 545px;
   }
 
-  .transicao-feed {
+  .feed-conteudo {
+    width: 650px;
+  }
+
+  .transicao-feed,
+  .transicao-calendario {
     padding-left: 22px;
   }
 }
