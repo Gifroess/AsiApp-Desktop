@@ -11,7 +11,7 @@
       <p class="text-[10px] tracking-[4px] text-black mb-1">HOME</p>
 
       <h1 class="text-[20px] font-bold text-black leading-tight">
-        Bem vindo, “{{ usuario()?.name || 'Nome do Membro' }}”!
+        Bem vindo, {{ usuario()?.name || 'Nome do Membro' }}!
       </h1>
 
       <p class="text-[13px] text-black mt-2">

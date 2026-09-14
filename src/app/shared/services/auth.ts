@@ -1,8 +1,4 @@
-import {
-  EnvironmentInjector,
-  Injectable,
-  runInInjectionContext
-} from '@angular/core';
+import { EnvironmentInjector, Injectable, runInInjectionContext } from '@angular/core';
 
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
@@ -12,14 +8,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
-import {
-  firstValueFrom,
-  map,
-  Observable,
-  of,
-  switchMap
-} from 'rxjs';
-
+import {firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
 import { UserInterface } from '../interfaces/user-interface';
 
 

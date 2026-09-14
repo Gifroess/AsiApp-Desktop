@@ -11,6 +11,9 @@ import { Cadastro } from './components/cadastro/cadastro';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
 import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
 import { Perfil } from './components/perfil/perfil';
+import { GestaoFinanceira } from './components/gestao-financeira/gestao-financeira';
+import { Home } from './components/home/home';
+import { MenuPostagem } from './components/menu-postagem/menu-postagem';
 
 import { Sidebar } from './shared/components/sidebar/sidebar';
 
@@ -20,8 +23,11 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { environment } from '../assets/environments/environment';
-import { Home } from './components/home/home';
-import { MenuPostagem } from './components/menu-postagem/menu-postagem';
+import { registerLocaleData } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+
+registerLocaleData(localePt, 'pt-BR');
 
 @NgModule({
   declarations: [
@@ -33,7 +39,8 @@ import { MenuPostagem } from './components/menu-postagem/menu-postagem';
     Perfil,
     Sidebar,
     Home,
-    MenuPostagem,
+    GestaoFinanceira,
+    MenuPostagem
   ],
 
   imports: [
@@ -41,6 +48,7 @@ import { MenuPostagem } from './components/menu-postagem/menu-postagem';
     ReactiveFormsModule,
     AppRoutingModule,
     FormsModule,
+    CommonModule,
 
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,

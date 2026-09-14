@@ -1,0 +1,1443 @@
+<div class="min-h-screen flex bg-white overflow-x-hidden">
+
+  <app-sidebar paginaAtiva="financeiro"></app-sidebar>
+
+  <main
+    class="flex-1 min-w-0 min-h-screen bg-white px-10 py-8 xl:px-[68px] xl:py-[36px]"
+  >
+
+    <!-- CABEÇALHO -->
+    <header class="mb-7">
+      <p class="text-[10px] tracking-[4px] text-black mb-1">
+        GESTÃO
+      </p>
+
+      <h1 class="text-[20px] font-bold text-black leading-tight">
+        Gestão Financeira
+      </h1>
+
+      <p class="text-[13px] text-black mt-2">
+        Acompanhe e gerencie as movimentações financeiras da empresa!
+      </p>
+    </header>
+
+
+    <!-- ================================================= -->
+    <!-- CARDS DE RESUMO -->
+    <!-- ================================================= -->
+
+    <section class="grid grid-cols-3 gap-4 mb-6">
+
+      <!-- TOTAL DE ENTRADAS -->
+      <div class="bg-[#e9eaeb] rounded-[14px] p-[18px]">
+        <p class="text-[9px] tracking-[2.5px] text-black/50">
+          TOTAL DE ENTRADAS
+        </p>
+
+        <p class="text-[18px] font-bold text-black mt-2">
+          {{ formatarMoeda(totalEntradas()) }}
+        </p>
+      </div>
+
+
+      <!-- TOTAL DE SAÍDAS -->
+      <div class="bg-[#e9eaeb] rounded-[14px] p-[18px]">
+        <p class="text-[9px] tracking-[2.5px] text-black/50">
+          TOTAL DE SAÍDAS
+        </p>
+
+        <p class="text-[18px] font-bold text-black mt-2">
+          {{ formatarMoeda(totalSaidas()) }}
+        </p>
+      </div>
+
+
+      <!-- SALDO -->
+      <div class="bg-[#e9eaeb] rounded-[14px] p-[18px]">
+        <p class="text-[9px] tracking-[2.5px] text-black/50">
+          SALDO
+        </p>
+
+        <p class="text-[18px] font-bold text-black mt-2">
+          {{ formatarMoeda(saldo()) }}
+        </p>
+      </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- ÁREA FINANCEIRA -->
+    <!-- ================================================= -->
+
+    <section
+      class="w-full min-w-0 bg-[#e5e7e9] rounded-[14px] p-[18px]"
+    >
+
+      <!-- BARRA DE AÇÕES -->
+      <div class="flex items-center gap-3 mb-4">
+
+        <!-- BUSCA -->
+        <div class="relative flex-1 min-w-0">
+
+          <input
+            type="text"
+            [value]="textoPesquisa()"
+            (input)="textoPesquisa.set($any($event.target).value); atualizarTextoPesquisa()"
+            placeholder="Pesquisar lançamento..."
+            class="w-full h-[41px] bg-white/80 rounded-lg px-4 pr-10 text-[11px] text-black outline-none placeholder:text-black/40"
+          />
+
+          <svg
+            class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 pointer-events-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M20 20l-3.5-3.5"></path>
+          </svg>
+
+        </div>
+
+
+        <!-- CADASTRAR ENTRADA -->
+        <button
+          type="button"
+          (click)="abrirCadastro()"
+          class="h-[41px] px-4 rounded-lg bg-gradient-to-r from-[#168be8] to-[#00365f] text-white text-[10.5px] font-semibold flex items-center gap-2 shrink-0"
+        >
+          <span class="text-[20px] font-light leading-none">
+            +
+          </span>
+
+          Cadastrar Entrada
+        </button>
+
+
+        <!-- NOTA FISCAL -->
+        <button
+          type="button"
+          (click)="abrirNotaFiscal()"
+          class="h-[41px] px-4 rounded-lg bg-white text-black text-[10.5px] font-medium flex items-center gap-2 shrink-0"
+        >
+
+          <svg
+            class="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path d="M6 3h12v18l-2.5-1.5L13 21l-3-1.5L7.5 21 6 21V3z"></path>
+            <path d="M9 8h6"></path>
+            <path d="M9 12h6"></path>
+            <path d="M9 16h4"></path>
+          </svg>
+
+          Nota Fiscal
+
+        </button>
+
+
+        <!-- FILTROS -->
+        <button
+          type="button"
+          (click)="abrirFiltros()"
+          class="h-[41px] px-4 rounded-lg bg-white text-black text-[10.5px] font-medium flex items-center gap-2 shrink-0"
+        >
+
+          <svg
+            class="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path d="M4 6h16"></path>
+            <path d="M7 12h10"></path>
+            <path d="M10 18h4"></path>
+          </svg>
+
+          Filtros
+
+          @if (filtrosAtivos()) {
+            <span class="w-1.5 h-1.5 rounded-full bg-[#005b94]"></span>
+          }
+
+        </button>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- MENSAGENS -->
+      <!-- ================================================= -->
+
+      @if (erro()) {
+
+        <div
+          class="mb-4 bg-white rounded-lg px-4 py-3 text-[11px] text-red-600"
+        >
+          {{ erro() }}
+        </div>
+
+      }
+
+
+      @if (sucesso()) {
+
+        <div
+          class="mb-4 bg-white rounded-lg px-4 py-3 text-[11px] text-green-700"
+        >
+          {{ sucesso() }}
+        </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- TABELA -->
+      <!-- ================================================= -->
+
+      <div class="w-full min-w-0 overflow-hidden">
+
+        <!-- CABEÇALHO -->
+        <div
+          class="grid grid-cols-[minmax(180px,1.5fr)_90px_120px_minmax(130px,1fr)_90px_120px_38px] gap-3 items-center bg-white/70 rounded-lg px-4 py-[9px] text-[11px] font-semibold text-black"
+        >
+          <span>Lançamento</span>
+          <span>Tipo</span>
+          <span>Categoria</span>
+          <span>Fornecedor</span>
+          <span>Data</span>
+          <span>Valor</span>
+          <span></span>
+        </div>
+
+
+        <!-- CARREGANDO -->
+        @if (carregando()) {
+
+          <div
+            class="bg-white rounded-lg mt-2 px-4 py-8 text-center text-[11px] text-black/50"
+          >
+            Carregando lançamentos...
+          </div>
+
+        }
+
+
+        <!-- SEM RESULTADOS -->
+        @else if (lancamentosFiltrados().length === 0) {
+
+          <div
+            class="bg-white rounded-lg mt-2 px-4 py-8 text-center text-[11px] text-black/50"
+          >
+            Nenhum lançamento encontrado.
+          </div>
+
+        }
+
+
+        <!-- LANÇAMENTOS -->
+        @else {
+
+          <div class="mt-2 flex flex-col gap-2">
+
+            @for (
+              lancamento of lancamentosFiltrados();
+              track lancamento.id
+            ) {
+
+              <!-- LINHA DO LANÇAMENTO -->
+              <div class="bg-[#e5e6e7] rounded-lg overflow-hidden">
+
+                <div
+                  class="grid grid-cols-[minmax(180px,1.5fr)_90px_120px_minmax(130px,1fr)_90px_120px_38px] gap-3 items-center px-4 py-3 text-[11px] text-black"
+                >
+
+                  <!-- LANÇAMENTO -->
+                  <div class="flex items-center gap-3 min-w-0">
+
+                    <!-- barrinha colorida por tipo -->
+                    <div
+                      class="w-[2px] h-[30px] rounded-full shrink-0"
+                      [ngClass]="
+                        lancamento.type === 'entrada'
+                          ? 'bg-green-600'
+                          : 'bg-orange-500'
+                      "
+                    ></div>
+
+                    <p class="font-medium truncate min-w-0">
+                      {{ lancamento.title }}
+                    </p>
+
+                  </div>
+
+
+                  <!-- TIPO -->
+                  <div>
+                    <span
+                      class="font-medium"
+                      [ngClass]="
+                        lancamento.type === 'entrada'
+                          ? 'text-green-600'
+                          : 'text-orange-500'
+                      "
+                    >
+                      {{
+                        lancamento.type === 'entrada'
+                          ? 'Entrada'
+                          : 'Saída'
+                      }}
+                    </span>
+                  </div>
+
+
+                  <!-- CATEGORIA -->
+                  <div class="min-w-0">
+                    <p class="truncate">
+                      {{ lancamento.category }}
+                    </p>
+                  </div>
+
+
+                  <!-- FORNECEDOR -->
+                  <div class="min-w-0">
+                    <p class="truncate">
+                      {{ lancamento.supplier }}
+                    </p>
+                  </div>
+
+
+                  <!-- DATA -->
+                  <div>
+                    {{ formatarData(lancamento.date) }}
+                  </div>
+
+
+                  <!-- VALOR -->
+                  <div class="font-semibold">
+                    {{ formatarMoeda(lancamento.amount) }}
+                  </div>
+
+
+                  <!-- BOTÃO DETALHES -->
+                  <div class="flex justify-end">
+
+                    <button
+                            type="button"
+                            class="w-full flex items-center justify-center"
+                            (click)="abrirLancamento(lancamento.id!)"
+                          >
+                            @if (!lancamentoEstaAberto(lancamento.id!)) {
+
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                class="w-3.5 h-3.5 text-black"
+                              >
+                                <path d="m6 9 6 6 6-6"></path>
+                              </svg>
+
+                            } @else {
+
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                class="w-3.5 h-3.5 text-black"
+                              >
+                                <path d="m18 15-6-6-6 6"></path>
+                              </svg>
+
+                            }
+                          </button>
+
+                  </div>
+
+                </div>
+
+
+                <!-- DETALHES -->
+
+                @if (lancamentoEstaAberto(lancamento.id!)) {
+
+                  <div
+                    class="border-t border-[#eceeef] bg-[#e5e6e7] px-4 py-5"
+                  >
+
+                    <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+
+                      <div>
+                        <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                          Lançamento
+                        </p>
+
+                        <p class="text-[10px] text-black leading-[1.4]">
+                          {{ lancamento.title }}
+                        </p>
+                      </div>
+
+
+                      <div>
+                        <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                          Tipo
+                        </p>
+
+                        <p class="text-[10px] text-black leading-[1.4]">
+                          {{
+                            lancamento.type === 'entrada'
+                              ? 'Entrada / faturamento'
+                              : 'Saída / pagar'
+                          }}
+                        </p>
+                      </div>
+
+
+                      <div>
+                        <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                          Categoria
+                        </p>
+
+                        <p class="text-[10px] text-black leading-[1.4]">
+                          {{ lancamento.category }}
+                        </p>
+                      </div>
+
+
+                      <div>
+                        <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                          Fornecedor / Cliente
+                        </p>
+
+                        <p class="text-[10px] text-black leading-[1.4]">
+                          {{ lancamento.supplier }}
+                        </p>
+                      </div>
+
+
+                      <div>
+                        <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                          Data
+                        </p>
+
+                        <p class="text-[10px] text-black leading-[1.4]">
+                          {{ formatarData(lancamento.date) }}
+                        </p>
+                      </div>
+
+
+                      <div>
+                        <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                          Valor
+                        </p>
+
+                        <p class="text-[10px] text-black leading-[1.4]">
+                          {{ formatarMoeda(lancamento.amount) }}
+                        </p>
+                      </div>
+
+
+                      <!-- DOCUMENTO -->
+                      @if (lancamento.attachment) {
+
+                        <div class="col-span-2">
+
+                          <p class="text-[10px] tracking-[1.4px] font-medium mb-2">
+                            Documento
+                          </p>
+
+                          <a
+                            [href]="lancamento.attachment"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-2 mt-1 text-[10px] font-medium text-[#005b94] hover:underline"
+                          >
+
+                            <svg
+                              class="w-4 h-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                            >
+                              <path
+                                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                              ></path>
+                              <path d="M14 2v6h6"></path>
+                              <path d="M8 13h8"></path>
+                              <path d="M8 17h6"></path>
+                            </svg>
+
+                            Visualizar documento
+
+                          </a>
+
+                        </div>
+
+                      }
+
+                    </div>
+
+                  </div>
+
+                }
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+<!-- RELATÓRIOS -->
+<section class="mt-10">
+  <h2 class="text-[15px] font-medium mb-4">Relatórios</h2>
+
+  <!-- Fluxo de caixa -->
+  <div class="w-full bg-[#e5e7e9] rounded-[14px] px-4 pt-4 pb-4">
+
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <p class="text-[10px] tracking-[2px] text-black mb-1">
+          FLUXO DE CAIXA
+        </p>
+
+        <h3 class="text-[14px] font-medium text-black">
+          Movimentação financeira por período
+        </h3>
+      </div>
+    </div>
+
+    <!-- Período -->
+    <div class="flex items-end gap-3 mb-5">
+
+      <!-- Data inicial -->
+      <div class="flex flex-col">
+        <label
+          for="dataInicioRelatorio"
+          class="text-[10px] font-medium text-black mb-1.5"
+        >
+          Data inicial
+        </label>
+
+        <input
+          id="dataInicioRelatorio"
+          type="date"
+          [value]="dataInicioRelatorio()"
+          (input)="dataInicioRelatorio.set($any($event.target).value)"
+          class="h-[34px] w-[150px] rounded-[8px] bg-white px-3 text-[10px] text-black outline-none border border-transparent focus:border-[#168be8]"
+        />
+      </div>
+
+      <!-- Data final -->
+      <div class="flex flex-col">
+        <label
+          for="dataFimRelatorio"
+          class="text-[10px] font-medium text-black mb-1.5"
+        >
+          Data final
+        </label>
+
+        <input
+          id="dataFimRelatorio"
+          type="date"
+          [value]="dataFimRelatorio()"
+          (input)="dataFimRelatorio.set($any($event.target).value)"
+          class="h-[34px] w-[150px] rounded-[8px] bg-white px-3 text-[10px] text-black outline-none border border-transparent focus:border-[#168be8]"
+        />
+      </div>
+
+      <!-- Botão -->
+      <button
+        type="button"
+        (click)="gerarRelatorio()"
+        class="h-[34px] px-4 rounded-[8px] bg-gradient-to-r from-[#168be8] to-[#00365f] text-[10px] font-medium text-white hover:bg-[#0f7dd3] transition"
+      >
+        Gerar relatório
+      </button>
+
+    </div>
+
+    <!-- Erro do relatório -->
+    @if (erroRelatorio()) {
+      <div class="mb-5 rounded-[8px] bg-red-100 px-4 py-3">
+        <p class="text-[10px] text-red-600">
+          {{ erroRelatorio() }}
+        </p>
+      </div>
+    }
+
+    <!-- Resumo do período -->
+    @if (relatorioGerado()) {
+
+      <div class="grid grid-cols-3 gap-5 mb-5">
+
+        <!-- Entradas -->
+        <div class="bg-white rounded-[10px] px-4 py-3">
+          <p class="text-[9px] text-black mb-1">
+            Entradas no período
+          </p>
+
+          <p class="text-[15px] font-bold text-green-600">
+            {{ entradasRelatorio() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+        <!-- Saídas -->
+        <div class="bg-white rounded-[10px] px-4 py-3">
+          <p class="text-[9px] text-black mb-1">
+            Saídas no período
+          </p>
+
+          <p class="text-[15px] font-bold text-orange-500">
+            {{ saidasRelatorio() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+        <!-- Saldo -->
+        <div class="bg-white rounded-[10px] px-4 py-3">
+          <p class="text-[9px] text-black mb-1">
+            Saldo do período
+          </p>
+
+          <p
+            class="text-[15px] font-bold"
+            [ngClass]="
+              saldoRelatorio() >= 0
+                ? 'text-green-600'
+                : 'text-orange-500'
+            "
+          >
+            {{ saldoRelatorio() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Tabela do fluxo de caixa -->
+      <div class="w-full overflow-x-auto">
+
+        <div class="min-w-[650px]">
+
+          <!-- Cabeçalho da tabela -->
+          <div class="grid grid-cols-4 px-4 py-2 text-[10px] text-black">
+            <div>Data</div>
+            <div>Entradas</div>
+            <div>Saídas</div>
+            <div class="text-right">
+              Saldo acumulado
+            </div>
+          </div>
+
+          <!-- Dados do relatório -->
+          <div class="bg-white rounded-lg overflow-hidden">
+
+            @if (fluxoCaixa().length > 0) {
+
+              @for (dia of fluxoCaixa(); track dia.data.getTime()) {
+
+                <div
+                  class="grid grid-cols-4 items-center px-4 py-3 text-[11px] border-b border-[#e5e7e9] last:border-b-0"
+                >
+
+                  <!-- Data -->
+                  <div>
+                    {{ dia.data | date:'dd/MM/yyyy' }}
+                  </div>
+
+                  <!-- Entradas -->
+                  <div class="font-medium text-green-600">
+                    {{ dia.entradas | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </div>
+
+                  <!-- Saídas -->
+                  <div class="font-medium text-orange-500">
+                    {{ dia.saidas | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </div>
+
+                  <!-- Saldo acumulado -->
+                  <div
+                    class="text-right font-medium"
+                    [ngClass]="
+                      dia.saldo >= 0
+                        ? 'text-black'
+                        : 'text-orange-500'
+                    "
+                  >
+                    {{ dia.saldo | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                  </div>
+
+                </div>
+
+              }
+
+            } @else {
+
+              <div class="flex items-center justify-center py-6">
+                <p class="text-[11px] text-black">
+                  Não há movimentações financeiras no período selecionado.
+                </p>
+              </div>
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    } @else {
+
+      <!-- Estado inicial -->
+      <div class="flex items-center justify-center py-6">
+        <p class="text-[11px] text-black">
+          Selecione um período para gerar o relatório.
+        </p>
+      </div>
+
+    }
+
+  </div>
+</section>
+
+  </main>
+</div>
+
+
+<!-- ===================================================== -->
+<!-- MODAL: FILTROS -->
+<!-- ===================================================== -->
+
+@if (modalFiltrosAberto()) {
+
+  <div
+    class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+    (click)="fecharFiltros()"
+  >
+
+    <div
+      class="w-full max-w-[430px] max-h-[90vh] overflow-y-auto bg-[#f1f2f3] rounded-[16px] p-7 shadow-xl"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- CABEÇALHO -->
+      <div class="flex items-start justify-between mb-6">
+
+        <div>
+
+          <p class="text-[9px] tracking-[3px] text-black/60 mb-1">
+            GESTÃO FINANCEIRA
+          </p>
+
+          <h2 class="text-[18px] font-bold text-black">
+            Filtros
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          (click)="fecharFiltros()"
+          class="text-xl text-black/60 hover:text-black leading-none"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- FORMULÁRIO -->
+      <form
+        [formGroup]="formFiltros"
+        (ngSubmit)="aplicarFiltros()"
+        class="grid grid-cols-2 gap-x-4 gap-y-4"
+      >
+
+        <!-- TIPO -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Tipo
+          </label>
+
+          <select
+            formControlName="type"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          >
+            <option value="">
+              Todos
+            </option>
+
+            <option value="entrada">
+              Entrada
+            </option>
+
+            <option value="saida">
+              Saída
+            </option>
+          </select>
+
+        </div>
+
+
+        <!-- CATEGORIA -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Categoria
+          </label>
+
+          <select
+            formControlName="category"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          >
+            <option value="">
+              Todas
+            </option>
+
+            @for (
+              categoria of categoriasDisponiveis();
+              track categoria
+            ) {
+
+              <option [value]="categoria">
+                {{ categoria }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- FORNECEDOR -->
+        <div class="col-span-2">
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Fornecedor
+          </label>
+
+          <input
+            type="text"
+            formControlName="supplier"
+            placeholder="Digite o fornecedor..."
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- VALOR MÍNIMO -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Valor mínimo
+          </label>
+
+          <input
+            type="number"
+            formControlName="minAmount"
+            min="0"
+            step="0.01"
+            placeholder="R$ 0,00"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- VALOR MÁXIMO -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Valor máximo
+          </label>
+
+          <input
+            type="number"
+            formControlName="maxAmount"
+            min="0"
+            step="0.01"
+            placeholder="R$ 0,00"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- DATA INICIAL -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Data inicial
+          </label>
+
+          <input
+            type="date"
+            formControlName="startDate"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          />
+
+        </div>
+
+
+        <!-- DATA FINAL -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Data final
+          </label>
+
+          <input
+            type="date"
+            formControlName="endDate"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          />
+
+        </div>
+
+
+        <!-- AÇÕES -->
+        <div class="col-span-2 flex justify-end items-center gap-2 mt-3">
+
+          <button
+            type="button"
+            (click)="limparFiltros()"
+            class="h-9 px-5 rounded-lg bg-white text-[10px] font-medium text-black"
+          >
+            Limpar
+          </button>
+
+          <button
+            type="submit"
+            class="h-9 px-5 rounded-lg bg-[#005b94] text-white text-[10px] font-semibold"
+          >
+            Aplicar filtros
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+}
+
+
+<!-- ===================================================== -->
+<!-- MODAL: CADASTRAR ENTRADA -->
+<!-- ===================================================== -->
+
+@if (modalCadastroAberto()) {
+
+  <div
+    class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+    (click)="fecharCadastro()"
+  >
+
+    <div
+      class="w-full max-w-[620px] max-h-[90vh] overflow-y-auto bg-[#f1f2f3] rounded-[16px] p-7 shadow-xl"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- CABEÇALHO -->
+      <div class="flex items-start justify-between mb-6">
+
+        <div>
+
+          <p class="text-[9px] tracking-[3px] text-black/60 mb-1">
+            GESTÃO FINANCEIRA
+          </p>
+
+          <h2 class="text-[18px] font-bold text-black">
+            Cadastrar Entrada
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          (click)="fecharCadastro()"
+          class="text-xl text-black/60 hover:text-black leading-none"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- FORMULÁRIO -->
+      <form
+        [formGroup]="formCadastro"
+        (ngSubmit)="cadastrarLancamento()"
+        class="grid grid-cols-2 gap-x-4 gap-y-4"
+      >
+
+        <!-- DESCRIÇÃO -->
+        <div class="col-span-2">
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Descrição
+          </label>
+
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Digite a descrição do lançamento..."
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- FORNECEDOR -->
+        <div class="col-span-2">
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Fornecedor / Cliente
+          </label>
+
+          <input
+            type="text"
+            formControlName="supplier"
+            placeholder="Digite o fornecedor ou cliente..."
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- VALOR -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Valor
+          </label>
+
+          <input
+            type="number"
+            formControlName="amount"
+            min="0"
+            step="0.01"
+            placeholder="R$ 0,00"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- TIPO -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Tipo
+          </label>
+
+          <select
+            formControlName="type"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          >
+            <option value="entrada">
+              Entrada / faturamento
+            </option>
+
+            <option value="saida">
+              Saída / pagar
+            </option>
+          </select>
+
+        </div>
+
+
+        <!-- CATEGORIA -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Categoria
+          </label>
+
+          <select
+            formControlName="category"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          >
+
+            @for (
+              categoria of categoriasDisponiveis();
+              track categoria
+            ) {
+
+              <option [value]="categoria">
+                {{ categoria }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- DATA -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Data
+          </label>
+
+          <input
+            type="date"
+            formControlName="date"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          />
+
+        </div>
+
+
+        <!-- AÇÕES -->
+        <div class="col-span-2 flex justify-end gap-2 mt-3">
+
+          <button
+            type="button"
+            (click)="fecharCadastro()"
+            class="h-9 px-5 rounded-lg bg-white text-[10px] font-medium text-black"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            [disabled]="salvandoCadastro()"
+            class="h-9 px-5 rounded-lg bg-[#005b94] text-white text-[10px] font-semibold disabled:opacity-50"
+          >
+            {{
+              salvandoCadastro()
+                ? 'Salvando...'
+                : 'Cadastrar'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+}
+
+
+<!-- ===================================================== -->
+<!-- MODAL: NOTA FISCAL -->
+<!-- ===================================================== -->
+
+@if (modalNotaFiscalAberto()) {
+
+  <div
+    class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+    (click)="fecharNotaFiscal()"
+  >
+
+    <div
+      class="w-full max-w-[620px] max-h-[90vh] overflow-y-auto bg-[#f1f2f3] rounded-[16px] p-7 shadow-xl"
+      (click)="$event.stopPropagation()"
+    >
+
+      <!-- CABEÇALHO -->
+      <div class="flex items-start justify-between mb-6">
+
+        <div>
+
+          <p class="text-[9px] tracking-[3px] text-black/60 mb-1">
+            GESTÃO FINANCEIRA
+          </p>
+
+          <h2 class="text-[18px] font-bold text-black">
+            Nota Fiscal
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          (click)="fecharNotaFiscal()"
+          class="text-xl text-black/60 hover:text-black leading-none"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- FORMULÁRIO -->
+      <form
+        [formGroup]="formNotaFiscal"
+        (ngSubmit)="cadastrarNotaFiscal()"
+        class="grid grid-cols-2 gap-x-4 gap-y-4"
+      >
+
+        <!-- DESCRIÇÃO -->
+        <div class="col-span-2">
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Descrição
+          </label>
+
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Digite a descrição da nota..."
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- FORNECEDOR -->
+        <div class="col-span-2">
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Fornecedor / Cliente
+          </label>
+
+          <input
+            type="text"
+            formControlName="supplier"
+            placeholder="Digite o fornecedor ou cliente..."
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- VALOR -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Valor
+          </label>
+
+          <input
+            type="number"
+            formControlName="amount"
+            min="0"
+            step="0.01"
+            placeholder="R$ 0,00"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none placeholder:text-black/35"
+          />
+
+        </div>
+
+
+        <!-- TIPO -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Tipo
+          </label>
+
+          <select
+            formControlName="type"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          >
+            <option value="entrada">
+              Entrada / faturamento
+            </option>
+
+            <option value="saida">
+              Saída / pagar
+            </option>
+          </select>
+
+        </div>
+
+
+        <!-- CATEGORIA -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Categoria
+          </label>
+
+          <select
+            formControlName="category"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          >
+
+            @for (
+              categoria of categoriasDisponiveis();
+              track categoria
+            ) {
+
+              <option [value]="categoria">
+                {{ categoria }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- DATA -->
+        <div>
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Data
+          </label>
+
+          <input
+            type="date"
+            formControlName="date"
+            class="w-full h-10 px-3 rounded-lg bg-white text-[11px] outline-none"
+          />
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ARQUIVO -->
+        <!-- ================================================= -->
+
+        <div class="col-span-2">
+
+          <label class="block text-[10px] font-medium mb-1.5 text-black">
+            Nota ou comprovante
+          </label>
+
+          <div
+            class="w-full min-h-[58px] flex items-center justify-center rounded-lg border border-dashed border-[#c8cbce] bg-white"
+            [class.border-solid]="arquivoSelecionado()"
+          >
+
+            @if (!arquivoSelecionado()) {
+
+              <label
+                for="arquivoFinanceiro"
+                class="w-full min-h-[58px] flex items-center justify-center gap-2 text-[#005b94] text-[10px] font-medium cursor-pointer"
+              >
+
+                <svg
+                  class="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <path d="M12 16V4"></path>
+                  <path d="M8 8l4-4 4 4"></path>
+                  <path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path>
+                </svg>
+
+                Anexar nota ou comprovante
+
+              </label>
+
+            } @else {
+
+              <div
+                class="flex items-center justify-between gap-3 w-full px-4"
+              >
+
+                <div class="flex items-center gap-2 min-w-0">
+
+                  <svg
+                    class="w-5 h-5 shrink-0 text-[#005b94]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <path d="M14 2v6h6"></path>
+                  </svg>
+
+                  <span class="text-[10px] truncate">
+                    {{ nomeArquivo() }}
+                  </span>
+
+                </div>
+
+                <button
+                  type="button"
+                  (click)="removerArquivo()"
+                  class="text-[10px] text-black/50 hover:text-black shrink-0"
+                >
+                  Remover
+                </button>
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <input
+            id="arquivoFinanceiro"
+            type="file"
+            accept="image/*,.pdf"
+            (change)="selecionarArquivo($event)"
+            class="hidden"
+          />
+
+
+          <p class="text-[9px] text-black/40 mt-1.5">
+            Formatos aceitos: imagem ou PDF.
+          </p>
+
+        </div>
+
+
+        <!-- AÇÕES -->
+        <div class="col-span-2 flex justify-end gap-2 mt-3">
+
+          <button
+            type="button"
+            (click)="fecharNotaFiscal()"
+            class="h-9 px-5 rounded-lg bg-white text-[10px] font-medium text-black"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            [disabled]="enviandoNotaFiscal()"
+            class="h-9 px-5 rounded-lg bg-[#005b94] text-white text-[10px] font-semibold disabled:opacity-50"
+          >
+            {{
+              enviandoNotaFiscal()
+                ? 'Enviando...'
+                : 'Cadastrar'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+}

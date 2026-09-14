@@ -1,9 +1,4 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  signal
-} from '@angular/core';
+import { Component, Input, OnInit, signal } from '@angular/core';
 
 import { Router } from '@angular/router';
 
@@ -17,12 +12,14 @@ import { UserInterface } from '../../interfaces/user-interface';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss'
 })
+
 export class Sidebar implements OnInit {
 
   @Input() paginaAtiva = '';
 
   usuario = signal<UserInterface | null>(null);
 
+  podeAcessarFinanceiro = false;
 
   constructor(
     private router: Router,
@@ -31,10 +28,10 @@ export class Sidebar implements OnInit {
 
 
   ngOnInit(): void {
-
     //carrega os dados do usuário logado
     this.authService.getUserData().subscribe(usuario => {
       this.usuario.set(usuario);
+      this.podeAcessarFinanceiro = usuario?.role === 'Presidência' || usuario?.role === 'Diretoria';
     });
   }
 
@@ -42,9 +39,15 @@ export class Sidebar implements OnInit {
   //navega entre as páginas disponíveis
   navegar(rota: string): void {
     this.router.navigate([rota]);
+    if (rota === 'financeiro') {
+      this.router.navigate(['/gestao-financeira']);
+      return;
+  }
   }
 
   async logout(): Promise<void> {
   await this.authService.logout();
 }
+
+
 }
