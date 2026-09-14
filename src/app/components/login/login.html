@@ -74,9 +74,13 @@
           }
         </div>
 
-        <a href="#" class="text-white text-xs text-left hover:underline mt-2">
+        <button
+          type="button"
+          (click)="abrirRecuperacaoSenha()"
+          class="text-white text-xs text-left hover:underline mt-2 bg-transparent border-0 p-0 cursor-pointer"
+        >
           Esqueceu a senha?
-        </a>
+        </button>
 
         <!--mensagem de erro geral vinda do firebase (senha incorreta, usuario nao encontrado)-->
         @if (authErrorMessage) {

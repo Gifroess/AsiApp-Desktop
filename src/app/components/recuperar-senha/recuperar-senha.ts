@@ -1,4 +1,6 @@
-import { Component, ElementRef, QueryList, ViewChildren, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-recuperar-senha',
@@ -8,125 +10,67 @@ import { Component, ElementRef, QueryList, ViewChildren, signal } from '@angular
 })
 export class RecuperarSenha {
 
-  //codigo de verificacao
-  codigo: string[] = ['', '', '', '', '', ''];
-
-  //estados da tela
+  email = '';
   isLoading = signal(false);
-  isReenviando = signal(false);
+  emailEnviado = signal(false);
   mensagemErro = signal('');
 
-  @ViewChildren('codigoInput')
-  codigoInputs!: QueryList<ElementRef<HTMLInputElement>>;
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-
-  //controla a digitacao e avanca para o proximo campo
-  onInput(event: Event, index: number) {
-    const input = event.target as HTMLInputElement;
-
-    //permite apenas numeros
-    const valor = input.value.replace(/\D/g, '');
-
-    input.value = valor.slice(-1);
-    this.codigo[index] = input.value;
+  async enviarEmail(): Promise<void> {
+    const email = this.email.trim().toLowerCase();
 
     this.mensagemErro.set('');
 
-    if (input.value && index < this.codigo.length - 1) {
-      this.codigoInputs.get(index + 1)?.nativeElement.focus();
-    }
-  }
-
-
-  //volta para o campo anterior ao apagar
-  onKeyDown(event: KeyboardEvent, index: number) {
-    const input = event.target as HTMLInputElement;
-
-    if (event.key === 'Backspace' && !input.value && index > 0) {
-      this.codigoInputs.get(index - 1)?.nativeElement.focus();
-    }
-  }
-
-
-  //permite colar o codigo completo
-  onPaste(event: ClipboardEvent) {
-    event.preventDefault();
-
-    const codigoColado = event.clipboardData
-      ?.getData('text')
-      .replace(/\D/g, '')
-      .slice(0, 6);
-
-    if (!codigoColado) {
+    if (!email) {
+      this.mensagemErro.set('Informe seu e-mail.');
       return;
     }
 
-    const digitos = codigoColado.split('');
-
-    this.codigo = ['', '', '', '', '', ''];
-
-    digitos.forEach((digito, index) => {
-      this.codigo[index] = digito;
-    });
-
-    this.mensagemErro.set('');
-
-    setTimeout(() => {
-      const inputs = this.codigoInputs.toArray();
-
-      inputs.forEach((input, index) => {
-        input.nativeElement.value = this.codigo[index];
-      });
-
-      const ultimoCampo = Math.min(digitos.length, 6) - 1;
-
-      if (ultimoCampo >= 0) {
-        inputs[ultimoCampo]?.nativeElement.focus();
-      }
-    });
-  }
-
-
-  //retorna o codigo completo
-  get codigoCompleto(): string {
-    return this.codigo.join('');
-  }
-
-
-  //verifica se todos os campos foram preenchidos
-  get codigoValido(): boolean {
-    return this.codigoCompleto.length === 6;
-  }
-
-
-  //valida o codigo informado
-  validarCodigo() {
-    if (!this.codigoValido) {
-      this.mensagemErro.set('Preencha todos os campos do código.');
+    if (!email.endsWith('@asimovjr.com.br')) {
+      this.mensagemErro.set(
+        'Utilize seu e-mail corporativo (@asimovjr.com.br).'
+      );
       return;
     }
 
-    //integracao com o backend sera adicionada posteriormente
+    this.isLoading.set(true);
+
+    try {
+      await this.authService.redefinirSenha(email);
+      this.emailEnviado.set(true);
+    } catch (erro: any) {
+      this.mensagemErro.set(
+        this.traduzErroFirebase(erro)
+      );
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
-
-  //prepara a tela para o reenvio do codigo
-  reenviarCodigo() {
-    this.codigo = ['', '', '', '', '', ''];
-    this.mensagemErro.set('');
-
-    //aguarda a atualizacao dos campos antes de alterar o foco
-    setTimeout(() => {
-      const inputs = this.codigoInputs.toArray();
-
-      inputs.forEach(input => {
-        input.nativeElement.value = '';
-      });
-
-      inputs[0]?.nativeElement.focus();
-    });
-
-    //integracao com o backend sera adicionada posteriormente
+  voltarLogin(): void {
+    this.router.navigate(['/']);
   }
 
+  private traduzErroFirebase(erro: any): string {
+    switch (erro?.code) {
+      case 'auth/invalid-email':
+        return 'O e-mail informado é inválido.';
+
+      case 'auth/user-not-found':
+        return 'Não encontramos uma conta cadastrada com este e-mail.';
+
+      case 'auth/too-many-requests':
+        return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+
+      case 'auth/network-request-failed':
+        return 'Não foi possível conectar ao Firebase. Verifique sua conexão.';
+
+      default:
+        return 'Não foi possível enviar o e-mail de recuperação.';
+    }
+  }
 }

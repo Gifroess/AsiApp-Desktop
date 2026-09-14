@@ -8,6 +8,7 @@ import { App } from './app';
 
 import { Login } from './components/login/login';
 import { Cadastro } from './components/cadastro/cadastro';
+import { RecuperarSenha } from './components/recuperar-senha/recuperar-senha';
 import { GestaoProjetos } from './components/gestao-projetos/gestao-projetos';
 import { GestaoPessoas } from './components/gestao-pessoas/gestao-pessoas';
 import { Perfil } from './components/perfil/perfil';
@@ -23,6 +24,7 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { environment } from '../assets/environments/environment';
+
 import { registerLocaleData } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
@@ -34,6 +36,7 @@ registerLocaleData(localePt, 'pt-BR');
     App,
     Login,
     Cadastro,
+    RecuperarSenha,
     GestaoProjetos,
     GestaoPessoas,
     Perfil,
@@ -56,8 +59,12 @@ registerLocaleData(localePt, 'pt-BR');
     AngularFireStorageModule,
   ],
 
-  providers: [provideBrowserGlobalErrorListeners()],
+  providers: [
+    provideBrowserGlobalErrorListeners()
+  ],
 
-  bootstrap: [App],
+  bootstrap: [
+    App
+  ],
 })
 export class AppModule {}

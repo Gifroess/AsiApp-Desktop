@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 import {
   AbstractControl,
@@ -9,7 +10,6 @@ import {
 } from '@angular/forms';
 
 import { AuthService } from '../../shared/services/auth';
-
 
 @Component({
   selector: 'app-login',
@@ -24,15 +24,12 @@ export class Login {
   isLoading = false;
   authErrorMessage = '';
 
-
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
-
-    //estrutura e validações do formulário de login
     this.loginForm = this.fb.group({
-
       email: [
         '',
         [
@@ -52,8 +49,7 @@ export class Login {
     });
   }
 
-
-  //valida o domínio corporativo da Asimov
+  //valida o dominio corporativo da Asimov
   corporateEmailValidator(
     control: AbstractControl
   ): ValidationErrors | null {
@@ -74,6 +70,10 @@ export class Login {
       : { corporateEmail: true };
   }
 
+  //abre a tela de recuperacao de senha
+  abrirRecuperacaoSenha(): void {
+    this.router.navigate(['/recuperar-senha']);
+  }
 
   //realiza o login com e-mail e senha
   async onSubmit(): Promise<void> {
@@ -99,7 +99,7 @@ export class Login {
         senha
       );
 
-      //o redirecionamento é feito pelo AuthService
+      //o redirecionamento e feito pelo AuthService
 
     } catch (error) {
 
@@ -111,7 +111,6 @@ export class Login {
       this.isLoading = false;
     }
   }
-
 
   //realiza o login utilizando uma conta google
   async loginWithGoogle(): Promise<void> {
@@ -123,7 +122,7 @@ export class Login {
 
       await this.authService.loginWithGoogle();
 
-      //o redirecionamento é feito pelo AuthService
+      //o redirecionamento e feito pelo AuthService
 
     } catch (error) {
 
@@ -135,7 +134,6 @@ export class Login {
       this.isLoading = false;
     }
   }
-
 
   //transforma os erros do firebase em mensagens mais claras
   private traduzErroFirebase(
