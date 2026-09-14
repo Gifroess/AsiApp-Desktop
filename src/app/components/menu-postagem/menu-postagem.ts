@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { EventoService } from '../../shared/services/evento.service';
+import { AutorPostagem, PostagemFirebase, PostagemService } from '../../shared/services/postagem.service';
 
 interface AreaCalendario {
   nome: string;
@@ -23,6 +24,10 @@ interface EventoLista {
   areas: string[];
 }
 
+interface PostagemLista extends PostagemFirebase {
+  id: string;
+}
+
 @Component({
   selector: 'app-menu-postagem',
   standalone: false,
@@ -31,6 +36,7 @@ interface EventoLista {
 })
 export class MenuPostagem {
   private hoje = new Date();
+  private autorAtual: AutorPostagem | null = null;
 
   abaAtiva = signal<'calendario' | 'feed'>('calendario');
   mesExibido = signal(new Date(this.hoje.getFullYear(), this.hoje.getMonth(), 1));
@@ -41,6 +47,13 @@ export class MenuPostagem {
   horarioDigitado = signal('');
   eventos = signal<EventoLista[]>([]);
   eventoEditando = signal<string | null>(null);
+
+  postagens = signal<PostagemLista[]>([]);
+  usuarioAtualUid = signal('');
+  textoPost = signal('');
+  imagemSelecionada = signal<File | null>(null);
+  imagemPreview = signal<string | null>(null);
+  publicando = signal(false);
 
   diasSemana = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
 
@@ -89,9 +102,12 @@ export class MenuPostagem {
 
   constructor(
     private location: Location,
-    private eventoService: EventoService
+    private eventoService: EventoService,
+    private postagemService: PostagemService
   ) {
     this.carregarEventos();
+    this.carregarPostagens();
+    this.carregarUsuarioAtual();
   }
 
   abrirFeed(): void {
@@ -115,6 +131,143 @@ export class MenuPostagem {
         }))
       );
     });
+  }
+
+  private carregarUsuarioAtual(): void {
+    this.postagemService.obterAutorAtual()
+      .then(autor => {
+        this.autorAtual = autor;
+        this.usuarioAtualUid.set(autor.uid);
+      })
+      .catch(erro => console.error('Erro ao carregar usuário:', erro));
+  }
+
+  private carregarPostagens(): void {
+    this.postagemService.listarPostagens().subscribe(postagens => {
+      const lista = postagens
+        .filter(post => !!post.id)
+        .map(post => ({
+          ...post,
+          id: post.id!,
+          curtidoPor: Array.isArray(post.curtidoPor) ? post.curtidoPor : [],
+          repostadoPor: Array.isArray(post.repostadoPor) ? post.repostadoPor : [],
+          imagemUrl: post.imagemUrl ?? null,
+          fotoAutorUrl: post.fotoAutorUrl ?? null
+        }))
+        .sort((a, b) =>
+          this.timestampEmMilissegundos(b.dataCriacao) -
+          this.timestampEmMilissegundos(a.dataCriacao)
+        );
+
+      this.postagens.set(lista);
+    });
+  }
+
+  atualizarTextoPost(valor: string): void {
+    this.textoPost.set(valor);
+  }
+
+  selecionarImagem(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+
+    if (!arquivo) return;
+
+    if (!arquivo.type.startsWith('image/')) {
+      alert('Selecione um arquivo de imagem.');
+      input.value = '';
+      return;
+    }
+
+    if (arquivo.size > 5 * 1024 * 1024) {
+      alert('A imagem deve ter no máximo 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    this.imagemSelecionada.set(arquivo);
+
+    const leitor = new FileReader();
+    leitor.onload = () => this.imagemPreview.set(leitor.result as string);
+    leitor.readAsDataURL(arquivo);
+  }
+
+  removerImagem(): void {
+    this.imagemSelecionada.set(null);
+    this.imagemPreview.set(null);
+  }
+
+  async publicarPost(): Promise<void> {
+    const texto = this.textoPost().trim();
+    const imagem = this.imagemSelecionada();
+
+    if (!texto && !imagem) {
+      alert('Escreva alguma coisa ou adicione uma imagem.');
+      return;
+    }
+
+    this.publicando.set(true);
+
+    try {
+      if (!this.autorAtual) {
+        this.autorAtual = await this.postagemService.obterAutorAtual();
+        this.usuarioAtualUid.set(this.autorAtual.uid);
+      }
+
+      const imagemUrl = imagem
+        ? await this.postagemService.enviarImagem(imagem, this.autorAtual.uid)
+        : null;
+
+      await this.postagemService.publicarPost(texto, imagemUrl, this.autorAtual);
+
+      this.textoPost.set('');
+      this.removerImagem();
+    } catch (erro) {
+      console.error('Erro ao publicar postagem:', erro);
+      alert('Não foi possível publicar agora. Confira o console para mais detalhes.');
+    } finally {
+      this.publicando.set(false);
+    }
+  }
+
+  alternarCurtida(post: PostagemLista): void {
+    const uid = this.usuarioAtualUid();
+    if (!uid) return;
+
+    const jaCurtiu = post.curtidoPor.includes(uid);
+
+    this.postagemService.alterarCurtida(post.id, uid, jaCurtiu)
+      .catch(erro => console.error('Erro ao curtir postagem:', erro));
+  }
+
+  alternarRepost(post: PostagemLista): void {
+    const uid = this.usuarioAtualUid();
+    if (!uid) return;
+
+    const jaRepostou = post.repostadoPor.includes(uid);
+
+    this.postagemService.alterarRepost(post.id, uid, jaRepostou)
+      .catch(erro => console.error('Erro ao repostar:', erro));
+  }
+
+  postCurtido(post: PostagemLista): boolean {
+    return !!this.usuarioAtualUid() && post.curtidoPor.includes(this.usuarioAtualUid());
+  }
+
+  postRepostado(post: PostagemLista): boolean {
+    return !!this.usuarioAtualUid() && post.repostadoPor.includes(this.usuarioAtualUid());
+  }
+
+  inicialAutor(nome: string): string {
+    return nome?.trim().charAt(0).toUpperCase() || '?';
+  }
+
+  private timestampEmMilissegundos(data: any): number {
+    if (!data) return 0;
+    if (data instanceof Date) return data.getTime();
+    if (typeof data.toDate === 'function') return data.toDate().getTime();
+
+    return 0;
   }
 
   adicionarEvento(): void {
@@ -173,6 +326,7 @@ export class MenuPostagem {
     const selecionada = this.dataSelecionada();
     const ano = mes.getFullYear();
     const numeroMes = mes.getMonth();
+
     const primeiroDia = new Date(ano, numeroMes, 1);
     const ultimoDia = new Date(ano, numeroMes + 1, 0);
     const diasAntes = (primeiroDia.getDay() + 6) % 7;
@@ -206,7 +360,6 @@ export class MenuPostagem {
     if (!ano || !mes || !dia) return;
 
     const data = new Date(ano, mes - 1, dia);
-
     this.dataSelecionada.set(data);
     this.mesExibido.set(new Date(ano, mes - 1, 1));
   }
@@ -220,13 +373,11 @@ export class MenuPostagem {
   }
 
   selecionarArea(area: string): void {
-    this.areasSelecionadas.update(lista => {
-      if (lista.includes(area)) {
-        return lista.filter(item => item !== area);
-      }
-
-      return [...lista, area];
-    });
+    this.areasSelecionadas.update(lista =>
+      lista.includes(area)
+        ? lista.filter(item => item !== area)
+        : [...lista, area]
+    );
   }
 
   areaSelecionada(area: string): boolean {
@@ -244,9 +395,9 @@ export class MenuPostagem {
   corDiaEvento(data: Date): string {
     const evento = this.eventos().find(item => this.mesmaData(item.data, data));
 
-    if (!evento) return 'transparent';
-
-    return this.corArea(evento.areas[0]);
+    return evento
+      ? this.corArea(evento.areas[0])
+      : 'transparent';
   }
 
   mesAnterior(): void {

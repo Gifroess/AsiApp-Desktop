@@ -65,9 +65,7 @@
               </div>
 
               <div class="cadastro-evento">
-                <strong class="cadastro-titulo">
-                  {{ eventoEditando() ? 'Editar Evento:' : 'Cadastre um Evento:' }}
-                </strong>
+                <strong class="cadastro-titulo">{{ eventoEditando() ? 'Editar Evento:' : 'Cadastre um Evento:' }}</strong>
 
                 <div class="campo-nome">
                   <svg viewBox="0 0 24 24" fill="none">
@@ -127,6 +125,7 @@
 
                             <span class="opcao-cor" [style.backgroundColor]="area.cor"></span>
                             <span>{{ area.nome }}</span>
+
                             <span class="check-area">
                               @if (areaSelecionada(area.nome)) {
                                 ✓
@@ -158,9 +157,7 @@
           </div>
 
           <section class="eventos-dia">
-            <p class="eventos-titulo">
-              Listagem de eventos para o dia {{ dataSelecionadaFormatada() }}:
-            </p>
+            <p class="eventos-titulo">Listagem de eventos para o dia {{ dataSelecionadaFormatada() }}:</p>
 
             <div class="lista-eventos">
               @for (evento of eventosDoDia(); track evento.id) {
@@ -209,19 +206,9 @@
         </div>
       </div>
 
-      <button
-        class="transicao-feed"
-        type="button"
-        aria-label="Ir para Feed Social"
-        (click)="abrirFeed()">
-
+      <button class="transicao-feed" type="button" aria-label="Ir para Feed Social" (click)="abrirFeed()">
         <svg viewBox="0 0 24 24" fill="none">
-          <path
-            d="M9 18L15 12L9 6"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"/>
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </main>
@@ -243,92 +230,129 @@
           </header>
 
           <section class="feed-lista">
-            <article class="post-feed">
-              <div class="post-autor">
-                <div class="post-avatar"></div>
+            @for (post of postagens(); track post.id) {
+              <article class="post-feed">
+                <div class="post-autor">
+                  <div class="post-avatar">
+                    @if (post.fotoAutorUrl) {
+                      <img [src]="post.fotoAutorUrl" [alt]="'Foto de ' + post.nomeAutor">
+                    } @else {
+                      <span>{{ inicialAutor(post.nomeAutor) }}</span>
+                    }
+                  </div>
 
-                <div class="post-texto">
-                  <strong>Nome do Membro</strong>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus
-                    ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus
-                    duis convallis.
-                  </p>
+                  <div class="post-texto">
+                    <strong>{{ post.nomeAutor }}</strong>
+
+                    @if (post.texto) {
+                      <p>{{ post.texto }}</p>
+                    }
+                  </div>
                 </div>
-              </div>
 
-              <div class="post-imagem"></div>
+                @if (post.imagemUrl) {
+                  <div class="post-midia">
+                    <img [src]="post.imagemUrl" alt="Imagem da publicação">
+                  </div>
+                }
 
-              <div class="post-acoes">
-                <button type="button" aria-label="Comentar">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M5 5H19V16H9L5 19V5Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
+                <div class="post-acoes">
+                  <button
+                    class="post-acao"
+                    type="button"
+                    aria-label="Repostar"
+                    [class.ativo]="postRepostado(post)"
+                    (click)="alternarRepost(post)">
 
-                <button type="button" aria-label="Curtir">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 20S4 15.2 4 9.5C4 6.9 5.9 5 8.3 5C9.8 5 11.1 5.8 12 7C12.9 5.8 14.2 5 15.7 5C18.1 5 20 6.9 20 9.5C20 15.2 12 20 12 20Z"
-                      stroke="currentColor"
-                      stroke-width="1.4"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </article>
+                    <span class="post-contagem">{{ post.repostadoPor.length }}</span>
 
-            <article class="post-feed post-feed-texto">
-              <div class="post-autor">
-                <div class="post-avatar"></div>
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M17 3L21 7L17 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M3 11V9C3 7.9 3.9 7 5 7H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7 21L3 17L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M21 13V15C21 16.1 20.1 17 19 17H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
 
-                <div class="post-texto">
-                  <strong>Nome do Membro</strong>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus
-                    ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus
-                    duis convallis.
-                  </p>
+                  <button
+                    class="post-acao"
+                    type="button"
+                    aria-label="Curtir"
+                    [class.ativo]="postCurtido(post)"
+                    (click)="alternarCurtida(post)">
+
+                    <span class="post-contagem">{{ post.curtidoPor.length }}</span>
+
+                    <svg viewBox="0 0 24 24" [attr.fill]="postCurtido(post) ? 'currentColor' : 'none'">
+                      <path
+                        d="M12 20S4 15.2 4 9.5C4 6.9 5.9 5 8.3 5C9.8 5 11.1 5.8 12 7C12.9 5.8 14.2 5 15.7 5C18.1 5 20 6.9 20 9.5C20 15.2 12 20 12 20Z"
+                        stroke="currentColor"
+                        stroke-width="1.4"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
+              </article>
+            } @empty {
+              <div class="feed-vazio">
+                <p>Ainda não há publicações.</p>
               </div>
-            </article>
+            }
           </section>
-
-          <div class="criar-post">
-            <div class="campo-publicacao">
-              <input type="text" placeholder="O que você está pensando?">
-
-              <button class="anexar-post" type="button" aria-label="Anexar arquivo">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M8.5 12.5L14.8 6.2C16.1 4.9 18.1 4.9 19.4 6.2C20.7 7.5 20.7 9.5 19.4 10.8L11 19.2C9.2 21 6.3 21 4.5 19.2C2.7 17.4 2.7 14.5 4.5 12.7L12.4 4.8"
-                    stroke="currentColor"
-                    stroke-width="1.4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-
-            <button class="publicar-post" type="button">Publicar</button>
-          </div>
         </div>
       </div>
 
-      <button
-        class="transicao-calendario"
-        type="button"
-        aria-label="Ir para Calendário"
-        (click)="abrirCalendario()">
+      <!-- campo fixo de nova publicação -->
+      <div class="composer-feed">
+        @if (imagemPreview()) {
+          <div class="preview-publicacao">
+            <img [src]="imagemPreview()" alt="Imagem selecionada">
+            <button type="button" aria-label="Remover imagem" (click)="removerImagem()">×</button>
+          </div>
+        }
 
+        <div class="criar-post">
+          <div class="campo-publicacao">
+            <input
+              type="text"
+              maxlength="500"
+              placeholder="O que você está pensando?"
+              [value]="textoPost()"
+              (input)="atualizarTextoPost($any($event.target).value)">
+
+            <button class="anexar-post" type="button" aria-label="Anexar imagem" (click)="arquivoPost.click()">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M8.5 12.5L14.8 6.2C16.1 4.9 18.1 4.9 19.4 6.2C20.7 7.5 20.7 9.5 19.4 10.8L11 19.2C9.2 21 6.3 21 4.5 19.2C2.7 17.4 2.7 14.5 4.5 12.7L12.4 4.8"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <input
+              #arquivoPost
+              class="input-arquivo"
+              type="file"
+              accept="image/*"
+              (change)="selecionarImagem($event)">
+          </div>
+
+          <button
+            class="publicar-post"
+            type="button"
+            [disabled]="publicando()"
+            (click)="publicarPost()">
+            {{ publicando() ? 'Publicando...' : 'Publicar' }}
+          </button>
+        </div>
+      </div>
+
+      <button class="transicao-calendario" type="button" aria-label="Ir para Calendário" (click)="abrirCalendario()">
         <svg viewBox="0 0 24 24" fill="none">
-          <path
-            d="M9 18L15 12L9 6"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"/>
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </main>

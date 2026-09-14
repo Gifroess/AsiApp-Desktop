@@ -11,7 +11,6 @@
   background: #fff;
 }
 
-/* estrutura das duas telas */
 .telas-postagem {
   position: relative;
   height: 100vh;
@@ -50,7 +49,6 @@
   }
 }
 
-/* area responsável pelo scroll */
 .tela-scroll {
   position: absolute;
   inset: 0;
@@ -94,9 +92,7 @@
   }
 }
 
-/* =========================
-   calendario
-========================= */
+/* calendario */
 
 .conteudo {
   width: 820px;
@@ -631,7 +627,6 @@
   }
 }
 
-/* faixa preta fora do scroll */
 .transicao-feed {
   position: absolute;
   top: 0;
@@ -657,9 +652,7 @@
   }
 }
 
-/* =========================
-   feed social
-========================= */
+/* feed social */
 
 .menu-feed {
   background: #050505;
@@ -667,7 +660,7 @@
 }
 
 .scroll-feed {
-  padding: 36px calc(var(--largura-transicao) + 70px) 34px 68px;
+  padding: 36px calc(var(--largura-transicao) + 70px) 130px 68px;
   background: #050505;
   color: #fff;
   scrollbar-width: thin;
@@ -752,8 +745,20 @@
 .post-avatar {
   width: 34px;
   height: 34px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   border-radius: 50%;
   background: #d7d7d7;
+  color: #333;
+  font-size: 12px;
+  font-weight: 600;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .post-texto {
@@ -771,47 +776,143 @@
     font-size: 10px;
     line-height: 1.45;
     color: #fff;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 }
 
-.post-imagem {
+.post-midia {
   width: calc(100% - 46px);
-  height: 320px;
   margin: 10px 0 0 46px;
+  overflow: hidden;
   border-radius: 12px;
   background: #e5e6e7;
+
+  img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: inherit;
+  }
 }
 
 .post-acoes {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 10px;
   margin-top: 8px;
+}
+
+.post-acao {
+  min-width: 22px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #bfc1c3;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &.ativo {
+    color: #168be8;
+  }
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.post-contagem {
+  min-height: 10px;
+  font-size: 8.5px;
+  line-height: 1;
+  font-family: inherit;
+  font-weight: 500;
+  color: inherit;
+}
+
+.feed-vazio {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #343434;
+  color: #777;
+
+  p {
+    margin: 0;
+    font-size: 10.5px;
+  }
+}
+
+/* campo fixo de publicação */
+
+.composer-feed {
+  position: absolute;
+  left: calc((100% - var(--largura-transicao) - var(--largura-scroll)) / 2);
+  bottom: 18px;
+  z-index: 40;
+  width: min(820px, calc(100% - var(--largura-transicao) - 100px));
+  padding: 10px;
+  box-sizing: border-box;
+  transform: translateX(-50%);
+  border: 1px solid #2f2f2f;
+  border-radius: 12px;
+  background: rgba(14, 14, 14, 0.96);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.preview-publicacao {
+  position: relative;
+  width: 180px;
+  margin: 0 0 10px;
+  overflow: hidden;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  background: #303030;
+
+  img {
+    display: block;
+    width: 180px;
+    height: 110px;
+    object-fit: cover;
+  }
 
   button {
-    width: 20px;
-    height: 20px;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
     display: grid;
     place-items: center;
     padding: 0;
     border: 0;
-    background: transparent;
-    color: #bfc1c3;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
     cursor: pointer;
-
-    &:hover {
-      color: #fff;
-    }
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
   }
-}
-
-.post-feed-texto {
-  padding-bottom: 19px;
 }
 
 .criar-post {
@@ -819,18 +920,19 @@
   grid-template-columns: 1fr 85px;
   align-items: center;
   gap: 12px;
-  margin-top: 8px;
 }
 
 .campo-publicacao {
-  height: 34px;
+  position: relative;
+  height: 36px;
   display: grid;
-  grid-template-columns: 1fr 34px;
+  grid-template-columns: 1fr 36px;
   overflow: hidden;
-  border-radius: 7px;
-  background: #303030;
+  border: 1px solid #3d3d3d;
+  border-radius: 8px;
+  background: #2b2b2b;
 
-  input {
+  input[type='text'] {
     min-width: 0;
     padding: 0 14px;
     border: 0;
@@ -841,14 +943,18 @@
     font-size: 10px;
 
     &::placeholder {
-      color: #777;
+      color: #858585;
     }
   }
 }
 
+.input-arquivo {
+  display: none;
+}
+
 .anexar-post {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -856,6 +962,7 @@
   background: transparent;
   color: #8d9093;
   cursor: pointer;
+  transition: color 0.15s ease;
 
   &:hover {
     color: #fff;
@@ -868,24 +975,32 @@
 }
 
 .publicar-post {
-  height: 34px;
+  height: 36px;
   padding: 0 18px;
   border: 0;
-  border-radius: 7px;
-  background: #0073c9;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #168be8 0%, #00365f 100%);
   color: #fff;
   font-family: inherit;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: filter 0.15s ease, transform 0.15s ease;
 
-  &:hover {
-    background: #0080df;
+  &:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.65;
   }
 }
 
-/* faixa branca fora do scroll */
 .transicao-calendario {
   position: absolute;
   top: 0;
@@ -911,7 +1026,6 @@
   }
 }
 
-/* impede clique na faixa da tela escondida */
 .telas-postagem.feed-ativo .tela-calendario .transicao-feed {
   pointer-events: none;
 }
@@ -919,10 +1033,6 @@
 .telas-postagem:not(.feed-ativo) .tela-feed .transicao-calendario {
   pointer-events: none;
 }
-
-/* =========================
-   responsividade
-========================= */
 
 @media (max-width: 1200px) {
   .pagina-postagens {
