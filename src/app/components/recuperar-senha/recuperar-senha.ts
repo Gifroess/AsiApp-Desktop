@@ -11,6 +11,7 @@ import { AuthService } from '../../shared/services/auth';
 export class RecuperarSenha {
 
   email = '';
+
   isLoading = signal(false);
   emailEnviado = signal(false);
   mensagemErro = signal('');
@@ -18,7 +19,16 @@ export class RecuperarSenha {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    //recebe o email completo enviado pela tela de login
+    const emailRecebido = history.state?.email;
+
+    if (typeof emailRecebido === 'string') {
+      this.email = emailRecebido
+        .trim()
+        .toLowerCase();
+    }
+  }
 
   async enviarEmail(): Promise<void> {
     const email = this.email.trim().toLowerCase();
@@ -41,6 +51,8 @@ export class RecuperarSenha {
 
     try {
       await this.authService.redefinirSenha(email);
+
+      this.email = email;
       this.emailEnviado.set(true);
     } catch (erro: any) {
       this.mensagemErro.set(
@@ -51,6 +63,11 @@ export class RecuperarSenha {
     }
   }
 
+  reenviarEmail(): void {
+    this.emailEnviado.set(false);
+    this.mensagemErro.set('');
+  }
+
   voltarLogin(): void {
     this.router.navigate(['/']);
   }
@@ -59,9 +76,6 @@ export class RecuperarSenha {
     switch (erro?.code) {
       case 'auth/invalid-email':
         return 'O e-mail informado é inválido.';
-
-      case 'auth/user-not-found':
-        return 'Não encontramos uma conta cadastrada com este e-mail.';
 
       case 'auth/too-many-requests':
         return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';

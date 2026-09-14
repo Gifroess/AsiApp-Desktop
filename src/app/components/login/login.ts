@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-
 import {
   AbstractControl,
   FormBuilder,
@@ -19,8 +18,9 @@ import { AuthService } from '../../shared/services/auth';
 })
 export class Login {
 
-  loginForm: FormGroup;
+  readonly dominioEmail = '@asimovjr.com.br';
 
+  loginForm: FormGroup;
   isLoading = false;
   authErrorMessage = '';
 
@@ -34,11 +34,9 @@ export class Login {
         '',
         [
           Validators.required,
-          Validators.email,
-          this.corporateEmailValidator
+          this.usuarioEmailValidator
         ]
       ],
-
       senha: [
         '',
         [
@@ -49,35 +47,73 @@ export class Login {
     });
   }
 
-  //valida o dominio corporativo da Asimov
-  corporateEmailValidator(
-    control: AbstractControl
-  ): ValidationErrors | null {
+  //valida apenas a parte do usuario antes do dominio
+  usuarioEmailValidator(control: AbstractControl): ValidationErrors | null {
+    const valor = String(control.value ?? '').trim();
 
-    const email = control.value as string;
-
-    if (!email) {
+    if (!valor) {
       return null;
     }
 
-    const dominioValido = email
+    const usuario = this.extrairUsuarioEmail(valor);
+    const formatoValido = /^[a-zA-Z0-9._-]+$/.test(usuario);
+
+    return formatoValido
+      ? null
+      : { usuarioEmailInvalido: true };
+  }
+
+  //aceita tanto usuario puro quanto email completo colado no campo
+  private extrairUsuarioEmail(valor: string): string {
+    return valor
       .trim()
       .toLowerCase()
-      .endsWith('@asimovjr.com.br');
-
-    return dominioValido
-      ? null
-      : { corporateEmail: true };
+      .split('@')[0];
   }
 
-  //abre a tela de recuperacao de senha
+  get usuarioEmailDigitado(): string {
+    const valor = String(this.loginForm.get('email')?.value ?? '');
+    return this.extrairUsuarioEmail(valor);
+  }
+
+  private montarEmailCorporativo(): string {
+    const valor = String(this.loginForm.get('email')?.value ?? '');
+    const usuario = this.extrairUsuarioEmail(valor);
+
+    return `${usuario}${this.dominioEmail}`;
+  }
+
+  //define a largura visual da primeira parte do email
+  larguraUsuarioEmail(): number {
+    const valor = String(this.loginForm.get('email')?.value ?? '');
+    const usuario = this.extrairUsuarioEmail(valor);
+
+    const caracteres = Math.max(usuario.length, 8);
+
+    return Math.min(caracteres + 1, 18);
+  }
+
+  //leva o email completo para a recuperacao de senha
   abrirRecuperacaoSenha(): void {
-    this.router.navigate(['/recuperar-senha']);
+    const emailControl = this.loginForm.get('email');
+
+    emailControl?.markAsTouched();
+
+    if (!emailControl || emailControl.invalid) {
+      return;
+    }
+
+    const email = this.montarEmailCorporativo();
+
+    this.router.navigate(
+      ['/recuperar-senha'],
+      {
+        state: { email }
+      }
+    );
   }
 
-  //realiza o login com e-mail e senha
   async onSubmit(): Promise<void> {
-
     this.authErrorMessage = '';
 
     if (this.loginForm.invalid) {
@@ -85,65 +121,38 @@ export class Login {
       return;
     }
 
-    const {
-      email,
-      senha
-    } = this.loginForm.value;
+    const email = this.montarEmailCorporativo();
+    const senha = this.loginForm.get('senha')?.value;
 
     this.isLoading = true;
 
     try {
-
-      await this.authService.login(
-        email,
-        senha
-      );
-
-      //o redirecionamento e feito pelo AuthService
-
+      await this.authService.login(email, senha);
     } catch (error) {
-
-      this.authErrorMessage =
-        this.traduzErroFirebase(error);
-
+      this.authErrorMessage = this.traduzErroFirebase(error);
     } finally {
-
       this.isLoading = false;
     }
   }
 
-  //realiza o login utilizando uma conta google
   async loginWithGoogle(): Promise<void> {
-
     this.authErrorMessage = '';
     this.isLoading = true;
 
     try {
-
       await this.authService.loginWithGoogle();
-
-      //o redirecionamento e feito pelo AuthService
-
     } catch (error) {
-
-      this.authErrorMessage =
-        this.traduzErroFirebase(error);
-
+      this.authErrorMessage = this.traduzErroFirebase(error);
     } finally {
-
       this.isLoading = false;
     }
   }
 
   //transforma os erros do firebase em mensagens mais claras
-  private traduzErroFirebase(
-    error: any
-  ): string {
-
+  private traduzErroFirebase(error: any): string {
     const codigo = error?.code;
 
     switch (codigo) {
-
       case 'auth/invalid-email':
         return 'E-mail inválido.';
 
