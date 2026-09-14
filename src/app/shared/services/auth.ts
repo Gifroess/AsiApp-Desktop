@@ -8,7 +8,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
-import {firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
+import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
 import { UserInterface } from '../interfaces/user-interface';
 
 
@@ -35,32 +35,25 @@ export class AuthService {
   ): Promise<void> {
 
     if (password !== confirmPassword) {
-      throw new Error(
-        'As senhas não coincidem.'
-      );
+      throw new Error('As senhas não coincidem.');
     }
 
     if (!this.isCorporateEmail(email)) {
-      throw new Error(
-        'Utilize um e-mail corporativo (@asimovjr.com.br).'
-      );
+      throw new Error('Utilize um e-mail corporativo (@asimovjr.com.br).');
     }
 
     const emailFormatado =
-      email
-        .trim()
-        .toLowerCase();
+      email.trim().toLowerCase();
 
 
     const userCredential =
       await runInInjectionContext(
         this.injector,
         () =>
-          this.auth
-            .createUserWithEmailAndPassword(
-              emailFormatado,
-              password
-            )
+          this.auth.createUserWithEmailAndPassword(
+            emailFormatado,
+            password
+          )
       );
 
 
@@ -69,9 +62,7 @@ export class AuthService {
 
 
     if (!user) {
-      throw new Error(
-        'Não foi possível concluir o cadastro.'
-      );
+      throw new Error('Não foi possível concluir o cadastro.');
     }
 
 
@@ -91,10 +82,11 @@ export class AuthService {
 
       photoUrl:
         null
+
     };
 
 
-    //salva os dados usando o mesmo uid do authentication
+    // Salva os dados utilizando o mesmo UID criado pelo Firebase Authentication.
     await runInInjectionContext(
       this.injector,
       () =>
@@ -105,21 +97,22 @@ export class AuthService {
     );
 
 
-    //envia o e-mail de verificacao
-    await user
-      .sendEmailVerification();
+    // Envia confirmação de e-mail.
+    await user.sendEmailVerification();
 
 
-    //encerra a sessao ate a confirmacao do e-mail
+    // Mantém o usuário deslogado até confirmar o e-mail.
     await runInInjectionContext(
       this.injector,
       () =>
         this.auth.signOut()
     );
+
   }
 
 
-  //salva os dados na colecao compartilhada
+
+  // Salva os dados complementares do usuário no Firestore.
   private salvarDados(
     id: string,
     user: UserInterface
@@ -132,10 +125,12 @@ export class AuthService {
         ...user,
         updatedAt: new Date()
       });
+
   }
 
 
-  //valida o dominio corporativo
+
+  // Valida se o usuário pertence ao domínio corporativo.
   private isCorporateEmail(
     email: string
   ): boolean {
@@ -143,10 +138,10 @@ export class AuthService {
     return email
       .trim()
       .toLowerCase()
-      .endsWith(
-        '@asimovjr.com.br'
-      );
+      .endsWith('@asimovjr.com.br');
+
   }
+
 
 
   // ---------- LOGIN ----------
@@ -156,6 +151,7 @@ export class AuthService {
     password: string
   ): Promise<void> {
 
+
     if (!this.isCorporateEmail(email)) {
       throw new Error(
         'Utilize um e-mail corporativo (@asimovjr.com.br).'
@@ -164,20 +160,17 @@ export class AuthService {
 
 
     const emailFormatado =
-      email
-        .trim()
-        .toLowerCase();
+      email.trim().toLowerCase();
 
 
     const userCredential =
       await runInInjectionContext(
         this.injector,
         () =>
-          this.auth
-            .signInWithEmailAndPassword(
-              emailFormatado,
-              password
-            )
+          this.auth.signInWithEmailAndPassword(
+            emailFormatado,
+            password
+          )
       );
 
 
@@ -192,7 +185,7 @@ export class AuthService {
     }
 
 
-    //impede login antes da confirmacao do e-mail
+    // Impede acesso antes da confirmação do e-mail.
     if (!user.emailVerified) {
 
       await runInInjectionContext(
@@ -205,87 +198,120 @@ export class AuthService {
       throw new Error(
         'E-mail ainda não verificado. Confira sua caixa de entrada.'
       );
+
     }
 
 
-    await this.router
-      .navigate(['/home']);
+    await this.router.navigate(['/home']);
+
   }
+
 
 
   // ---------- LOGIN COM GOOGLE ----------
 
-  async loginWithGoogle():
-    Promise<void> {
+  async loginWithGoogle(): Promise<void> {
 
     const provider =
-      new firebase.auth
-        .GoogleAuthProvider();
+      new firebase.auth.GoogleAuthProvider();
 
 
-    const userCredential =
-      await runInInjectionContext(
-        this.injector,
-        () =>
-          this.auth
-            .signInWithPopup(
-              provider
-            )
-      );
+    try {
+
+      // Usa a mesma instância AngularFire configurada no projeto.
+      const result =
+        await runInInjectionContext(
+          this.injector,
+          () =>
+            this.auth.signInWithPopup(provider)
+        );
 
 
-    const user =
-      userCredential.user;
+      const user =
+        result.user;
 
 
-    if (!user) {
-      throw new Error(
-        'Não foi possível autenticar com o Google.'
-      );
+      if (!user) {
+        throw new Error(
+          'Não foi possível autenticar com o Google.'
+        );
+      }
+
+
+      // Permite somente contas corporativas.
+      if (
+        !user.email ||
+        !this.isCorporateEmail(user.email)
+      ) {
+
+        await runInInjectionContext(
+          this.injector,
+          () =>
+            this.auth.signOut()
+        );
+
+
+        throw new Error(
+          'Utilize sua conta corporativa (@asimovjr.com.br) para entrar com o Google.'
+        );
+
+      }
+
+
+      // Verifica se o usuário realmente existe no cadastro da aplicação.
+      const userDoc =
+        await firstValueFrom(
+          this.firestore
+            .collection<UserInterface>('users')
+            .doc(user.uid)
+            .get()
+        );
+
+
+      if (!userDoc.exists) {
+
+        await runInInjectionContext(
+          this.injector,
+          () =>
+            this.auth.signOut()
+        );
+
+
+        throw new Error(
+          'E-mail não cadastrado. Realize o cadastro antes de entrar com o Google.'
+        );
+
+      }
+
+
+      await this.router.navigate(['/home']);
+
+
+    } catch(error:any) {
+
+
+      // Fechar o popup não deve ser tratado como erro.
+      if (
+        error?.code === 'auth/popup-closed-by-user' ||
+        error?.code === 'auth/cancelled-popup-request'
+      ) {
+
+        return;
+
+      }
+
+
+      throw error;
+
     }
 
-
-    //google so pode ser usado por usuarios ja cadastrados
-    const userDoc =
-      await runInInjectionContext(
-        this.injector,
-        () =>
-          firstValueFrom(
-            this.firestore
-              .collection<UserInterface>(
-                'users'
-              )
-              .doc(user.uid)
-              .get()
-          )
-      );
-
-
-    if (!userDoc.exists) {
-
-      await runInInjectionContext(
-        this.injector,
-        () =>
-          this.auth.signOut()
-      );
-
-
-      throw new Error(
-        'E-mail não cadastrado. Realize o cadastro antes de entrar com o Google.'
-      );
-    }
-
-
-    await this.router
-      .navigate(['/home']);
   }
-
-
-  // ---------- RECUPERACAO DE SENHA ----------
+    // ---------- RECUPERACAO DE SENHA ----------
 
   async redefinirSenha(
     email: string
   ): Promise<void> {
+
 
     if (!this.isCorporateEmail(email)) {
       throw new Error(
@@ -297,20 +323,22 @@ export class AuthService {
     await runInInjectionContext(
       this.injector,
       () =>
-        this.auth
-          .sendPasswordResetEmail(
-            email
-              .trim()
-              .toLowerCase()
-          )
+        this.auth.sendPasswordResetEmail(
+          email
+            .trim()
+            .toLowerCase()
+        )
     );
+
   }
+
 
 
   // ---------- LOGOUT ----------
 
   async logout():
     Promise<void> {
+
 
     await runInInjectionContext(
       this.injector,
@@ -319,9 +347,10 @@ export class AuthService {
     );
 
 
-    await this.router
-      .navigate(['/']);
+    await this.router.navigate(['/']);
+
   }
+
 
 
   // ---------- DADOS DO USUARIO ----------
@@ -329,41 +358,44 @@ export class AuthService {
   getUserData():
     Observable<UserInterface | null> {
 
-    return this.auth
-      .authState
-      .pipe(
 
-        switchMap(user => {
+    return this.auth.authState.pipe(
 
-          if (!user) {
-            return of(null);
-          }
+      switchMap(user => {
 
 
-          return runInInjectionContext(
-            this.injector,
-            () =>
-              this.firestore
-                .collection<UserInterface>(
-                  'users'
-                )
-                .doc(user.uid)
-                .valueChanges()
-          );
-        }),
+        if (!user) {
+          return of(null);
+        }
 
-        map(data =>
-          data ?? null
-        )
 
-      );
+        return runInInjectionContext(
+          this.injector,
+          () =>
+            this.firestore
+              .collection<UserInterface>('users')
+              .doc(user.uid)
+              .valueChanges()
+        );
+
+      }),
+
+
+      map(data =>
+        data ?? null
+      )
+
+    );
+
   }
+
 
 
   // ---------- UID ----------
 
   async getUid():
     Promise<string | null> {
+
 
     const user =
       await firstValueFrom(
@@ -372,13 +404,16 @@ export class AuthService {
 
 
     return user?.uid ?? null;
+
   }
+
 
 
   // ---------- AUTENTICACAO ----------
 
   isAuthenticated():
     Observable<boolean> {
+
 
     return this.auth
       .authState
@@ -387,5 +422,7 @@ export class AuthService {
           !!user
         )
       );
+
   }
+
 }
